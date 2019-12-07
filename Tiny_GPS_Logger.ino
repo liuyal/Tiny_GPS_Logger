@@ -140,6 +140,7 @@ void deleteFile(fs::FS &fs, String path) {
 
 void loop() {
   delay(1000);
+  // TODO: Add system on/off, Insert GNSS data 
   if (logging_on) {
     int data1 = millis();
     appendFile(SD, "/" + gnss_dir + "/GPS_" + String(nfiles) + ".log", String(data1) + "\n");
