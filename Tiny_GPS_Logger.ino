@@ -1,3 +1,7 @@
+#include <BLEDevice.h>
+#include <BLEUtils.h>
+#include <BLEServer.h>
+#include <BLE2902.h>
 #include <SPI.h>
 #include "SD.h"
 #include "FS.h"
@@ -17,6 +21,10 @@ void setup() {
 
 void Serial_Print(String msg) {
   Serial.print(msg);
+}
+
+void BLE_INIT(){
+
 }
 
 void SD_INIT() {
