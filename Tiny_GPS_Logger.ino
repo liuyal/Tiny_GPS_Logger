@@ -29,7 +29,7 @@ int nfiles = 0;
 
 const byte numChars = 50;
 char receivedChars[numChars];
-boolean newData = false;
+bool newData = false;
 
 void setup() {
   Serial.begin(115200);
@@ -146,7 +146,8 @@ int listDir(fs::FS &fs, String dirname, uint8_t levels) {
       Serial_Print("  DIR : " + String(file.name()) + "\n");
       time_t t = file.getLastWrite();
       struct tm * tmstruct = localtime(&t);
-      // Serial.printf("  LAST WRITE: %d-%02d-%02d %02d:%02d:%02d\n", (tmstruct->tm_year) + 1900, ( tmstruct->tm_mon) + 1, tmstruct->tm_mday, tmstruct->tm_hour , tmstruct->tm_min, tmstruct->tm_sec);
+      // Serial.printf("  LAST WRITE: %d-%02d-%02d %02d:%02d:%02d\n", (tmstruct->tm_year) + 1900, 
+      // ( tmstruct->tm_mon) + 1, tmstruct->tm_mday, tmstruct->tm_hour , tmstruct->tm_min, tmstruct->tm_sec);
       if (levels) listDir(fs, file.name(), levels - 1);
     }
     else {
@@ -154,7 +155,8 @@ int listDir(fs::FS &fs, String dirname, uint8_t levels) {
       Serial_Print("  FILE: " + String(file.name()) + "  SIZE: " + String(file.size()) + "\n");
       time_t t = file.getLastWrite();
       struct tm * tmstruct = localtime(&t);
-      // Serial.printf("  LAST WRITE: %d-%02d-%02d %02d:%02d:%02d\n", (tmstruct->tm_year) + 1900, ( tmstruct->tm_mon) + 1, tmstruct->tm_mday, tmstruct->tm_hour , tmstruct->tm_min, tmstruct->tm_sec);
+      // Serial.printf("  LAST WRITE: %d-%02d-%02d %02d:%02d:%02d\n", (tmstruct->tm_year) + 1900, 
+      // ( tmstruct->tm_mon) + 1, tmstruct->tm_mday, tmstruct->tm_hour , tmstruct->tm_min, tmstruct->tm_sec);
     }
     file = root.openNextFile();
   }
@@ -300,6 +302,7 @@ void REBOOT() {
 }
 
 void ble_send() {
+  // DOTO: replace with GNSS DATA
   int txValue = random(1, 20);
   char txString[8];
   dtostrf(txValue, 1, 2, txString);
@@ -310,14 +313,18 @@ void ble_send() {
 void loop() {
   int data1 = millis();
 
-  // TODO: Add system on/off, Insert GNSS data
+  // DOTO: Insert GNSS data
   if (logging_on) {
     appendFile(SD, "/" + gnss_dir + "/GPS_" + String(nfiles) + ".log", String(data1) + "\n");
   }
+
+  // TODO: Might Move to ble callback
   if (ble_transmit) {
     ble_send();
   }
 
+  // DOTO: Replace with BLE callback
   CMD_EVENT();
+
   delay(1000);
 }
