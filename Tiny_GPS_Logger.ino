@@ -40,6 +40,7 @@ void setup() {
   nfiles = listDir(SD, "/" + gnss_dir, 0);
   if ( EEPROM.read(log_flag_addr) == 0x01) logging_on = true;
   else logging_on = false;
+  Serial_Print("\n");
 }
 
 void Serial_Print(String msg) {
@@ -178,7 +179,7 @@ void readFile(fs::FS &fs, String path) {
     Serial_Print("Failed to open file for reading\n");
     return;
   }
-  Serial_Print("Read from file: ");
+  Serial_Print("Read from file: \n");
   while (file.available()) Serial.write(file.read());
   file.close();
 }
@@ -243,7 +244,7 @@ void CMD_EVENT() {
     }
     else if (String(receivedChars).indexOf("reboot") >= 0) {
       Serial_Print("[rebooting]\n");
-      delay(3000);
+      delay(2000);
       ESP.restart();
     }
     else if (String(receivedChars).indexOf("reset") >= 0) {
@@ -255,13 +256,19 @@ void CMD_EVENT() {
       EEPROM.write(log_flag_addr, 0x00);
       EEPROM.commit();
     }
+    else if (String(receivedChars).indexOf("read") >= 0) {
+      int start_index = String(receivedChars).indexOf("|") + 1;
+      int end_index = String(receivedChars).indexOf("]");
+      String index = String(receivedChars).substring(start_index, end_index);
+      readFile(SD, "/" + gnss_dir + "/GPS_" + String(index.toInt()) + ".log");
+    }
     newData = false;
   }
 }
 
 void loop() {
 
-  String gnss_data;
+  String gnss_data = "";
 
   if (logging_on) {
     while (Serial2.available()) gnss_data = String(gnss_data + String((char)Serial2.read()));
