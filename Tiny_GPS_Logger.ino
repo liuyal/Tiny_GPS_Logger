@@ -9,7 +9,6 @@
 #define RXD2 16
 #define TXD2 17
 
-// See the following for generating UUIDs: https://www.uuidgenerator.net/
 #define SERVICE_UUID        "000ffdf4-68d9-4e48-a89a-219e581f0d64"
 #define CHARACTERISTIC_UUID "44a80b83-c605-4406-8e50-fc42f03b6d38"
 
@@ -20,9 +19,7 @@ bool deviceConnected = false;
 
 const int CS = 5;
 int log_flag_addr = 0;
-int ble_flag_addr = 1;
 bool logging_on = false;
-bool ble_transmit = false;
 
 String gnss_dir = "GNSS_LOGS";
 int nfiles = 0;
@@ -36,12 +33,13 @@ void setup() {
   Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
   EEPROM.begin(64);
   Serial_Print("\nESP32_ON\n");
-  STATE_INIT();
   BLE_INIT();
   SD_INIT();
   listDir(SD, "/", 0);
   createDir(SD, "/" + gnss_dir);
   nfiles = listDir(SD, "/" + gnss_dir, 0);
+  if ( EEPROM.read(log_flag_addr) == 0x01) logging_on = true;
+  else logging_on = false;
 }
 
 void Serial_Print(String msg) {
@@ -70,15 +68,6 @@ class BLE_Callbacks: public BLECharacteristicCallbacks {
       }
     }
 };
-
-void STATE_INIT() {
-  byte log_state = EEPROM.read(log_flag_addr);
-  if (log_state == 0x01) logging_on = true;
-  else logging_on = false;
-  byte ble_state = EEPROM.read(ble_flag_addr);
-  if (ble_state == 0x01) ble_transmit = true;
-  else ble_transmit = false;
-}
 
 void BLE_INIT() {
   Serial_Print("\nInitializing BLE...\n");
@@ -111,7 +100,8 @@ void SD_INIT() {
   Serial_Print("\nInitializing SD Card...\n");
   if (!SD.begin(CS)) {
     Serial_Print("Initialization Failed!\n");
-    REBOOT();
+    delay(1000);
+    ESP.restart();
     return;
   }
   Serial_Print("Initialization Success!\n");
@@ -144,19 +134,11 @@ int listDir(fs::FS &fs, String dirname, uint8_t levels) {
   while (file) {
     if (file.isDirectory()) {
       Serial_Print("  DIR : " + String(file.name()) + "\n");
-      time_t t = file.getLastWrite();
-      struct tm * tmstruct = localtime(&t);
-      // Serial.printf("  LAST WRITE: %d-%02d-%02d %02d:%02d:%02d\n", (tmstruct->tm_year) + 1900, 
-      // ( tmstruct->tm_mon) + 1, tmstruct->tm_mday, tmstruct->tm_hour , tmstruct->tm_min, tmstruct->tm_sec);
       if (levels) listDir(fs, file.name(), levels - 1);
     }
     else {
       count += 1;
       Serial_Print("  FILE: " + String(file.name()) + "  SIZE: " + String(file.size()) + "\n");
-      time_t t = file.getLastWrite();
-      struct tm * tmstruct = localtime(&t);
-      // Serial.printf("  LAST WRITE: %d-%02d-%02d %02d:%02d:%02d\n", (tmstruct->tm_year) + 1900, 
-      // ( tmstruct->tm_mon) + 1, tmstruct->tm_mday, tmstruct->tm_hour , tmstruct->tm_min, tmstruct->tm_sec);
     }
     file = root.openNextFile();
   }
@@ -175,6 +157,16 @@ void createDir(fs::FS &fs, String path) {
 
 void removeDir(fs::FS &fs, String path) {
   Serial_Print("Removing Dir: " + path + "\n");
+  File root = fs.open(path);
+  if (!root || !root.isDirectory()) {
+    Serial_Print("Failed to open directory\n");
+    return;
+  }
+  File file = root.openNextFile();
+  while (file) {
+    if (!file.isDirectory()) deleteFile(SD, file.name());
+    file = root.openNextFile();
+  }
   if (fs.rmdir(path))Serial_Print("Dir removed\n");
   else Serial_Print("rmdir failed\n");
 }
@@ -191,34 +183,11 @@ void readFile(fs::FS &fs, String path) {
   file.close();
 }
 
-void writeFile(fs::FS &fs, String path, String message) {
-  Serial_Print("Writing file: " + path + "\n");
-  File file = fs.open(path, FILE_WRITE);
-  if (!file) {
-    Serial_Print("Failed to open file for writing\n");
-    return;
-  }
-  if (file.print(message)) Serial_Print("File written\n");
-  else Serial_Print("Write failed\n");
-  file.close();
-}
-
 void appendFile(fs::FS &fs, String path, String message) {
-  Serial_Print("Append to file: " + path + " ");
   File file = fs.open(path, FILE_APPEND);
-  if (!file) {
-    Serial_Print("Failed to open file\n");
-    return;
-  }
-  if (file.print(message)) Serial_Print("| Data appended\n");
-  else Serial_Print("Append failed\n");
+  if (!file) return;
+  file.print(message);
   file.close();
-}
-
-void renameFile(fs::FS &fs, String path1, String path2) {
-  Serial_Print("Renaming file " + path1 + " to " + path2 + "\n");
-  if (fs.rename(path1, path2)) Serial_Print("File renamed\n");
-  else Serial_Print("Rename failed\n");
 }
 
 void deleteFile(fs::FS &fs, String path) {
@@ -256,75 +225,56 @@ void CMD_EVENT() {
   recvWithStartEndMarkers();
   if (newData == true) {
     Serial_Print(String(receivedChars) + "\n");
-    if (String(receivedChars).indexOf("start_log") >= 0) {
-      Serial_Print("[start_log_ack]\n");
+    if (String(receivedChars).indexOf("log_on") >= 0) {
+      Serial_Print("[start_logging]\n");
       logging_on = true;
       EEPROM.write(log_flag_addr, 0x01);
       EEPROM.commit();
     }
-    else if (String(receivedChars).indexOf("end_log") >= 0) {
-      Serial_Print("[end_log_ack]\n");
+    else if (String(receivedChars).indexOf("log_off") >= 0) {
+      Serial_Print("[end_logging]\n");
       logging_on = false;
       EEPROM.write(log_flag_addr, 0x00);
       EEPROM.commit();
     }
-    else if (String(receivedChars).indexOf("start_ble") >= 0) {
-      Serial_Print("[start_ble_ack]\n");
-      ble_transmit = true;
-      EEPROM.write(ble_flag_addr, 0x01);
-      EEPROM.commit();
-    }
-    else if (String(receivedChars).indexOf("end_ble") >= 0) {
-      Serial_Print("[end_ble_ack]\n");
-      ble_transmit = false;
-      EEPROM.write(ble_flag_addr, 0x00);
-      EEPROM.commit();
+    else if (String(receivedChars).indexOf("list") >= 0) {
+      int files = listDir(SD, "/" + gnss_dir, 0);
+      Serial_Print("Number of Files: " + String(files) + "\n");
     }
     else if (String(receivedChars).indexOf("reboot") >= 0) {
-      Serial_Print("[reboot_ack]\n");
-      REBOOT();
+      Serial_Print("[rebooting]\n");
+      delay(3000);
+      ESP.restart();
     }
     else if (String(receivedChars).indexOf("reset") >= 0) {
-      Serial_Print("[reset_ack]\n");
-      RESET();
+      Serial_Print("[system_reset]\n");
+      removeDir(SD, "/" + gnss_dir);
+      createDir(SD, "/" + gnss_dir);
+      nfiles = listDir(SD, "/" + gnss_dir, 0);
+      logging_on = false;
+      EEPROM.write(log_flag_addr, 0x00);
+      EEPROM.commit();
     }
     newData = false;
   }
 }
 
-void RESET() {
-  // reset to default system state
-}
-
-void REBOOT() {
-  delay(3000);
-  ESP.restart();
-}
-
-void ble_send() {
-  // DOTO: replace with GNSS DATA
-  int txValue = random(1, 20);
-  char txString[8];
-  dtostrf(txValue, 1, 2, txString);
-  pCharacteristic->setValue(txString);
-  pCharacteristic->notify();
-}
-
 void loop() {
-  int data1 = millis();
 
-  // DOTO: Insert GNSS data
+  String gnss_data;
+
   if (logging_on) {
-    appendFile(SD, "/" + gnss_dir + "/GPS_" + String(nfiles) + ".log", String(data1) + "\n");
+    while (Serial2.available()) gnss_data = String(gnss_data + String((char)Serial2.read()));
+    Serial_Print(gnss_data);
+    appendFile(SD, "/" + gnss_dir + "/GPS_" + String(nfiles) + ".log", gnss_data);
   }
 
-  // TODO: Might Move to ble callback
-  if (ble_transmit) {
-    ble_send();
-  }
+  // DOTO: replace with GNSS DATA OR Callback (send for every request from phone)
+  //  char txString[8];
+  //  pCharacteristic->setValue(txString);
+  //  pCharacteristic->notify();
+  //  delay(1000);
 
   // DOTO: Replace with BLE callback
   CMD_EVENT();
-
-  delay(1000);
 }

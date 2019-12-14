@@ -1,10 +1,18 @@
 # Tiny GPS Logger
 
+A GPS logging device made with ESP32, NEO-6M, and SDCard Module. 
 
-### Guides
+## Hardware Schematic
+
+## Hardware Pin Connection
+
+## Android App Guide
+
+## Links
 
 GPS
 
+- https://www.gpsinformation.org/dale/nmea.htm
 - https://randomnerdtutorials.com/guide-to-neo-6m-gps-module-with-arduino/
 - https://lastminuteengineers.com/neo6m-gps-arduino-tutorial/
 
@@ -16,4 +24,10 @@ SD Card
 
 BLE
 
+- https://www.uuidgenerator.net/
 - https://randomnerdtutorials.com/esp32-bluetooth-low-energy-ble-arduino-ide/
+
+
+App
+
+- 
