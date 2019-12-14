@@ -12,20 +12,21 @@ A GPS logging device made with ESP32, NEO-6M, and SDCard Module.
 
 GPS
 
-- https://www.gpsinformation.org/dale/nmea.htm
-- https://randomnerdtutorials.com/guide-to-neo-6m-gps-module-with-arduino/
-- https://lastminuteengineers.com/neo6m-gps-arduino-tutorial/
+- [NMEA Messages Info](https://www.gpsinformation.org/dale/nmea.htm)
+- [NEO-6M Guide A](https://randomnerdtutorials.com/guide-to-neo-6m-gps-module-with-arduino/)
+- [NEO-6M Guide B](https://lastminuteengineers.com/neo6m-gps-arduino-tutorial/)
+- [NEO-6 DataSheet](https://www.u-blox.com/sites/default/files/products/documents/NEO-6_DataSheet_%28GPS.G6-HW-09005%29.pdf)
+- [NEO-6 Product Summary](https://www.u-blox.com/sites/default/files/products/documents/NEO-6_ProductSummary_%28GPS.G6-HW-09003%29.pdf)
+SDCARD
 
-SD Card
-
-- https://randomnerdtutorials.com/esp32-data-logging-temperature-to-microsd-card/
-- https://lastminuteengineers.com/arduino-micro-sd-card-module-tutorial/
-
+- [ESP32 SDCard Example](https://randomnerdtutorials.com/esp32-data-logging-temperature-to-microsd-card/)
+- [SDCard Example](https://lastminuteengineers.com/arduino-micro-sd-card-module-tutorial/)
+- [SD Library](https://www.arduino.cc/en/reference/SD)
 
 BLE
 
-- https://www.uuidgenerator.net/
-- https://randomnerdtutorials.com/esp32-bluetooth-low-energy-ble-arduino-ide/
+- [UUID Generator](https://www.uuidgenerator.net/)
+- [ESP32 BLE Guide](https://randomnerdtutorials.com/esp32-bluetooth-low-energy-ble-arduino-ide/)
 
 
 App
