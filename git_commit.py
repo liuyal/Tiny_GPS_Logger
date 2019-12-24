@@ -20,7 +20,7 @@ time.sleep(1)
 cmd = r'git push'
 os.system(cmd)
 
-cmd = r'git config --global user.email "liuyal@sfu.ca"'
-os.system(cmd)
+# cmd = r'git config --global user.email "liuyal@sfu.ca"'
+# os.system(cmd)
 
 time.sleep(1)
