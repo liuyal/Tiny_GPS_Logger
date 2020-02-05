@@ -271,7 +271,9 @@ void loop() {
   String gnss_data = "";
 
   if (logging_on) {
-    while (Serial2.available()) gnss_data = String(gnss_data + String((char)Serial2.read()));
+    while (Serial2.available()) { 
+      gnss_data = String(gnss_data + String((char)Serial2.read()));
+    }
     Serial_Print(gnss_data);
     appendFile(SD, "/" + gnss_dir + "/GPS_" + String(nfiles) + ".log", gnss_data);
   }
