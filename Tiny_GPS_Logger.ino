@@ -5,6 +5,7 @@
 #include <SPI.h>
 #include "SD.h"
 #include "FS.h"
+#include "TinyGPS++.h"
 
 #define RXD2 16
 #define TXD2 17
@@ -18,21 +19,18 @@ BLECharacteristic* pCharacteristic = NULL;
 bool deviceConnected = false;
 
 const int CS = 5;
-int log_flag_addr = 0;
 bool logging_on = false;
-
+int log_flag_addr = 0;
 String gnss_dir = "GNSS_LOGS";
 int nfiles = 0;
 
-const byte numChars = 50;
-char receivedChars[numChars];
-bool newData = false;
+TinyGPSPlus gps;
 
 void setup() {
   Serial.begin(115200);
   Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
   EEPROM.begin(64);
-  Serial_Print("\nESP32_ON\n");
+  Serial_Print("\n*****ESP32_ON*****\n");
   BLE_INIT();
   SD_INIT();
   listDir(SD, "/", 0);
@@ -63,9 +61,14 @@ class BLE_Callbacks: public BLECharacteristicCallbacks {
       std::string value = pCharacteristic->getValue();
       if (value.length() > 0) {
         Serial_Print("BLE Value: ");
+
         // DOTO: Trigger logging + ble send data
-        for (int i = 0; i < value.length(); i++) Serial.print(value[i], HEX);
+        for (int i = 0; i < value.length(); i++) {
+          Serial.print(value[i], HEX);
+        }
         Serial_Print("\n");
+
+
       }
     }
 };
@@ -102,7 +105,6 @@ void SD_INIT() {
   if (!SD.begin(CS)) {
     Serial_Print("Initialization Failed!\n");
     delay(1000);
-    ESP.restart();
     return;
   }
   Serial_Print("Initialization Success!\n");
@@ -197,72 +199,104 @@ void deleteFile(fs::FS &fs, String path) {
   else Serial_Print("Delete failed\n");
 }
 
-void recvWithStartEndMarkers() {
-  static boolean recvInProgress = false;
-  static byte ndx = 0;
-  char startMarker = '<';
-  char endMarker = '>';
-  char rc;
-  while (Serial.available() > 0 && newData == false) {
-    rc = Serial.read();
-    if (recvInProgress == true) {
-      if (rc != endMarker) {
-        receivedChars[ndx] = rc;
-        ndx++;
-        if (ndx >= numChars)  ndx = numChars - 1;
-      }
-      else {
-        receivedChars[ndx] = '\0';
-        recvInProgress = false;
-        ndx = 0;
-        newData = true;
-      }
-    }
-    else if (rc == startMarker) recvInProgress = true;
-  }
+void gps_valid() {
+  Serial_Print(String(gps.location.isValid()) + "\n");
+  Serial_Print(String(gps.location.isUpdated()) + "\n");
+  Serial_Print(String(gps.location.age()) + "\n");
 }
 
+// TODO: Convert into BLE Callbacks
 void CMD_EVENT() {
-  recvWithStartEndMarkers();
-  if (newData == true) {
-    Serial_Print(String(receivedChars) + "\n");
-    if (String(receivedChars).indexOf("log_on") >= 0) {
-      Serial_Print("[start_logging]\n");
-      logging_on = true;
-      EEPROM.write(log_flag_addr, 0x01);
-      EEPROM.commit();
-    }
-    else if (String(receivedChars).indexOf("log_off") >= 0) {
-      Serial_Print("[end_logging]\n");
-      logging_on = false;
-      EEPROM.write(log_flag_addr, 0x00);
-      EEPROM.commit();
-    }
-    else if (String(receivedChars).indexOf("list") >= 0) {
-      int files = listDir(SD, "/" + gnss_dir, 0);
-      Serial_Print("Number of Files: " + String(files) + "\n");
-    }
-    else if (String(receivedChars).indexOf("reboot") >= 0) {
-      Serial_Print("[rebooting]\n");
-      delay(2000);
-      ESP.restart();
-    }
-    else if (String(receivedChars).indexOf("reset") >= 0) {
-      Serial_Print("[system_reset]\n");
-      removeDir(SD, "/" + gnss_dir);
-      createDir(SD, "/" + gnss_dir);
-      nfiles = listDir(SD, "/" + gnss_dir, 0);
-      logging_on = false;
-      EEPROM.write(log_flag_addr, 0x00);
-      EEPROM.commit();
-    }
-    else if (String(receivedChars).indexOf("read") >= 0) {
-      int start_index = String(receivedChars).indexOf("|") + 1;
-      int end_index = String(receivedChars).indexOf("]");
-      String index = String(receivedChars).substring(start_index, end_index);
-      readFile(SD, "/" + gnss_dir + "/GPS_" + String(index.toInt()) + ".log");
-    }
-    newData = false;
+
+  String receivedChars;
+  while (Serial.available() > 0 ) {
+    receivedChars = Serial.readString();
+    // Serial.println(receivedChars);
+  }
+
+  if (receivedChars.indexOf("log_on") >= 0) {
+    Serial_Print("[start_logging]\n");
+    logging_on = true;
+    EEPROM.write(log_flag_addr, 0x01);
+    EEPROM.commit();
+  }
+  else if (receivedChars.indexOf("log_off") >= 0) {
+    Serial_Print("[end_logging]\n");
+    logging_on = false;
+    EEPROM.write(log_flag_addr, 0x00);
+    EEPROM.commit();
+  }
+  else if (receivedChars.indexOf("list") >= 0) {
+    int files = listDir(SD, "/" + gnss_dir, 0);
+    Serial_Print("Number of Files: " + String(files) + "\n");
+  }
+  else if (receivedChars.indexOf("read") >= 0) {
+    String index = receivedChars.substring(receivedChars.indexOf("|") + 1, receivedChars.indexOf("]"));
+    readFile(SD, "/" + gnss_dir + "/GPS_" + String(index.toInt()) + ".log");
+  }
+  else if (receivedChars.indexOf("reboot") >= 0) {
+    Serial_Print("[rebooting]\n");
+    delay(2000);
+    ESP.restart();
+  }
+  else if (receivedChars.indexOf("reset") >= 0) {
+    Serial_Print("[system_reset]\n");
+    removeDir(SD, "/" + gnss_dir);
+    createDir(SD, "/" + gnss_dir);
+    nfiles = listDir(SD, "/" + gnss_dir, 0);
+    logging_on = false;
+    EEPROM.write(log_flag_addr, 0x00);
+    EEPROM.commit();
+  }
+  else if (receivedChars.indexOf("get_data") >= 0) {
+    gps_valid();
+    String gps_latitude = String(gps.location.lat(), 7);
+    String gps_longitude = String(gps.location.lng(), 7);
+    String gps_date = String(gps.date.value());
+    String gps_hours = String(gps.time.hour());
+    String gps_minutes = String(gps.time.minute());
+    String gps_seconds = String(gps.time.second());
+    String gps_speed = String(gps.speed.kmph());
+    String gps_course =  String(gps.course.deg());
+    String gps_alt = String(gps.altitude.meters());
+    String gps_nsat = String(gps.satellites.value());
+    String gps_hdop = String(gps.hdop.value());
+    if (gps.time.hour() < 10) gps_hours = "0" + gps_hours;
+    if (gps.time.minute() < 10) gps_minutes = "0" + gps_minutes;
+    if (gps.time.second() < 10) gps_seconds = "0" + gps_seconds;
+    Serial_Print(gps_latitude + "\n");
+    Serial_Print(gps_longitude + "\n");
+    Serial_Print(gps_date + "\n");
+    Serial_Print(gps_hours + ":" + gps_minutes + ":" + gps_seconds + "\n");
+    Serial_Print(gps_speed + "\n");
+    Serial_Print(gps_course + "\n");
+    Serial_Print(gps_alt + "\n");
+    Serial_Print(gps_nsat + "\n");
+    Serial_Print(gps_hdop + "\n");
+  }
+  else if (receivedChars.indexOf("get_pos") >= 0) {
+    gps_valid();
+    String gps_latitude = String(gps.location.lat(), 7);
+    String gps_longitude = String(gps.location.lng(), 7);
+    Serial_Print(gps_latitude + "\n");
+    Serial_Print(gps_longitude + "\n");
+  }
+  else if (receivedChars.indexOf("get_datetime") >= 0) {
+    gps_valid();
+    String gps_date = String(gps.date.value());
+    String gps_hours = String(gps.time.hour());
+    String gps_minutes = String(gps.time.minute());
+    String gps_seconds = String(gps.time.second());
+    if (gps.time.hour() < 10) gps_hours = "0" + gps_hours;
+    if (gps.time.minute() < 10) gps_minutes = "0" + gps_minutes;
+    if (gps.time.second() < 10) gps_seconds = "0" + gps_seconds;
+    Serial_Print(gps_date + "\n");
+    Serial_Print(gps_hours + ":" + gps_minutes + ":" + gps_seconds + "\n");
+  }
+  else if (receivedChars.indexOf("test") >= 0) {
+    uint32_t value = 556;
+    pCharacteristic->setValue((uint8_t*)&value, 4);
+    pCharacteristic->notify();
   }
 }
 
@@ -270,20 +304,16 @@ void loop() {
 
   String gnss_data = "";
 
+  while (Serial2.available()) {
+    int raw_data = Serial2.read();
+    gps.encode(raw_data);
+    gnss_data = String(gnss_data + String((char)raw_data));
+  }
+
   if (logging_on) {
-    while (Serial2.available()) { 
-      gnss_data = String(gnss_data + String((char)Serial2.read()));
-    }
     Serial_Print(gnss_data);
     appendFile(SD, "/" + gnss_dir + "/GPS_" + String(nfiles) + ".log", gnss_data);
   }
 
-  // DOTO: replace with GNSS DATA OR Callback (send for every request from phone)
-  //  char txString[8];
-  //  pCharacteristic->setValue(txString);
-  //  pCharacteristic->notify();
-  //  delay(1000);
-
-  // DOTO: Replace with BLE callback
   CMD_EVENT();
 }

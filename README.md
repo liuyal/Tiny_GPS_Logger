@@ -6,9 +6,11 @@ A GPS logging device made with ESP32, NEO-6M, and SDCard Module.
 
 ## Hardware Pin Connection
 
-## Android App Guide
+## Android App User Guide
 
-## Links
+## WEB UI
+
+## Resource Links
 
 GPS
 
@@ -17,6 +19,7 @@ GPS
 - [NEO-6M Guide B](https://lastminuteengineers.com/neo6m-gps-arduino-tutorial/)
 - [NEO-6 DataSheet](https://www.u-blox.com/sites/default/files/products/documents/NEO-6_DataSheet_%28GPS.G6-HW-09005%29.pdf)
 - [NEO-6 Product Summary](https://www.u-blox.com/sites/default/files/products/documents/NEO-6_ProductSummary_%28GPS.G6-HW-09003%29.pdf)
+- [Tiny GPS++ Library](http://arduiniana.org/libraries/tinygpsplus/)
 
 SDCARD
 
@@ -28,8 +31,9 @@ BLE
 
 - [UUID Generator](https://www.uuidgenerator.net/)
 - [ESP32 BLE Guide](https://randomnerdtutorials.com/esp32-bluetooth-low-energy-ble-arduino-ide/)
-
+- [Indication & Notification](https://community.nxp.com/docs/DOC-328525)
 
 App
 
 - 
+
