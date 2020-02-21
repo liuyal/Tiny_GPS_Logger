@@ -19,9 +19,13 @@ BLECharacteristic* pCharacteristic = NULL;
 bool deviceConnected = false;
 
 const int CS = 5;
+bool gps_on = false;
+bool gps_print = false;
 bool logging_on = false;
-int log_flag_addr = 0;
+int gps_flag_addr = 0;
+int log_flag_addr = 1;
 String gnss_dir = "GNSS_LOGS";
+String gnss_data;
 int nfiles = 0;
 
 TinyGPSPlus gps;
@@ -36,7 +40,8 @@ void setup() {
   listDir(SD, "/", 0);
   createDir(SD, "/" + gnss_dir);
   nfiles = listDir(SD, "/" + gnss_dir, 0);
-  if ( EEPROM.read(log_flag_addr) == 0x01) logging_on = true;
+  if (EEPROM.read(gps_flag_addr) == 0x01) gps_on = true;
+  if (EEPROM.read(log_flag_addr) == 0x01) logging_on = true;
   else logging_on = false;
   Serial_Print("\n");
 }
@@ -108,6 +113,10 @@ void SD_INIT() {
     return;
   }
   Serial_Print("Initialization Success!\n");
+  cd_info();
+}
+
+void cd_info() {
   Serial_Print("-------SD Card Info-------\n");
   Serial_Print("SD Card Type:\t");
   uint8_t cardType = SD.cardType();
@@ -214,14 +223,26 @@ void CMD_EVENT() {
     // Serial.println(receivedChars);
   }
 
-  if (receivedChars.indexOf("log_on") >= 0) {
-    Serial_Print("[start_logging]\n");
+  if (receivedChars.indexOf("gps_on") >= 0) {
+    Serial_Print("\n[start_gps]\n");
+    gps_on = true;
+    EEPROM.write(gps_flag_addr, 0x01);
+    EEPROM.commit();
+  }
+  if (receivedChars.indexOf("gps_off") >= 0) {
+    Serial_Print("\n[stop_gps]\n");
+    gps_on = false;
+    EEPROM.write(gps_flag_addr, 0x00);
+    EEPROM.commit();
+  }
+  else if (receivedChars.indexOf("log_on") >= 0) {
+    Serial_Print("\n[start_logging]\n");
     logging_on = true;
     EEPROM.write(log_flag_addr, 0x01);
     EEPROM.commit();
   }
   else if (receivedChars.indexOf("log_off") >= 0) {
-    Serial_Print("[end_logging]\n");
+    Serial_Print("\n[end_logging]\n");
     logging_on = false;
     EEPROM.write(log_flag_addr, 0x00);
     EEPROM.commit();
@@ -235,18 +256,26 @@ void CMD_EVENT() {
     readFile(SD, "/" + gnss_dir + "/GPS_" + String(index.toInt()) + ".log");
   }
   else if (receivedChars.indexOf("reboot") >= 0) {
-    Serial_Print("[rebooting]\n");
+    Serial_Print("\n[rebooting]\n");
     delay(2000);
     ESP.restart();
   }
   else if (receivedChars.indexOf("reset") >= 0) {
-    Serial_Print("[system_reset]\n");
+    Serial_Print("\n[system_reset]\n");
     removeDir(SD, "/" + gnss_dir);
     createDir(SD, "/" + gnss_dir);
     nfiles = listDir(SD, "/" + gnss_dir, 0);
     logging_on = false;
     EEPROM.write(log_flag_addr, 0x00);
     EEPROM.commit();
+  }
+  else if (receivedChars.indexOf("gps_print") >= 0) {
+    gps_print = !gps_print;
+  }
+  else if (receivedChars.indexOf("get_status") >= 0) {
+     Serial_Print(gps_on ? "1" : "0");
+     Serial_Print(gps_print ? "1" : "0");
+     Serial_Print(logging_on ? "1" : "0");
   }
   else if (receivedChars.indexOf("get_data") >= 0) {
     gps_valid();
@@ -302,16 +331,20 @@ void CMD_EVENT() {
 
 void loop() {
 
-  String gnss_data = "";
+  gnss_data = "";
 
-  while (Serial2.available()) {
-    int raw_data = Serial2.read();
-    gps.encode(raw_data);
-    gnss_data = String(gnss_data + String((char)raw_data));
+  if (gps_on) {
+    while (Serial2.available()) {
+      int raw_data = Serial2.read();
+      gps.encode(raw_data);
+      gnss_data = String(gnss_data + String((char)raw_data));
+    }
+    if (gps_print) {
+      Serial_Print(gnss_data);
+    }
   }
 
-  if (logging_on) {
-    Serial_Print(gnss_data);
+  if (gps_on && logging_on) {
     appendFile(SD, "/" + gnss_dir + "/GPS_" + String(nfiles) + ".log", gnss_data);
   }
 
