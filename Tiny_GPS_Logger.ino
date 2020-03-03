@@ -251,7 +251,7 @@ void CMD_EVENT() {
     int files = listDir(SD, "/" + gnss_dir, 0);
     Serial_Print("Number of Files: " + String(files) + "\n");
   }
-  else if (receivedChars.indexOf("read") >= 0) {
+  else if (receivedChars.indexOf("read|") >= 0) {
     String index = receivedChars.substring(receivedChars.indexOf("|") + 1, receivedChars.indexOf("]"));
     readFile(SD, "/" + gnss_dir + "/GPS_" + String(index.toInt()) + ".log");
   }
