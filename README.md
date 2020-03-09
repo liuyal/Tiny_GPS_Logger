@@ -10,18 +10,20 @@ A GPS logging device made with ESP32, NEO-6M, and SDCard Module.
 
 ## BLE Code
 
-|Hex Code|Funciton| Describtion|
-|0x00|None| - |
-|0x01|GPS device status||
-|0x02|Turn GPS on||
-|0x03|GPS off||
-|0x04|logging on||
-|0x05|logging off||
-|0x06|Get GPS data||
-|0x07|List Files||
-|0x08|Read File||
-|0x09|Reboot||
-|0x0a|Reset||
+
+| Hex Code    | Function    | Description |
+| --- | --- | --- |
+| 0x00 | None| - |
+| 0x01 | GPS device status | |
+| 0x02 | Turn GPS on | |
+| 0x03 | Turn GPS off |  |
+| 0x04 | Turn logging on | |
+| 0x05 | Turn logging off |  |
+| 0x06 | Get GPS data |  |
+| 0x07 | List Files |  |
+| 0x08 | Read File |  |
+| 0x09 | Reboot |  |
+| 0x0a | Reset |  |
 
 ## Resource Links
 
