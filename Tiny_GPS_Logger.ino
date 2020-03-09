@@ -21,6 +21,7 @@ bool deviceConnected = false;
 const int CS = 5;
 bool gps_on = false;
 bool gps_print = false;
+bool has_fix = false;
 bool logging_on = false;
 int gps_flag_addr = 0;
 int log_flag_addr = 1;
@@ -61,19 +62,89 @@ class ServerCallbacks: public BLEServerCallbacks {
     }
 };
 
+// DOTO: Trigger logging + ble send data
 class BLE_Callbacks: public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic *pCharacteristic) {
       std::string value = pCharacteristic->getValue();
       if (value.length() > 0) {
-        Serial_Print("BLE Value: ");
-
-        // DOTO: Trigger logging + ble send data
-        for (int i = 0; i < value.length(); i++) {
-          Serial.print(value[i], HEX);
-        }
+        Serial_Print("BLE Code: ");
+        for (int i = 0; i < value.length(); i++) Serial.print(value[i], HEX);
         Serial_Print("\n");
-
-
+        if (value[0] == 0x01) {
+          // Get Status
+          Serial_Print("Status: ");
+          byte buf[3];
+          buf[0] = gps_on ? 0x01 : 0x00;
+          buf[1] = gps_print ? 0x01 : 0x00;
+          buf[2] = logging_on ? 0x01 : 0x00;
+          Serial_Print(String(buf[0]) + String(buf[1]) + String(buf[2]) + "\n");
+          pCharacteristic->setValue(buf, sizeof(buf));
+          pCharacteristic->indicate();
+        }
+        else if (value[0] == 0x02) {
+          Serial_Print("[start_gps]\n");
+          gps_on = true;
+          EEPROM.write(gps_flag_addr, 0x01);
+          EEPROM.commit();
+        }
+        else if (value[0] == 0x03) {
+          Serial_Print("[stop_gps]\n");
+          gps_on = false;
+          EEPROM.write(gps_flag_addr, 0x00);
+          EEPROM.commit();
+        }
+        else if (value[0] == 0x04) {
+          Serial_Print("[start_logging]\n");
+          logging_on = true;
+          EEPROM.write(log_flag_addr, 0x01);
+          EEPROM.commit();
+        }
+        else if (value[0] == 0x05) {
+          Serial_Print("[end_logging]\n");
+          logging_on = false;
+          EEPROM.write(log_flag_addr, 0x00);
+          EEPROM.commit();
+        }
+        else if (value[0] == 0x06) {
+          String gps_latitude = String(gps.location.lat(), 7);
+          String gps_longitude = String(gps.location.lng(), 7);
+          String gps_date = String(gps.date.value());
+          String gps_hours = String(gps.time.hour());
+          String gps_minutes = String(gps.time.minute());
+          String gps_seconds = String(gps.time.second());
+          String gps_speed = String(gps.speed.kmph());
+          String gps_course =  String(gps.course.deg());
+          String gps_alt = String(gps.altitude.meters());
+          String gps_nsat = String(gps.satellites.value());
+          String gps_hdop = String(gps.hdop.value());
+          String gps_valid = String(gps.location.isValid()) + "," + String(gps.location.isUpdated()) + "," + String(gps.location.age());
+          String gps_data = gps_latitude + "," + gps_longitude + "," + gps_date + "," + gps_hours + "," + gps_minutes + "," + gps_seconds + "," + gps_speed + "," + gps_course + "," + gps_alt + "," + gps_nsat + "," + gps_hdop;
+          String packet = gps_valid + "," + gps_data;
+          byte buf[packet.length() + 1];
+          packet.getBytes(buf, sizeof(buf));
+          pCharacteristic->setValue(buf, sizeof(buf));
+          pCharacteristic->indicate();
+          Serial_Print(packet + "\n");
+        }
+        else if (value[0] == 0x07) {} // List
+        else if (value[0] == 0x08) {} // read
+        else if (value[0] == 0x09) {
+          Serial_Print("[rebooting]\n");
+          delay(2000);
+          ESP.restart();
+        }
+        else if (value[0] == 0x0a) {
+          Serial_Print("[system_reset]\n");
+          removeDir(SD, "/" + gnss_dir);
+          createDir(SD, "/" + gnss_dir);
+          nfiles = listDir(SD, "/" + gnss_dir, 0);
+          gps_on = false;
+          gps_print = false;
+          logging_on = false;
+          EEPROM.write(log_flag_addr, 0x00);
+          EEPROM.write(gps_flag_addr, 0x00);
+          EEPROM.commit();
+        }
       }
     }
 };
@@ -113,10 +184,6 @@ void SD_INIT() {
     return;
   }
   Serial_Print("Initialization Success!\n");
-  cd_info();
-}
-
-void cd_info() {
   Serial_Print("-------SD Card Info-------\n");
   Serial_Print("SD Card Type:\t");
   uint8_t cardType = SD.cardType();
@@ -210,38 +277,37 @@ void deleteFile(fs::FS &fs, String path) {
 
 // TODO: Convert into BLE Callbacks
 void CMD_EVENT() {
-
   String receivedChars;
   while (Serial.available() > 0 ) {
     receivedChars = Serial.readString();
     // Serial.println(receivedChars);
   }
-
-  if (receivedChars.indexOf("get_status") >= 0) {
+  if (receivedChars.indexOf("status") >= 0) {
     Serial_Print(gps_on ? "1" : "0");
     Serial_Print(gps_print ? "1" : "0");
     Serial_Print(logging_on ? "1" : "0");
+    Serial_Print("\n");
   }
   else if (receivedChars.indexOf("gps_on") >= 0) {
-    Serial_Print("\n[start_gps]\n");
+    Serial_Print("[start_gps]\n");
     gps_on = true;
     EEPROM.write(gps_flag_addr, 0x01);
     EEPROM.commit();
   }
   if (receivedChars.indexOf("gps_off") >= 0) {
-    Serial_Print("\n[stop_gps]\n");
+    Serial_Print("[stop_gps]\n");
     gps_on = false;
     EEPROM.write(gps_flag_addr, 0x00);
     EEPROM.commit();
   }
   else if (receivedChars.indexOf("log_on") >= 0) {
-    Serial_Print("\n[start_logging]\n");
+    Serial_Print("[start_logging]\n");
     logging_on = true;
     EEPROM.write(log_flag_addr, 0x01);
     EEPROM.commit();
   }
   else if (receivedChars.indexOf("log_off") >= 0) {
-    Serial_Print("\n[end_logging]\n");
+    Serial_Print("[end_logging]\n");
     logging_on = false;
     EEPROM.write(log_flag_addr, 0x00);
     EEPROM.commit();
@@ -249,7 +315,7 @@ void CMD_EVENT() {
   else if (receivedChars.indexOf("gps_print") >= 0) {
     gps_print = !gps_print;
   }
-  else if (receivedChars.indexOf("get_data") >= 0) {
+  else if (receivedChars.indexOf("data") >= 0) {
     String gps_latitude = String(gps.location.lat(), 7);
     String gps_longitude = String(gps.location.lng(), 7);
     String gps_date = String(gps.date.value());
@@ -261,11 +327,9 @@ void CMD_EVENT() {
     String gps_alt = String(gps.altitude.meters());
     String gps_nsat = String(gps.satellites.value());
     String gps_hdop = String(gps.hdop.value());
-    if (gps.time.hour() < 10) gps_hours = "0" + gps_hours;
-    if (gps.time.minute() < 10) gps_minutes = "0" + gps_minutes;
-    if (gps.time.second() < 10) gps_seconds = "0" + gps_seconds;
-    Serial_Print(String(gps.location.isValid()) + "," + String(gps.location.isUpdated()) + "," + String(gps.location.age()) + ",");
-    Serial_Print(gps_latitude + "," + gps_longitude + "," + gps_date + "," + gps_hours + ":" + gps_minutes + ":" + gps_seconds + "," + gps_speed + "," + gps_course + "," + gps_alt + "," + gps_nsat + "," + gps_hdop + "\n");
+    String gps_valid = String(gps.location.isValid()) + "," + String(gps.location.isUpdated()) + "," + String(gps.location.age());
+    String gps_data = gps_latitude + "," + gps_longitude + "," + gps_date + "," + gps_hours + "," + gps_minutes + "," + gps_seconds + "," + gps_speed + "," + gps_course + "," + gps_alt + "," + gps_nsat + "," + gps_hdop;
+    Serial_Print(gps_valid + "," + gps_data + "\n");
   }
   else if (receivedChars.indexOf("list") >= 0) {
     int files = listDir(SD, "/" + gnss_dir, 0);
@@ -276,23 +340,21 @@ void CMD_EVENT() {
     readFile(SD, "/" + gnss_dir + "/GPS_" + String(index.toInt()) + ".log");
   }
   else if (receivedChars.indexOf("reboot") >= 0) {
-    Serial_Print("\n[rebooting]\n");
+    Serial_Print("[rebooting]\n");
     delay(2000);
     ESP.restart();
   }
   else if (receivedChars.indexOf("reset") >= 0) {
-    Serial_Print("\n[system_reset]\n");
+    Serial_Print("[system_reset]\n");
     removeDir(SD, "/" + gnss_dir);
     createDir(SD, "/" + gnss_dir);
     nfiles = listDir(SD, "/" + gnss_dir, 0);
+    gps_on = false;
+    gps_print = false;
     logging_on = false;
     EEPROM.write(log_flag_addr, 0x00);
+    EEPROM.write(gps_flag_addr, 0x00);
     EEPROM.commit();
-  }
-  else if (receivedChars.indexOf("test") >= 0) {
-    uint32_t value = 556;
-    pCharacteristic->setValue((uint8_t*)&value, 4);
-    pCharacteristic->notify();
   }
 }
 
@@ -306,14 +368,11 @@ void loop() {
       gps.encode(raw_data);
       gnss_data = String(gnss_data + String((char)raw_data));
     }
-    if (gps_print) {
-      Serial_Print(gnss_data);
-    }
+
+    if (gps_print) Serial_Print(gnss_data);
   }
 
-  if (gps_on && logging_on) {
-    appendFile(SD, "/" + gnss_dir + "/GPS_" + String(nfiles) + ".log", gnss_data);
-  }
+  if (gps_on && logging_on)  appendFile(SD, "/" + gnss_dir + "/GPS_" + String(nfiles) + ".log", gnss_data);
 
   CMD_EVENT();
 }

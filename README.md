@@ -1,6 +1,6 @@
 # Tiny GPS Logger
 
-A GPS logging device made with ESP32, NEO-6M, and SDCard Module. 
+A portable GPS logging device built with ESP32, NEO-6M, and SDCard Module. 
 
 ## Hardware Schematic
 
@@ -10,9 +10,8 @@ A GPS logging device made with ESP32, NEO-6M, and SDCard Module.
 
 ## BLE Code
 
-
 | Hex Code    | Function    | Description |
-| --- | --- | --- |
+| :---: | --- | --- |
 | 0x00 | None| - |
 | 0x01 | GPS device status | |
 | 0x02 | Turn GPS on | |
