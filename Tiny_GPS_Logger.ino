@@ -208,12 +208,6 @@ void deleteFile(fs::FS &fs, String path) {
   else Serial_Print("Delete failed\n");
 }
 
-void gps_valid() {
-  Serial_Print(String(gps.location.isValid()) + "\n");
-  Serial_Print(String(gps.location.isUpdated()) + "\n");
-  Serial_Print(String(gps.location.age()) + "\n");
-}
-
 // TODO: Convert into BLE Callbacks
 void CMD_EVENT() {
 
@@ -223,7 +217,12 @@ void CMD_EVENT() {
     // Serial.println(receivedChars);
   }
 
-  if (receivedChars.indexOf("gps_on") >= 0) {
+  if (receivedChars.indexOf("get_status") >= 0) {
+    Serial_Print(gps_on ? "1" : "0");
+    Serial_Print(gps_print ? "1" : "0");
+    Serial_Print(logging_on ? "1" : "0");
+  }
+  else if (receivedChars.indexOf("gps_on") >= 0) {
     Serial_Print("\n[start_gps]\n");
     gps_on = true;
     EEPROM.write(gps_flag_addr, 0x01);
@@ -247,6 +246,27 @@ void CMD_EVENT() {
     EEPROM.write(log_flag_addr, 0x00);
     EEPROM.commit();
   }
+  else if (receivedChars.indexOf("gps_print") >= 0) {
+    gps_print = !gps_print;
+  }
+  else if (receivedChars.indexOf("get_data") >= 0) {
+    String gps_latitude = String(gps.location.lat(), 7);
+    String gps_longitude = String(gps.location.lng(), 7);
+    String gps_date = String(gps.date.value());
+    String gps_hours = String(gps.time.hour());
+    String gps_minutes = String(gps.time.minute());
+    String gps_seconds = String(gps.time.second());
+    String gps_speed = String(gps.speed.kmph());
+    String gps_course =  String(gps.course.deg());
+    String gps_alt = String(gps.altitude.meters());
+    String gps_nsat = String(gps.satellites.value());
+    String gps_hdop = String(gps.hdop.value());
+    if (gps.time.hour() < 10) gps_hours = "0" + gps_hours;
+    if (gps.time.minute() < 10) gps_minutes = "0" + gps_minutes;
+    if (gps.time.second() < 10) gps_seconds = "0" + gps_seconds;
+    Serial_Print(String(gps.location.isValid()) + "," + String(gps.location.isUpdated()) + "," + String(gps.location.age()) + ",");
+    Serial_Print(gps_latitude + "," + gps_longitude + "," + gps_date + "," + gps_hours + ":" + gps_minutes + ":" + gps_seconds + "," + gps_speed + "," + gps_course + "," + gps_alt + "," + gps_nsat + "," + gps_hdop + "\n");
+  }
   else if (receivedChars.indexOf("list") >= 0) {
     int files = listDir(SD, "/" + gnss_dir, 0);
     Serial_Print("Number of Files: " + String(files) + "\n");
@@ -268,59 +288,6 @@ void CMD_EVENT() {
     logging_on = false;
     EEPROM.write(log_flag_addr, 0x00);
     EEPROM.commit();
-  }
-  else if (receivedChars.indexOf("gps_print") >= 0) {
-    gps_print = !gps_print;
-  }
-  else if (receivedChars.indexOf("get_status") >= 0) {
-     Serial_Print(gps_on ? "1" : "0");
-     Serial_Print(gps_print ? "1" : "0");
-     Serial_Print(logging_on ? "1" : "0");
-  }
-  else if (receivedChars.indexOf("get_data") >= 0) {
-    gps_valid();
-    String gps_latitude = String(gps.location.lat(), 7);
-    String gps_longitude = String(gps.location.lng(), 7);
-    String gps_date = String(gps.date.value());
-    String gps_hours = String(gps.time.hour());
-    String gps_minutes = String(gps.time.minute());
-    String gps_seconds = String(gps.time.second());
-    String gps_speed = String(gps.speed.kmph());
-    String gps_course =  String(gps.course.deg());
-    String gps_alt = String(gps.altitude.meters());
-    String gps_nsat = String(gps.satellites.value());
-    String gps_hdop = String(gps.hdop.value());
-    if (gps.time.hour() < 10) gps_hours = "0" + gps_hours;
-    if (gps.time.minute() < 10) gps_minutes = "0" + gps_minutes;
-    if (gps.time.second() < 10) gps_seconds = "0" + gps_seconds;
-    Serial_Print(gps_latitude + "\n");
-    Serial_Print(gps_longitude + "\n");
-    Serial_Print(gps_date + "\n");
-    Serial_Print(gps_hours + ":" + gps_minutes + ":" + gps_seconds + "\n");
-    Serial_Print(gps_speed + "\n");
-    Serial_Print(gps_course + "\n");
-    Serial_Print(gps_alt + "\n");
-    Serial_Print(gps_nsat + "\n");
-    Serial_Print(gps_hdop + "\n");
-  }
-  else if (receivedChars.indexOf("get_pos") >= 0) {
-    gps_valid();
-    String gps_latitude = String(gps.location.lat(), 7);
-    String gps_longitude = String(gps.location.lng(), 7);
-    Serial_Print(gps_latitude + "\n");
-    Serial_Print(gps_longitude + "\n");
-  }
-  else if (receivedChars.indexOf("get_datetime") >= 0) {
-    gps_valid();
-    String gps_date = String(gps.date.value());
-    String gps_hours = String(gps.time.hour());
-    String gps_minutes = String(gps.time.minute());
-    String gps_seconds = String(gps.time.second());
-    if (gps.time.hour() < 10) gps_hours = "0" + gps_hours;
-    if (gps.time.minute() < 10) gps_minutes = "0" + gps_minutes;
-    if (gps.time.second() < 10) gps_seconds = "0" + gps_seconds;
-    Serial_Print(gps_date + "\n");
-    Serial_Print(gps_hours + ":" + gps_minutes + ":" + gps_seconds + "\n");
   }
   else if (receivedChars.indexOf("test") >= 0) {
     uint32_t value = 556;
