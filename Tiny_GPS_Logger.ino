@@ -20,7 +20,6 @@ bool deviceConnected = false;
 
 const int CS = 5;
 bool gps_on = false;
-bool gps_print = false;
 bool has_fix = false;
 bool logging_on = false;
 int gps_flag_addr = 0;
@@ -40,7 +39,7 @@ void setup() {
   SD_INIT();
   listDir(SD, "/", 0);
   createDir(SD, "/" + gnss_dir);
-  nfiles = listDir(SD, "/" + gnss_dir, 0);
+  listDir(SD, "/" + gnss_dir, 0);
   if (EEPROM.read(gps_flag_addr) == 0x01) gps_on = true;
   if (EEPROM.read(log_flag_addr) == 0x01) logging_on = true;
   else logging_on = false;
@@ -62,7 +61,6 @@ class ServerCallbacks: public BLEServerCallbacks {
     }
 };
 
-// DOTO: Trigger logging + ble send data
 class BLE_Callbacks: public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic *pCharacteristic) {
       std::string value = pCharacteristic->getValue();
@@ -70,76 +68,82 @@ class BLE_Callbacks: public BLECharacteristicCallbacks {
         Serial_Print("BLE Code: ");
         for (int i = 0; i < value.length(); i++) Serial.print(value[i], HEX);
         Serial_Print("\n");
+
         if (value[0] == 0x01) {
-          // Get Status
-          Serial_Print("Status: ");
-          byte buf[3];
+          Serial_Print("Status: " + String(gps_on ? 0x01 : 0x00) + String(logging_on ? 0x01 : 0x00) + "\n");
+          byte buf[2];
           buf[0] = gps_on ? 0x01 : 0x00;
-          buf[1] = gps_print ? 0x01 : 0x00;
-          buf[2] = logging_on ? 0x01 : 0x00;
-          Serial_Print(String(buf[0]) + String(buf[1]) + String(buf[2]) + "\n");
+          buf[1] = logging_on ? 0x01 : 0x00;
           pCharacteristic->setValue(buf, sizeof(buf));
           pCharacteristic->indicate();
         }
         else if (value[0] == 0x02) {
-          Serial_Print("[start_gps]\n");
-          gps_on = true;
-          EEPROM.write(gps_flag_addr, 0x01);
-          EEPROM.commit();
+          if (!gps_on) {
+            Serial_Print("[start_gps]\n");
+            gps_on = true;
+            EEPROM.write(gps_flag_addr, 0x01);
+            EEPROM.commit();
+          }
+          else {
+            Serial_Print("[stop_gps]\n");
+            gps_on = false;
+            EEPROM.write(gps_flag_addr, 0x00);
+            EEPROM.commit();
+          }
         }
         else if (value[0] == 0x03) {
-          Serial_Print("[stop_gps]\n");
-          gps_on = false;
-          EEPROM.write(gps_flag_addr, 0x00);
-          EEPROM.commit();
+          if (!logging_on) {
+            Serial_Print("[start_logging]\n");
+            logging_on = true;
+            EEPROM.write(log_flag_addr, 0x01);
+            EEPROM.commit();
+          }
+          else {
+            Serial_Print("[end_logging]\n");
+            logging_on = false;
+            EEPROM.write(log_flag_addr, 0x00);
+            EEPROM.commit();
+          }
         }
         else if (value[0] == 0x04) {
-          Serial_Print("[start_logging]\n");
-          logging_on = true;
-          EEPROM.write(log_flag_addr, 0x01);
-          EEPROM.commit();
-        }
-        else if (value[0] == 0x05) {
-          Serial_Print("[end_logging]\n");
-          logging_on = false;
-          EEPROM.write(log_flag_addr, 0x00);
-          EEPROM.commit();
-        }
-        else if (value[0] == 0x06) {
-          String gps_latitude = String(gps.location.lat(), 7);
-          String gps_longitude = String(gps.location.lng(), 7);
-          String gps_date = String(gps.date.value());
-          String gps_hours = String(gps.time.hour());
-          String gps_minutes = String(gps.time.minute());
-          String gps_seconds = String(gps.time.second());
-          String gps_speed = String(gps.speed.kmph());
-          String gps_course =  String(gps.course.deg());
-          String gps_alt = String(gps.altitude.meters());
-          String gps_nsat = String(gps.satellites.value());
-          String gps_hdop = String(gps.hdop.value());
           String gps_valid = String(gps.location.isValid()) + "," + String(gps.location.isUpdated()) + "," + String(gps.location.age());
-          String gps_data = gps_latitude + "," + gps_longitude + "," + gps_date + "," + gps_hours + "," + gps_minutes + "," + gps_seconds + "," + gps_speed + "," + gps_course + "," + gps_alt + "," + gps_nsat + "," + gps_hdop;
-          String packet = gps_valid + "," + gps_data;
+          String gps_data_a = String(gps.location.lat(), 7); + "," + String(gps.location.lng(), 7) + "," + String(gps.date.value()) + "," + String(gps.time.hour()) + "," + String(gps.time.minute()) + "," + String(gps.time.second()) + ",";
+          String gps_data_b = String(gps.satellites.value()) + "," + String(gps.speed.kmph()) + "," + String(gps.course.deg()) + "," + String(gps.altitude.meters()) + "," +  String(gps.hdop.value());
+          String packet = gps_valid + "," + gps_data_a + gps_data_b;
           byte buf[packet.length() + 1];
           packet.getBytes(buf, sizeof(buf));
           pCharacteristic->setValue(buf, sizeof(buf));
           pCharacteristic->indicate();
           Serial_Print(packet + "\n");
         }
-        else if (value[0] == 0x07) {} // List
-        else if (value[0] == 0x08) {} // read
-        else if (value[0] == 0x09) {
+        else if (value[0] == 0x05) {
+          String listing = listDir(SD, "/" + gnss_dir, 0);
+          byte buf[listing.length() + 1];
+          listing.getBytes(buf, sizeof(buf));
+          pCharacteristic->setValue(buf, sizeof(buf));
+          pCharacteristic->indicate();
+          Serial_Print(listing);
+        }
+        else if (value[0] == 0x06) {
+          String text = readFile(SD, "/" + gnss_dir + "/GPS_" + int(value[1]) + ".log");
+          byte buf[text.length() + 1];
+          text.getBytes(buf, sizeof(buf));
+          
+          pCharacteristic->setValue(buf, 20);
+          pCharacteristic->indicate();
+          Serial_Print(text);
+        }
+        else if (value[0] == 0x07) {
           Serial_Print("[rebooting]\n");
           delay(2000);
           ESP.restart();
         }
-        else if (value[0] == 0x0a) {
+        else if (value[0] == 0x08) {
           Serial_Print("[system_reset]\n");
           removeDir(SD, "/" + gnss_dir);
           createDir(SD, "/" + gnss_dir);
-          nfiles = listDir(SD, "/" + gnss_dir, 0);
+          listDir(SD, "/" + gnss_dir, 0);
           gps_on = false;
-          gps_print = false;
           logging_on = false;
           EEPROM.write(log_flag_addr, 0x00);
           EEPROM.write(gps_flag_addr, 0x00);
@@ -201,13 +205,14 @@ void SD_INIT() {
   Serial_Print("--------------------------\n");
 }
 
-int listDir(fs::FS &fs, String dirname, uint8_t levels) {
+String listDir(fs::FS &fs, String dirname, uint8_t levels) {
+  String listing = "";
   int count = 0;
   Serial_Print("Listing directory: " + dirname + "\n");
   File root = fs.open(dirname);
   if (!root || !root.isDirectory()) {
     Serial_Print("Failed to open directory\n");
-    return -1;
+    return "-1,";
   }
   File file = root.openNextFile();
   while (file) {
@@ -218,10 +223,12 @@ int listDir(fs::FS &fs, String dirname, uint8_t levels) {
     else {
       count += 1;
       Serial_Print("  FILE: " + String(file.name()) + "  SIZE: " + String(file.size()) + "\n");
+      listing = listing + "," +  String(file.name()) + "," + String(file.size());
     }
     file = root.openNextFile();
   }
-  return count;
+  nfiles = count;
+  return String(count) + listing;
 }
 
 void createDir(fs::FS &fs, String path) {
@@ -250,23 +257,25 @@ void removeDir(fs::FS &fs, String path) {
   else Serial_Print("rmdir failed\n");
 }
 
-void readFile(fs::FS &fs, String path) {
-  Serial_Print("Reading file: " + path + "\n");
-  File file = fs.open(path);
-  if (!file) {
-    Serial_Print("Failed to open file for reading\n");
-    return;
-  }
-  Serial_Print("Read from file: \n");
-  while (file.available()) Serial.write(file.read());
-  file.close();
-}
-
 void appendFile(fs::FS &fs, String path, String message) {
   File file = fs.open(path, FILE_APPEND);
   if (!file) return;
   file.print(message);
   file.close();
+}
+
+String readFile(fs::FS &fs, String path) {
+  String text = "";
+  Serial_Print("Reading file: " + path + "\n");
+  File file = fs.open(path);
+  if (!file) {
+    return "Failed to open file for reading\n";
+  }
+  while (file.available()) {
+    text = text + (char)file.read();
+  }
+  file.close();
+  return text;
 }
 
 void deleteFile(fs::FS &fs, String path) {
@@ -275,7 +284,6 @@ void deleteFile(fs::FS &fs, String path) {
   else Serial_Print("Delete failed\n");
 }
 
-// TODO: Convert into BLE Callbacks
 void CMD_EVENT() {
   String receivedChars;
   while (Serial.available() > 0 ) {
@@ -283,61 +291,49 @@ void CMD_EVENT() {
     // Serial.println(receivedChars);
   }
   if (receivedChars.indexOf("status") >= 0) {
-    Serial_Print(gps_on ? "1" : "0");
-    Serial_Print(gps_print ? "1" : "0");
-    Serial_Print(logging_on ? "1" : "0");
-    Serial_Print("\n");
+    Serial_Print("Status: " + String(gps_on ? "1" : "0") + String(logging_on ? "1" : "0") + "\n");
   }
-  else if (receivedChars.indexOf("gps_on") >= 0) {
-    Serial_Print("[start_gps]\n");
-    gps_on = true;
-    EEPROM.write(gps_flag_addr, 0x01);
-    EEPROM.commit();
+  else if (receivedChars.indexOf("toggle_gps") >= 0) {
+    if (!gps_on) {
+      Serial_Print("[start_gps]\n");
+      gps_on = true;
+      EEPROM.write(gps_flag_addr, 0x01);
+      EEPROM.commit();
+    }
+    else {
+      Serial_Print("[stop_gps]\n");
+      gps_on = false;
+      EEPROM.write(gps_flag_addr, 0x00);
+      EEPROM.commit();
+    }
   }
-  if (receivedChars.indexOf("gps_off") >= 0) {
-    Serial_Print("[stop_gps]\n");
-    gps_on = false;
-    EEPROM.write(gps_flag_addr, 0x00);
-    EEPROM.commit();
-  }
-  else if (receivedChars.indexOf("log_on") >= 0) {
-    Serial_Print("[start_logging]\n");
-    logging_on = true;
-    EEPROM.write(log_flag_addr, 0x01);
-    EEPROM.commit();
-  }
-  else if (receivedChars.indexOf("log_off") >= 0) {
-    Serial_Print("[end_logging]\n");
-    logging_on = false;
-    EEPROM.write(log_flag_addr, 0x00);
-    EEPROM.commit();
-  }
-  else if (receivedChars.indexOf("gps_print") >= 0) {
-    gps_print = !gps_print;
+  else if (receivedChars.indexOf("toggle_log") >= 0) {
+    if (!logging_on) {
+      Serial_Print("[start_logging]\n");
+      logging_on = true;
+      EEPROM.write(log_flag_addr, 0x01);
+      EEPROM.commit();
+    }
+    else {
+      Serial_Print("[end_logging]\n");
+      logging_on = false;
+      EEPROM.write(log_flag_addr, 0x00);
+      EEPROM.commit();
+    }
   }
   else if (receivedChars.indexOf("data") >= 0) {
-    String gps_latitude = String(gps.location.lat(), 7);
-    String gps_longitude = String(gps.location.lng(), 7);
-    String gps_date = String(gps.date.value());
-    String gps_hours = String(gps.time.hour());
-    String gps_minutes = String(gps.time.minute());
-    String gps_seconds = String(gps.time.second());
-    String gps_speed = String(gps.speed.kmph());
-    String gps_course =  String(gps.course.deg());
-    String gps_alt = String(gps.altitude.meters());
-    String gps_nsat = String(gps.satellites.value());
-    String gps_hdop = String(gps.hdop.value());
     String gps_valid = String(gps.location.isValid()) + "," + String(gps.location.isUpdated()) + "," + String(gps.location.age());
-    String gps_data = gps_latitude + "," + gps_longitude + "," + gps_date + "," + gps_hours + "," + gps_minutes + "," + gps_seconds + "," + gps_speed + "," + gps_course + "," + gps_alt + "," + gps_nsat + "," + gps_hdop;
-    Serial_Print(gps_valid + "," + gps_data + "\n");
+    String gps_data_a = String(gps.location.lat(), 7); + "," + String(gps.location.lng(), 7) + "," + String(gps.date.value()) + "," + String(gps.time.hour()) + "," + String(gps.time.minute()) + "," + String(gps.time.second()) + ",";
+    String gps_data_b = String(gps.satellites.value()) + "," + String(gps.speed.kmph()) + "," + String(gps.course.deg()) + "," + String(gps.altitude.meters()) + "," +  String(gps.hdop.value());
+    String packet = gps_valid + "," + gps_data_a + gps_data_b;
+    Serial_Print(packet + "\n");
   }
   else if (receivedChars.indexOf("list") >= 0) {
-    int files = listDir(SD, "/" + gnss_dir, 0);
-    Serial_Print("Number of Files: " + String(files) + "\n");
+    listDir(SD, "/" + gnss_dir, 0);
   }
   else if (receivedChars.indexOf("read|") >= 0) {
     String index = receivedChars.substring(receivedChars.indexOf("|") + 1, receivedChars.indexOf("]"));
-    readFile(SD, "/" + gnss_dir + "/GPS_" + String(index.toInt()) + ".log");
+    Serial.print(readFile(SD, "/" + gnss_dir + "/GPS_" + String(index.toInt()) + ".log"));
   }
   else if (receivedChars.indexOf("reboot") >= 0) {
     Serial_Print("[rebooting]\n");
@@ -348,9 +344,8 @@ void CMD_EVENT() {
     Serial_Print("[system_reset]\n");
     removeDir(SD, "/" + gnss_dir);
     createDir(SD, "/" + gnss_dir);
-    nfiles = listDir(SD, "/" + gnss_dir, 0);
+    listDir(SD, "/" + gnss_dir, 0);
     gps_on = false;
-    gps_print = false;
     logging_on = false;
     EEPROM.write(log_flag_addr, 0x00);
     EEPROM.write(gps_flag_addr, 0x00);
@@ -368,11 +363,9 @@ void loop() {
       gps.encode(raw_data);
       gnss_data = String(gnss_data + String((char)raw_data));
     }
-
-    if (gps_print) Serial_Print(gnss_data);
   }
 
-  if (gps_on && logging_on)  appendFile(SD, "/" + gnss_dir + "/GPS_" + String(nfiles) + ".log", gnss_data);
+  if (gps_on && logging_on) appendFile(SD, "/" + gnss_dir + "/GPS_" + String(nfiles) + ".log", gnss_data);
 
   CMD_EVENT();
 }
