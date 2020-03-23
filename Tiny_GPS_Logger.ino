@@ -16,9 +16,9 @@
 BLEServer* pServer = NULL;
 BLEService* pService = NULL;
 BLECharacteristic* pCharacteristic = NULL;
-bool deviceConnected = false;
 
-bool has_fix = true;
+bool device_connected = false;
+bool has_fix = false;
 bool gps_on = false;
 bool gps_print = false;
 bool logging_on = false;
@@ -32,6 +32,7 @@ int nfiles = 0;
 String gnss_dir = "GNSS_LOGS";
 String gnss_data;
 int log_counter = 0;
+String log_buffer = "";
 
 TinyGPSPlus gps;
 
@@ -57,11 +58,11 @@ void setup() {
 
 class ServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
-      deviceConnected = true;
+      device_connected = true;
       Serial_Print("BLE Device Connected!\n");
     };
     void onDisconnect(BLEServer* pServer) {
-      deviceConnected = false;
+      device_connected = false;
       Serial_Print("BLE Device Disconnect!\n");
     }
 };
@@ -75,11 +76,13 @@ class BLE_Callbacks: public BLECharacteristicCallbacks {
         Serial_Print("\n");
 
         if (value[0] == 0x01) {
-          Serial_Print("Status: " + String(gps_on ? 0x01 : 0x00) + String(logging_on ? 0x01 : 0x00) + String(gps_print ? "1" : "0") + "\n");
-          byte buf[3];
-          buf[0] = gps_on ? 0x01 : 0x00;
-          buf[1] = logging_on ? 0x01 : 0x00;
-          buf[2] = gps_print ? 0x01 : 0x00;
+          Serial_Print("Status: " + String(device_connected ? 0x01 : 0x00) + String(has_fix ? 0x01 : 0x00) + String(gps_on ? 0x01 : 0x00) + String(gps_print ? 0x01 : 0x00) + String(logging_on ? 0x01 : 0x00) + "\n");
+          byte buf[5];
+          buf[0] = device_connected ? 0x01 : 0x00;
+          buf[1] = has_fix ? 0x01 : 0x00;
+          buf[2] = gps_on ? 0x01 : 0x00;
+          buf[3] = gps_print ? 0x01 : 0x00;
+          buf[4] = logging_on ? 0x01 : 0x00;
           pCharacteristic->setValue(buf, sizeof(buf));
           pCharacteristic->indicate();
         }
@@ -297,7 +300,7 @@ void CMD_EVENT() {
     // Serial.println(receivedChars);
   }
   if (receivedChars.indexOf("status") >= 0) {
-    Serial_Print("Status: " + String(gps_on ? "1" : "0") + String(logging_on ? "1" : "0") + String(gps_print ? "1" : "0") + "\n");
+    Serial_Print("Status: " + String(device_connected ? 0x01 : 0x00) + String(has_fix ? 0x01 : 0x00) + String(gps_on ? 0x01 : 0x00) + String(gps_print ? 0x01 : 0x00) + String(logging_on ? 0x01 : 0x00) + "\n");
   }
   else if (receivedChars.indexOf("gps") >= 0) {
     if (!gps_on) {
@@ -351,7 +354,6 @@ void CMD_EVENT() {
   }
   else if (receivedChars.indexOf("list") >= 0) {
     listDir(SD, "/" + gnss_dir, 0);
-    delay(1000);
   }
   else if (receivedChars.indexOf("read|") >= 0) {
     String index = receivedChars.substring(receivedChars.indexOf("|") + 1, receivedChars.indexOf("]"));
@@ -389,8 +391,14 @@ void loop() {
       gnss_data = String(gnss_data + String((char)raw_data));
     }
     if (gps_print) Serial_Print(gnss_data);
-    if (logging_on) appendFile(SD, "/" + gnss_dir + "/GPS_" + String(nfiles) + ".log", gnss_data);
+    log_buffer = log_buffer + gnss_data;
+    if (logging_on && log_counter % 1000 == 0 && log_counter != 0) {
+      appendFile(SD, "/" + gnss_dir + "/GPS_" + String(nfiles) + ".log", log_buffer);
+      log_buffer = "";
+      log_counter = 0;
+    }
   }
 
+  log_counter++;
   CMD_EVENT();
 }
