@@ -18,7 +18,7 @@ BLEService* pService = NULL;
 BLECharacteristic* pCharacteristic = NULL;
 bool deviceConnected = false;
 
-bool has_fix = false;
+bool has_fix = true;
 bool gps_on = false;
 bool gps_print = false;
 bool logging_on = false;
@@ -113,9 +113,9 @@ class BLE_Callbacks: public BLECharacteristicCallbacks {
         }
         else if (value[0] == 0x04) {
           String gps_valid = String(gps.location.isValid()) + "," + String(gps.location.isUpdated()) + "," + String(gps.location.age());
-          String gps_data_a = String(gps.location.lat(), 7) + "," + String(gps.location.lng(), 7) + "," + String(gps.date.value()) + "," + String(gps.time.hour()) + "," + String(gps.time.minute()) + "," + String(gps.time.second()) + ",";
+          String gps_data_a = String(gps.location.lat(), 7) + "," + String(gps.location.lng(), 7) + "," + String(gps.date.value()) + "," + String(gps.time.hour()) + "," + String(gps.time.minute()) + "," + String(gps.time.second());
           String gps_data_b = String(gps.satellites.value()) + "," + String(gps.speed.kmph()) + "," + String(gps.course.deg()) + "," + String(gps.altitude.meters()) + "," +  String(gps.hdop.value());
-          String packet = gps_valid + "," + gps_data_a + gps_data_b;
+          String packet = gps_valid + "," + gps_data_a  + "," + gps_data_b;
           byte buf[packet.length() + 1];
           packet.getBytes(buf, sizeof(buf));
           pCharacteristic->setValue(buf, sizeof(buf));
