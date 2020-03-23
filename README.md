@@ -12,15 +12,17 @@ A portable GPS logging device built with ESP32, NEO-6M, and SDCard Module.
 
 | Hex Code    | Function    | Description |
 | :---: | --- | --- |
-| 0x00 | None| - |
-| 0x01 | GPS device status | |
-| 0x02 | Toggle GPS on/off | |
-| 0x03 | Toggle logging on/off | |
-| 0x04 | Get GPS data |  |
-| 0x05 | List Files |  |
-| 0x06 | Read File |  |
-| 0x07 | Reboot |  |
-| 0x08 | Reset |  |
+| 0x00 | None             	|  |
+| 0x01 | GPS device status 	|  |
+| 0x02 | Toggle GPS on 		|  |
+| 0x03 | Toggle GPS off 	|  |
+| 0x04 | Toggle logging on 	|  |
+| 0x05 | Toggle logging off |  |
+| 0x06 | Get GPS data 		|  |
+| 0x07 | List Files 		|  |
+| 0x08 | Read File 			|  |
+| 0x09 | Reboot 			|  |
+| 0x0a | Reset 				|  |
 
 ## Resource Links
 
