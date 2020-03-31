@@ -24,6 +24,18 @@ A portable GPS logging device built with ESP32, NEO-6M, and SDCard Module.
 | 0x09 | Reboot 			|  |
 | 0x0a | Reset 				|  |
 
+## GPS Status Flags
+
+5 bit status flag system
+
+| Bit Number | Flag | Description |
+| :---: | --- | --- |
+| 1 | Device Connection 	|  |
+| 2 | GPS Has Fix 			|  |
+| 3 | GPS On/Off Status		|  |
+| 4 | GPS Print to Serial 	|  |
+| 5 | Logging Status 		|  |
+
 ## Resource Links
 
 GPS
