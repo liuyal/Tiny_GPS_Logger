@@ -28,13 +28,15 @@ A portable GPS logging device built with ESP32, NEO-6M, and SDCard Module.
 
 5 bit status flag system
 
+Status: 00000
+
 | Bit Number | Flag | Description |
 | :---: | --- | --- |
-| 1 | Device Connection 	|  |
-| 2 | GPS Has Fix 			|  |
-| 3 | GPS On/Off Status		|  |
-| 4 | GPS Print to Serial 	|  |
-| 5 | Logging Status 		|  |
+| 1 | Device Connection 		|  |
+| 2 | GPS Has Fix 				|  |
+| 3 | GPS On/Off Status			|  |
+| 4 | GPS Serial Print Status  	|  |
+| 5 | Logging Status 			|  |
 
 ## Resource Links
 
