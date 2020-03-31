@@ -10,35 +10,36 @@ A portable GPS logging device built with ESP32, NEO-6M, and SDCard Module.
 
 ## BLE Code
 
-| Hex Code    | Function    | Description |
+| Hex Code | Function | Description |
 | :---: | --- | --- |
-| 0x00 | None             	|  |
-| 0x01 | Get device status 	|  |
-| 0x02 | Toggle GPS on 		|  |
-| 0x03 | Toggle GPS off 	|  |
-| 0x04 | Toggle logging on 	|  |
-| 0x05 | Toggle print off 	|  |
-| 0x06 | Toggle print on 	|  |
-| 0x07 | Toggle logging off |  |
-| 0x08 | Get GPS data 		|  |
-| 0x09 | List Files 		|  |
-| 0x0a | Read File 			|  |
-| 0x0b | Reboot 			|  |
-| 0x0c | Reset 				|  |
-
+| 0x00 | None             		|  |
+| 0x01 | Get device status 		|  |
+| 0x02 | Toggle GPS on 			|  |
+| 0x03 | Toggle GPS off 		|  |
+| 0x04 | Toggle logging on 		|  |
+| 0x05 | Toggle logging off 	|  |
+| 0x06 | Toggle BLE print on 	|  |
+| 0x07 | Toggle BLE print off 	|  |
+| 0x08 | Get GPS data 			|  |
+| 0x09 | List Files 			|  |
+| 0x0a | Read File 				|  |
+| 0x0b | Reboot 				|  |
+| 0x0c | Reset 					|  |
+	
 ## GPS Status Flags
 
 5 bit status flag system
 
-ex. Status: 00000
+ex. Status: 000000
 
 | Bit Number | Flag | Description |
 | :---: | --- | --- |
 | 1 | Device Connection 		|  |
 | 2 | GPS Has Fix 				|  |
 | 3 | GPS On/Off Status			|  |
-| 4 | GPS Print Status  		|  |
-| 5 | Logging Status 			|  |
+| 4 | GPS Serial Print Status  	|  |
+| 5 | GPS BLE Print Status  	|  |
+| 6 | Logging Status 			|  |
 
 ## Resource Links
 
