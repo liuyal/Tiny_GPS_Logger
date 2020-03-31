@@ -111,6 +111,18 @@ class BLE_Callbacks: public BLECharacteristicCallbacks {
           EEPROM.commit();
         }
         else if (value[0] == 0x06) {
+          Serial_Print("[start_printing]\n");
+          gps_print = true;
+          EEPROM.write(print_flag_addr, 0x01);
+          EEPROM.commit();
+        }
+        else if (value[0] == 0x07) {
+          Serial_Print("[end_printing]\n");
+          gps_print = false;
+          EEPROM.write(print_flag_addr, 0x00);
+          EEPROM.commit();
+        }
+        else if (value[0] == 0x08) {
           String gps_valid = String(gps.location.isValid()) + "," + String(gps.location.isUpdated()) + "," + String(gps.location.age());
           String gps_data_a = String(gps.location.lat(), 7) + "," + String(gps.location.lng(), 7) + "," + String(gps.date.value());
           String gps_data_b = String(gps.time.hour()) + "," + String(gps.time.minute()) + "," + String(gps.time.second());
@@ -122,7 +134,7 @@ class BLE_Callbacks: public BLECharacteristicCallbacks {
           pCharacteristic->indicate();
           Serial_Print(packet + "\n");
         }
-        else if (value[0] == 0x07) {
+        else if (value[0] == 0x09) {
           String listing = listDir(SD, "/" + gnss_dir, 0);
           byte buf[listing.length() + 1];
           listing.getBytes(buf, sizeof(buf));
@@ -130,7 +142,7 @@ class BLE_Callbacks: public BLECharacteristicCallbacks {
           pCharacteristic->indicate();
           Serial_Print(listing);
         }
-        else if (value[0] == 0x08) {
+        else if (value[0] == 0x0a) {
           String text = readFile(SD, "/" + gnss_dir + "/GPS_" + int(value[1]) + ".log");
           // Not Possible so far
           // byte buf[text.length() + 1];
@@ -139,12 +151,12 @@ class BLE_Callbacks: public BLECharacteristicCallbacks {
           // pCharacteristic->indicate();
           // Serial_Print(text);
         }
-        else if (value[0] == 0x09) {
+        else if (value[0] == 0x0b) {
           Serial_Print("[rebooting]\n");
           delay(2000);
           ESP.restart();
         }
-        else if (value[0] == 0x0a) {
+        else if (value[0] == 0x0c) {
           Serial_Print("[system_reset]\n");
           removeDir(SD, "/" + gnss_dir);
           createDir(SD, "/" + gnss_dir);
@@ -390,15 +402,28 @@ void loop() {
       gps.encode(raw_data);
       gnss_data = String(gnss_data + String((char)raw_data));
     }
-    if (gps_print) Serial_Print(gnss_data);
+
+    if (gps.location.age() > 10000) has_fix = false;
+    else has_fix = true;
+    
+    if (gps_print) {
+      Serial_Print(gnss_data);
+      byte buf[gnss_data.length() + 1];
+      gnss_data.getBytes(buf, sizeof(buf));
+      pCharacteristic->setValue(buf, sizeof(buf));
+      pCharacteristic->notify();
+    }
+
     log_buffer = log_buffer + gnss_data;
+
     if (logging_on && log_counter % 1000 == 0 && log_counter != 0) {
       appendFile(SD, "/" + gnss_dir + "/GPS_" + String(nfiles) + ".log", log_buffer);
       log_buffer = "";
       log_counter = 0;
     }
   }
-
+  else has_fix = false;
+  
   log_counter++;
   CMD_EVENT();
 }

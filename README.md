@@ -17,25 +17,27 @@ A portable GPS logging device built with ESP32, NEO-6M, and SDCard Module.
 | 0x02 | Toggle GPS on 		|  |
 | 0x03 | Toggle GPS off 	|  |
 | 0x04 | Toggle logging on 	|  |
-| 0x05 | Toggle logging off |  |
-| 0x06 | Get GPS data 		|  |
-| 0x07 | List Files 		|  |
-| 0x08 | Read File 			|  |
-| 0x09 | Reboot 			|  |
-| 0x0a | Reset 				|  |
+| 0x05 | Toggle print off 	|  |
+| 0x06 | Toggle print on 	|  |
+| 0x07 | Toggle logging off |  |
+| 0x08 | Get GPS data 		|  |
+| 0x09 | List Files 		|  |
+| 0x0a | Read File 			|  |
+| 0x0b | Reboot 			|  |
+| 0x0c | Reset 				|  |
 
 ## GPS Status Flags
 
 5 bit status flag system
 
-Status: 00000
+ex. Status: 00000
 
 | Bit Number | Flag | Description |
 | :---: | --- | --- |
 | 1 | Device Connection 		|  |
 | 2 | GPS Has Fix 				|  |
 | 3 | GPS On/Off Status			|  |
-| 4 | GPS Serial Print Status  	|  |
+| 4 | GPS Print Status  		|  |
 | 5 | Logging Status 			|  |
 
 ## Resource Links
@@ -47,6 +49,7 @@ GPS
 - [NEO-6M Guide B](https://lastminuteengineers.com/neo6m-gps-arduino-tutorial/)
 - [NEO-6 DataSheet](https://www.u-blox.com/sites/default/files/products/documents/NEO-6_DataSheet_%28GPS.G6-HW-09005%29.pdf)
 - [NEO-6 Product Summary](https://www.u-blox.com/sites/default/files/products/documents/NEO-6_ProductSummary_%28GPS.G6-HW-09003%29.pdf)
+- [NEOGPS](https://github.com/SlashDevin/NeoGPS/tree/master/examples)
 
 SDCARD
 - [ESP32 SDCard Example](https://randomnerdtutorials.com/esp32-data-logging-temperature-to-microsd-card/)
