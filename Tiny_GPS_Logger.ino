@@ -143,11 +143,25 @@ class BLE_Callbacks: public BLECharacteristicCallbacks {
           // Serial_Print(text);
         }
         else if (value[0] == 0x0b) {
+          uint64_t bytes = SD.totalBytes();
+          uint64_t used_bytes = SD.usedBytes();
+          uint32_t bytes_low = bytes % 0xFFFFFFFF;
+          uint32_t bytes_high = (bytes >> 32) % 0xFFFFFFFF;
+          uint32_t used_bytes_low = used_bytes % 0xFFFFFFFF;
+          uint32_t used_bytes_high = (used_bytes >> 32) % 0xFFFFFFFF;
+          String sdcard = String(bytes_high) + String(bytes_low) + "," + String(used_bytes_high) + String(used_bytes_low);
+          byte buf[sdcard.length() + 1];
+          sdcard.getBytes(buf, sizeof(buf));
+          pCharacteristic->setValue(buf, sizeof(buf));
+          pCharacteristic->indicate();
+          Serial_Print(sdcard + "\n");
+        }
+        else if (value[0] == 0x0c) {
           Serial_Print("[rebooting]\n");
           delay(2000);
           ESP.restart();
         }
-        else if (value[0] == 0x0c) {
+        else if (value[0] == 0x0d) {
           Serial_Print("[system_reset]\n");
           removeDir(SD, "/" + gnss_dir);
           createDir(SD, "/" + gnss_dir);
@@ -368,6 +382,15 @@ void CMD_EVENT() {
   else if (receivedChars.indexOf("read|") >= 0) {
     String index = receivedChars.substring(receivedChars.indexOf("|") + 1, receivedChars.indexOf("]"));
     Serial_Print(readFile(SD, "/" + gnss_dir + "/GPS_" + String(index.toInt()) + ".log"));
+  }
+  else if (receivedChars.indexOf("sdcard") >= 0) {
+    uint64_t bytes = SD.totalBytes();
+    uint64_t used_bytes = SD.usedBytes();
+    uint32_t bytes_low = bytes % 0xFFFFFFFF;
+    uint32_t bytes_high = (bytes >> 32) % 0xFFFFFFFF;
+    uint32_t used_bytes_low = used_bytes % 0xFFFFFFFF;
+    uint32_t used_bytes_high = (used_bytes >> 32) % 0xFFFFFFFF;
+    Serial_Print(String(bytes_high) + String(bytes_low) + "," + String(used_bytes_high) + String(used_bytes_low) + "\n");
   }
   else if (receivedChars.indexOf("reboot") >= 0) {
     Serial_Print("[rebooting]\n");

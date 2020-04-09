@@ -23,14 +23,15 @@ A portable GPS logging device built with ESP32, NEO-6M, and SDCard Module.
 | 0x08 | Get GPS data 			|  |
 | 0x09 | List Files 			|  |
 | 0x0a | Read File 				|  |
-| 0x0b | Reboot 				|  |
-| 0x0c | Reset 					|  |
+| 0x0b | Get SDCard Status 		|  |
+| 0x0c | Reboot 				|  |
+| 0x0d | Reset 					|  |
 	
 ## GPS Status Flags
 
 5 bit status flag system
 
-ex. Status: 000000
+ex. Status: 0 0 0 0 0 0
 
 | Bit Number | Flag | Description |
 | :---: | --- | --- |
