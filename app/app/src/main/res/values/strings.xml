@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">tiny_gps</string>
+    <string name="refresh">refresh</string>
 </resources>
