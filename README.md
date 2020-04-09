@@ -65,5 +65,5 @@ BLE
 - Indication & Notification [Link1](https://community.nxp.com/docs/DOC-328525) [Link2](https://www.onethesis.com/2015/11/21/ble-introduction-notify-or-indicate/)
 
 Andriod App
-- 
+- [BLE Basics](https://developer.android.com/guide/topics/connectivity/bluetooth-le)
 

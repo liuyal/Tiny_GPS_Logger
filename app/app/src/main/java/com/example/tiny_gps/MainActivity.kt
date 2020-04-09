@@ -1,11 +1,19 @@
 package com.example.tiny_gps
 
+import com.example.tiny_gps.ApClass
+
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 
 
 class MainActivity : AppCompatActivity() {
+
+
+
+
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
