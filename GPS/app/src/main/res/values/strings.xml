@@ -11,5 +11,13 @@
     <string name="menu_map">Map</string>
     <string name="menu_log">Logs</string>
 
+    <string name="refresh">RESCAN</string>
+    <string name="ble_name">N/A</string>
+    <string name="ble_mac">00:00:00:00:00:00</string>
+    <string name="ble_bond">NOT BONDED</string>
+    <string name="ble_db">0dBm</string>
+    <string name="connect_btn_label">CONNECT</string>
+
+
     <string name="home_second">Home Second</string>
 </resources>
