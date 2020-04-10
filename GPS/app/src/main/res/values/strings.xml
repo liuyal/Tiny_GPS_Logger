@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">GPS</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">BLE Settings</string>
+
+    <string name="menu_home">Home</string>
+    <string name="menu_map">Map</string>
+    <string name="menu_log">Logs</string>
+
+    <string name="home_second">Home Second</string>
+</resources>
