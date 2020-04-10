@@ -14,6 +14,8 @@ import com.example.gps.objects.MyApplication
 import com.google.android.material.navigation.NavigationView
 import android.content.Intent
 
+import maes.tech.intentanim.CustomIntent;
+
 class MainActivity : AppCompatActivity() {
 
     var mApp = MyApplication()
@@ -32,6 +34,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.action_settings -> {
                     val intent = Intent(this, BLEActivity::class.java)
                     startActivity(intent)
+                    CustomIntent.customType(this, "left-to-right")
                 }
             }
             true
