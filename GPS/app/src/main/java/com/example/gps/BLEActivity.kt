@@ -84,6 +84,7 @@ class BLEActivity : AppCompatActivity() {
         return super.onCreateOptionsMenu(menu)
     }
 
+    // Selected Scan buttom
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
         if (id == R.id.scan_btn) {
