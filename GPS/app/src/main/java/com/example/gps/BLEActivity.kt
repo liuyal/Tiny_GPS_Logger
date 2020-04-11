@@ -1,99 +1,88 @@
 package com.example.gps
 
-import android.app.Activity
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
+import android.bluetooth.le.BluetoothLeScanner
+import android.bluetooth.le.ScanCallback
+import android.bluetooth.le.ScanResult
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
-import android.view.View
-import android.widget.Toast
+import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.example.gps.objects.MyApplication
-import com.example.gps.objects.RecyclerAdapter
-import maes.tech.intentanim.CustomIntent
 import kotlinx.android.synthetic.main.activity_ble.*
+import maes.tech.intentanim.CustomIntent
 
 class BLEActivity : AppCompatActivity() {
 
     var mApp = MyApplication()
+    var scan_flag: Boolean = false
+    var device_list  : ArrayList<BluetoothDevice> = ArrayList()
 
-    private var BLEAdapter: BluetoothAdapter? = null
-    private lateinit var Devices: Set<BluetoothDevice>
-    private val REQUEST_ENABLE_BLUETOOTH = 1
+    private val bleScanner = object : ScanCallback() {
+        override fun onScanResult(callbackType: Int, result: ScanResult?) {
+            Log.d("ScanDeviceActivity", "onScanResult(): ${result?.device?.address} - ${result?.device?.name}")
+            if (result != null) {
 
-    companion object {
-        val EXTRA_ADDRESS: String = "Device_address"
+
+
+
+
+
+            }
+        }
+    }
+
+    private val bluetoothLeScanner: BluetoothLeScanner
+        get() {
+            val bluetoothManager = applicationContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+            val bluetoothAdapter = bluetoothManager.adapter
+            return bluetoothAdapter.bluetoothLeScanner
+        }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        when (requestCode) {
+            1 -> when (grantResults) {
+                intArrayOf(PackageManager.PERMISSION_GRANTED) -> {
+                    bluetoothLeScanner.startScan(bleScanner)
+                }
+            }
+            else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ble)
-
-        BLEAdapter = BluetoothAdapter.getDefaultAdapter()
-        if(BLEAdapter == null) {
-            Toast.makeText(applicationContext, "Device doesn't support bluetooth!", Toast.LENGTH_SHORT).show()
-            return
-        }
-        if(!BLEAdapter!!.isEnabled) {
-            val enableBluetoothIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            startActivityForResult(enableBluetoothIntent, REQUEST_ENABLE_BLUETOOTH)
-        }
-
-        select_device_refresh.setOnClickListener{ ScanDeviceList() }
-
-        // Add back to home button to action bar
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
     }
 
 
 
-    private fun ScanDeviceList() {
-
-        val SCAN_PERIOD : Long = 10000
-
-        Devices = BLEAdapter!!.bondedDevices
-
-
-        val temp = BLEAdapter!!.bluetoothLeScanner
-
-        val list : ArrayList<BluetoothDevice> = ArrayList()
-
-        if (!Devices.isEmpty()) {
-            for (device: BluetoothDevice in Devices) {
-                list.add(device)
-                println(device)
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val id = item.itemId
+        if (id == R.id.scan_btn) {
+            if (scan_flag) {
+                bluetoothLeScanner.stopScan(bleScanner)
+                item.setTitle("SCAN")
             }
+            else {
+                bluetoothLeScanner.startScan(bleScanner)
+                item.setTitle("STOP")
+            }
+            scan_flag = !scan_flag
         }
-        else {
-            Toast.makeText(applicationContext, "No bluetooth devices found", Toast.LENGTH_SHORT).show()
-        }
-
-        select_device_list.layoutManager = LinearLayoutManager(this)
-        select_device_list.adapter = RecyclerAdapter(list)
-        //select_device_list.addItemDecoration(SimpleDividerItemDecoration(this))
-
-
+        return super.onOptionsItemSelected(item)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_ENABLE_BLUETOOTH) {
-            if (resultCode == Activity.RESULT_OK) {
-                if (BLEAdapter!!.isEnabled) {
-                    Toast.makeText(applicationContext, "Bluetooth has been enabled", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(applicationContext, "Bluetooth has been disabled", Toast.LENGTH_SHORT).show()
-                }
-            } else if (resultCode == Activity.RESULT_CANCELED) {
-                Toast.makeText(applicationContext, "Bluetooth enabling has been canceled", Toast.LENGTH_SHORT).show()
-            }
-        }
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        getMenuInflater().inflate(R.menu.ble_menu, menu);
+        return super.onCreateOptionsMenu(menu)
     }
-
 
     // Intent overide back to main activity
     override fun onSupportNavigateUp(): Boolean {
@@ -106,3 +95,7 @@ class BLEActivity : AppCompatActivity() {
 }
 
 
+//        select_device_list.layoutManager = LinearLayoutManager(this)
+//        select_device_list.adapter = RecyclerAdapter(list)
+//        select_device_list.adapter?.notifyDataSetChanged()
+//        select_device_list.addItemDecoration(SimpleDividerItemDecoration(this))
