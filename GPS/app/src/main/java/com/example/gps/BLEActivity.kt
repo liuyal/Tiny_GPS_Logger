@@ -13,26 +13,29 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.gps.objects.MyApplication
+import com.example.gps.objects.RecyclerAdapter
+import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator
 import kotlinx.android.synthetic.main.activity_ble.*
 import maes.tech.intentanim.CustomIntent
+
 
 class BLEActivity : AppCompatActivity() {
 
     var mApp = MyApplication()
     var scan_flag: Boolean = false
-    var device_list  : ArrayList<BluetoothDevice> = ArrayList()
+    var device_list : ArrayList<BluetoothDevice> = ArrayList()
 
     private val bleScanner = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult?) {
-            Log.d("ScanDeviceActivity", "onScanResult(): ${result?.device?.address} - ${result?.device?.name}")
+            //Log.d("[DEBUG]", "SCAN: ${result?.device?.address} - ${result?.device?.name}")
             if (result != null) {
-
-
-
-
-
-
+                if (result.device !in device_list) {
+                    device_list.add(result.device)
+                    select_device_list.adapter?.notifyItemInserted(device_list.size-1)
+                }
             }
         }
     }
@@ -58,44 +61,52 @@ class BLEActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ble)
+
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+
+        select_device_list.apply {
+            layoutManager = LinearLayoutManager(this.context)
+            adapter = RecyclerAdapter(device_list)
+        }
+        select_device_list.addItemDecoration(DividerItemDecoration(select_device_list.context, DividerItemDecoration.VERTICAL))
+        select_device_list.itemAnimator = SlideInLeftAnimator()
+        select_device_list.itemAnimator?.apply { addDuration = 350}
     }
 
+    override fun onStop() {
+        super.onStop()
+        bluetoothLeScanner.stopScan(bleScanner)
+        scan_flag = false
+    }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.ble_menu, menu);
+        return super.onCreateOptionsMenu(menu)
+    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
         if (id == R.id.scan_btn) {
             if (scan_flag) {
                 bluetoothLeScanner.stopScan(bleScanner)
-                item.setTitle("SCAN")
-            }
-            else {
+                item.title = "SCAN"
+            } else {
                 bluetoothLeScanner.startScan(bleScanner)
-                item.setTitle("STOP")
+                item.title = "STOP"
             }
             scan_flag = !scan_flag
         }
         return super.onOptionsItemSelected(item)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        getMenuInflater().inflate(R.menu.ble_menu, menu);
-        return super.onCreateOptionsMenu(menu)
-    }
-
-    // Intent overide back to main activity
+    // Intent back to main activity
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
+        supportFragmentManager.popBackStack();
         CustomIntent.customType(this, "right-to-left")
         return true
     }
 }
 
 
-//        select_device_list.layoutManager = LinearLayoutManager(this)
-//        select_device_list.adapter = RecyclerAdapter(list)
-//        select_device_list.adapter?.notifyDataSetChanged()
-//        select_device_list.addItemDecoration(SimpleDividerItemDecoration(this))
+

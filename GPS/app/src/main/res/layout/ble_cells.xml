@@ -10,9 +10,8 @@
         android:layout_width="wrap_content"
         android:layout_height="22dp"
         android:text="@string/ble_name"
-        android:textSize="20sp"
-        android:layout_alignTop="@+id/connect_btn"
-        android:layout_marginTop="0dp"
+        android:textSize="15sp"
+        android:layout_marginTop="10dp"
         android:layout_marginStart="10dp"/>
 
     <TextView
@@ -21,7 +20,7 @@
         android:layout_width="wrap_content"
         android:layout_height="22dp"
         android:text="@string/ble_mac"
-        android:textSize="20sp"
+        android:textSize="15sp"
         android:textColor="#000000"
         android:layout_below="@id/ble_name_lable"
         android:layout_marginTop = "5dp"
@@ -34,7 +33,7 @@
         android:layout_width="140dp"
         android:layout_height="wrap_content"
         android:text="@string/ble_bond"
-        android:textSize="20sp"
+        android:textSize="15sp"
         android:textColor="#000000"
         android:layout_below="@id/ble_mac_label"
         android:layout_marginTop = "5dp"
@@ -47,7 +46,7 @@
         android:layout_width="160dp"
         android:layout_height="45dp"
         android:textSize="20sp"
-        android:paddingLeft="40px"
+        android:paddingStart="30dp"
         android:textAlignment="viewStart"
 
         android:textColor="#FFFFFF"
@@ -55,7 +54,7 @@
         android:stateListAnimator="@null"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="28dp"
         android:layout_marginEnd="10dp"
         />
 
