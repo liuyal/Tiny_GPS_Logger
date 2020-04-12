@@ -64,7 +64,7 @@ class BLEActivity : AppCompatActivity() {
 
         select_device_list.apply {
             layoutManager = LinearLayoutManager(this.context)
-            adapter = RecyclerAdapter(deviceList) { partItem: ArrayList<BluetoothDevice> -> partItemClicked(partItem) }
+            adapter = RecyclerAdapter(deviceList) { partItem: BluetoothDevice -> partItemClicked(partItem) }
         }
         select_device_list.addItemDecoration(DividerItemDecoration(select_device_list.context, DividerItemDecoration.VERTICAL))
         select_device_list.itemAnimator = SlideInLeftAnimator()
@@ -99,11 +99,10 @@ class BLEActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    private fun partItemClicked(partItem: ArrayList<BluetoothDevice> ) {
-
-        println("Clicked")
-
+    private fun partItemClicked(partItem: BluetoothDevice ) {
         println(partItem)
+
+        
 
     }
 
