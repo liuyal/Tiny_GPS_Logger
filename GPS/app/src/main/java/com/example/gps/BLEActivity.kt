@@ -85,6 +85,8 @@ class BLEActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         BLE = BleService(this, applicationContext as ContextWrapper)
+        BLE?.initialize()
+        BLE?.mBluetoothGatt = GlobalApplication.bleGatt
     }
 
     override fun onStop() {
@@ -111,6 +113,7 @@ class BLEActivity : AppCompatActivity() {
             Toast.makeText(applicationContext, "BlueTooth is not enabled!", Toast.LENGTH_SHORT).show()
             return false
         } else {
+            BLE?.disconnect()
             BLE?.close()
             if (id == R.id.scan_btn) {
                 if (scanFlag) {
@@ -136,6 +139,8 @@ class BLEActivity : AppCompatActivity() {
 
         Log.d("[DEBUG]", "Select: $index|$partItem|$serviceUUID")
         val isConnected: Boolean? = BLE?.connect(partItem.address.toString())
+
+        // TODO: add popup
 
         if (isConnected!!) {
             GlobalApplication.gps_device.service_uuid = serviceUUID

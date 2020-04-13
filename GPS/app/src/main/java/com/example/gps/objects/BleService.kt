@@ -57,7 +57,7 @@ class BleService(c: Context, appc: ContextWrapper) {
 
 
     fun disconnect() {
-        if (mBluetoothAdapter == null || mBluetoothGatt == null) return
+        if (this.mBluetoothAdapter == null || mBluetoothGatt == null) return
         mBluetoothGatt!!.disconnect()
     }
 
