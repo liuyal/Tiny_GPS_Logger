@@ -1,5 +1,6 @@
 package com.example.gps
 
+import android.app.ProgressDialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
@@ -8,12 +9,17 @@ import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.PopupWindow
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -21,6 +27,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.gps.objects.BleService
 import com.example.gps.objects.GlobalApplication
 import com.example.gps.objects.ScanAdapter
+import com.example.gps.ui.assets.PopUpWindow
 import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator
 import kotlinx.android.synthetic.main.activity_ble.*
 import maes.tech.intentanim.CustomIntent
@@ -153,9 +160,11 @@ class BLEActivity : AppCompatActivity() {
 
         if (isConnected && serviceUUID != null) {
             // TODO: add success popup
+            //https://developer.android.com/reference/android/widget/PopupWindow#xml-attributes
             GlobalApplication.gps_device.service_uuid = serviceUUID
             GlobalApplication.result = resultsList[index]
             GlobalApplication.bleGatt = BLE?.mBluetoothGatt!!
+
             onSupportNavigateUp()
         } else if (scanFlag){
             Toast.makeText(applicationContext, "Invalid Device!", Toast.LENGTH_SHORT).show()
