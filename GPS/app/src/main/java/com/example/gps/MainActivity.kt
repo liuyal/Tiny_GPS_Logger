@@ -1,5 +1,7 @@
 package com.example.gps
 
+import android.content.ContextWrapper
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
@@ -10,17 +12,17 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.example.gps.objects.MyApplication
+import com.example.gps.objects.BleService
+import com.example.gps.objects.GlobalApplication
 import com.google.android.material.navigation.NavigationView
-import android.content.Intent
-
-import maes.tech.intentanim.CustomIntent;
+import maes.tech.intentanim.CustomIntent
 
 class MainActivity : AppCompatActivity() {
 
-    var mApp = MyApplication()
-
     private lateinit var appBarConfiguration: AppBarConfiguration
+
+    private var BLE: BleService? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,6 +49,13 @@ class MainActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(setOf(R.id.nav_home, R.id.nav_map, R.id.nav_logs), drawerLayout)
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        BLE = BleService(this, applicationContext as ContextWrapper)
+        BLE?.initialize()
+        BLE?.mBluetoothGatt = GlobalApplication.bleGatt
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

@@ -12,45 +12,41 @@
         android:layout_height="22dp"
         android:text="@string/ble_name"
         android:textSize="15sp"
-        android:layout_marginTop="5dp"
-        android:layout_marginStart="10dp"
-        tools:ignore="RelativeOverlap" />
+        android:textStyle="bold"
+        android:layout_above="@id/ble_mac_label"
+        android:layout_marginStart="10dp"/>
 
     <TextView
         android:id="@+id/ble_mac_label"
         android:gravity="center_vertical"
         android:layout_width="wrap_content"
-        android:layout_height="22dp"
+        android:layout_height="25dp"
         android:text="@string/ble_mac"
         android:textSize="15sp"
         android:textColor="#000000"
-        android:layout_below="@id/ble_name_label"
-        android:layout_marginTop = "5dp"
-        android:layout_marginBottom="0dp"
-        android:layout_marginStart="10dp"/>
+        android:layout_centerVertical="true"
+        android:layout_marginStart="10dp"
+        tools:ignore="RelativeOverlap" />
 
     <TextView
-        android:id="@+id/ble_bond_label"
+        android:id="@+id/ble_db_label"
         android:gravity="center_vertical"
         android:layout_width="140dp"
         android:layout_height="wrap_content"
-        android:text="@string/ble_bond"
+        android:text="@string/ble_db"
         android:textSize="15sp"
         android:textColor="#000000"
         android:layout_below="@id/ble_mac_label"
-        android:layout_marginTop = "5dp"
-        android:layout_marginBottom="0dp"
         android:layout_marginStart="10dp"/>
 
     <Button
         android:id="@+id/connect_btn"
         android:text="@string/connect_btn_label"
-        android:layout_width="170dp"
+        android:layout_width="150dp"
         android:layout_height="40dp"
         android:textSize="17sp"
-        android:paddingStart="30dp"
+        android:paddingStart="20dp"
         android:textAlignment="viewStart"
-
         android:textColor="#FFFFFF"
         android:background="@drawable/btn_unpressed"
         android:stateListAnimator="@null"
@@ -60,5 +56,12 @@
         android:layout_marginEnd="10dp"
         tools:ignore="RtlSymmetry" />
 
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ic_bluetooth_black_24dp"
+        android:layout_centerInParent="true"
+        android:layout_alignEnd="@id/connect_btn"
+        android:layout_marginEnd="15dp" />
 
 </RelativeLayout>

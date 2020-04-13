@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.example.gps.R
 import kotlinx.android.synthetic.main.ble_cells.view.*
 
-class RecyclerAdapter(private val devices : ArrayList<BluetoothDevice>, private val results: ArrayList<ScanResult>, private val listener: (BluetoothDevice) -> Unit) : RecyclerView.Adapter<ViewHolder>() {
+class ScanAdapter(private val devices : ArrayList<BluetoothDevice>, private val results: ArrayList<ScanResult>, private val listener: (BluetoothDevice) -> Unit) : RecyclerView.Adapter<ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomViewHolder {
         return CustomViewHolder(LayoutInflater.from(parent.context), parent)
@@ -30,14 +30,15 @@ class RecyclerAdapter(private val devices : ArrayList<BluetoothDevice>, private 
 
             val name: TextView? = itemView.findViewById(R.id.ble_name_label)
             val mac: TextView? = itemView.findViewById(R.id.ble_mac_label)
-            val status: TextView? = itemView.findViewById(R.id.ble_bond_label)
+            val status: TextView? = itemView.findViewById(R.id.ble_db_label)
+            val rssi = "RSSI: " + result.rssi.toString() + "dbm"
 
             itemView.connect_btn.setOnClickListener { clickListener(device) }
 
             if (device.name != null && device.name.isNotEmpty()) name?.text = device.name
             else name?.text = "N/A"
             mac?.text = device.address
-
+            status?.text = rssi
         }
     }
 }

@@ -45,7 +45,7 @@ void setup() {
   Serial.begin(115200);
   Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
   EEPROM.begin(64);
-  Serial_Print("\n*****ESP32_ON*****\n");
+  Serial_Print("\n\r*****ESP32_ON*****\n\r");
   BLE_INIT();
   SD_INIT();
   listDir(SD, "/", 0);
@@ -55,17 +55,17 @@ void setup() {
   if (EEPROM.read(log_flag_addr) == 0x01) logging_on = true;
   if (EEPROM.read(print_flag_addr) == 0x01) gps_print = true;
   if (EEPROM.read(ble_print_flag_addr) == 0x01) ble_print = true;
-  Serial_Print("\n");
+  Serial_Print("\n\r");
 }
 
 class ServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
       device_connected = true;
-      Serial_Print("BLE Device Connected!\n");
+      Serial_Print("BLE Device Connected!\n\r");
     };
     void onDisconnect(BLEServer* pServer) {
       device_connected = false;
-      Serial_Print("BLE Device Disconnect!\n");
+      Serial_Print("BLE Device Disconnect!\n\r");
     }
 };
 
@@ -75,7 +75,7 @@ class BLE_Callbacks: public BLECharacteristicCallbacks {
       if (value.length() > 0) {
         Serial_Print("BLE Code: ");
         for (int i = 0; i < value.length(); i++) Serial.print(value[i], HEX);
-        Serial_Print("\n");
+        Serial_Print("\n\r");
 
         if (value[0] == 0x01) {
           byte buf[6];
@@ -87,30 +87,30 @@ class BLE_Callbacks: public BLECharacteristicCallbacks {
           buf[5] = logging_on ? 0x01 : 0x00;
           pCharacteristic->setValue(buf, sizeof(buf));
           pCharacteristic->indicate();
-          Serial_Print("Status: " + String(buf[0]) + String(buf[1]) + String(buf[2]) + String(buf[3]) + String(buf[4]) + String(buf[5]) + "\n");
+          Serial_Print("Status: " + String(buf[0]) + String(buf[1]) + String(buf[2]) + String(buf[3]) + String(buf[4]) + String(buf[5]) + "\n\r");
         }
         else if (value[0] == 0x02) {
-          Serial_Print("[start_gps]\n"); gps_on = true;
+          Serial_Print("[start_gps]\n\r"); gps_on = true;
           EEPROM.write(gps_flag_addr, 0x01); EEPROM.commit();
         }
         else if (value[0] == 0x03) {
-          Serial_Print("[end_gps]\n"); gps_on = false;
+          Serial_Print("[end_gps]\n\r"); gps_on = false;
           EEPROM.write(gps_flag_addr, 0x00); EEPROM.commit();
         }
         else if (value[0] == 0x04) {
-          Serial_Print("[start_logging]\n"); logging_on = true;
+          Serial_Print("[start_logging]\n\r"); logging_on = true;
           EEPROM.write(log_flag_addr, 0x01); EEPROM.commit();
         }
         else if (value[0] == 0x05) {
-          Serial_Print("[end_logging]\n"); logging_on = false;
+          Serial_Print("[end_logging]\n\r"); logging_on = false;
           EEPROM.write(log_flag_addr, 0x00); EEPROM.commit();
         }
         else if (value[0] == 0x06) {
-          Serial_Print("[start_ble_printing]\n"); ble_print = true;
+          Serial_Print("[start_ble_printing]\n\r"); ble_print = true;
           EEPROM.write(ble_print_flag_addr, 0x01); EEPROM.commit();
         }
         else if (value[0] == 0x07) {
-          Serial_Print("[end_ble_printing]\n"); ble_print = false;
+          Serial_Print("[end_ble_printing]\n\r"); ble_print = false;
           EEPROM.write(ble_print_flag_addr, 0x00); EEPROM.commit();
         }
         else if (value[0] == 0x08) {
@@ -123,7 +123,7 @@ class BLE_Callbacks: public BLECharacteristicCallbacks {
           packet.getBytes(buf, sizeof(buf));
           pCharacteristic->setValue(buf, sizeof(buf));
           pCharacteristic->indicate();
-          Serial_Print(packet + "\n");
+          Serial_Print(packet + "\n\r");
         }
         else if (value[0] == 0x09) {
           String listing = listDir(SD, "/" + gnss_dir, 0);
@@ -154,15 +154,15 @@ class BLE_Callbacks: public BLECharacteristicCallbacks {
           sdcard.getBytes(buf, sizeof(buf));
           pCharacteristic->setValue(buf, sizeof(buf));
           pCharacteristic->indicate();
-          Serial_Print(sdcard + "\n");
+          Serial_Print(sdcard + "\n\r");
         }
         else if (value[0] == 0x0c) {
-          Serial_Print("[rebooting]\n");
+          Serial_Print("[rebooting]\n\r");
           delay(2000);
           ESP.restart();
         }
         else if (value[0] == 0x0d) {
-          Serial_Print("[system_reset]\n");
+          Serial_Print("[system_reset]\n\r");
           removeDir(SD, "/" + gnss_dir);
           createDir(SD, "/" + gnss_dir);
           listDir(SD, "/" + gnss_dir, 0);
@@ -175,17 +175,17 @@ class BLE_Callbacks: public BLECharacteristicCallbacks {
           EEPROM.write(print_flag_addr, 0x00);
           EEPROM.write(ble_print_flag_addr, 0x00);
           EEPROM.commit();
-          Serial_Print("[reset_complete]\n");
+          Serial_Print("[reset_complete]\n\r");
         }
       }
     }
 };
 
 void BLE_INIT() {
-  Serial_Print("\nInitializing BLE...\n");
-  Serial_Print("SERVICE UUID: " + String(SERVICE_UUID) + "\n");
-  Serial_Print("CHARACTERISTIC UUID: " + String(CHARACTERISTIC_UUID) + "\n");
-  Serial_Print("Starting BLE Server...\n");
+  Serial_Print("\n\rInitializing BLE...\n\r");
+  Serial_Print("SERVICE UUID: " + String(SERVICE_UUID) + "\n\r");
+  Serial_Print("CHARACTERISTIC UUID: " + String(CHARACTERISTIC_UUID) + "\n\r");
+  Serial_Print("Starting BLE Server...\n\r");
   BLEDevice::init("ESP32_BLE");
   pServer = BLEDevice::createServer();
   pServer->setCallbacks(new ServerCallbacks());
@@ -205,52 +205,52 @@ void BLE_INIT() {
   pAdvertising->setMinPreferred(0x06);
   pAdvertising->setMinPreferred(0x12);
   pServer->getAdvertising()->start();
-  Serial_Print("Characteristic Defined!\n");
+  Serial_Print("Characteristic Defined!\n\r");
 }
 
 void SD_INIT() {
-  Serial_Print("\nInitializing SD Card...\n");
+  Serial_Print("\n\rInitializing SD Card...\n\r");
   if (!SD.begin(CS)) {
-    Serial_Print("Initialization Failed!\n");
+    Serial_Print("Initialization Failed!\n\r");
     delay(1000);
     return;
   }
-  Serial_Print("Initialization Success!\n");
-  Serial_Print("-------SD Card Info-------\n");
+  Serial_Print("Initialization Success!\n\r");
+  Serial_Print("-------SD Card Info-------\n\r");
   Serial_Print("SD Card Type:\t");
   uint8_t cardType = SD.cardType();
-  if (cardType == CARD_MMC) Serial_Print("MMC\n");
-  else if (cardType == CARD_SD) Serial_Print("SDSC\n");
-  else if (cardType == CARD_SDHC) Serial_Print("SDHC\n");
-  else if (cardType == CARD_NONE) Serial_Print("No SD Card Attached\n");
-  else Serial_Print("UNKNOWN\n");
+  if (cardType == CARD_MMC) Serial_Print("MMC\n\r");
+  else if (cardType == CARD_SD) Serial_Print("SDSC\n\r");
+  else if (cardType == CARD_SDHC) Serial_Print("SDHC\n\r");
+  else if (cardType == CARD_NONE) Serial_Print("No SD Card Attached\n\r");
+  else Serial_Print("UNKNOWN\n\r");
   uint64_t bytes = SD.totalBytes();
   uint64_t used_bytes = SD.usedBytes();
-  Serial_Print("Volume(MB):\t" + String((float)bytes / (1000 * 1000)) + "\n");
-  Serial_Print("Volume(GB):\t" + String((float)bytes / (1000 * 1000 * 1000)) + "\n");
-  Serial_Print("Used(MB):\t" + String((float)used_bytes / (1000 * 1000)) + "\n");
-  Serial_Print("Used(GB):\t" + String((float)used_bytes / (1000 * 1000 * 1000)) + "\n");
-  Serial_Print("--------------------------\n");
+  Serial_Print("Volume(MB):\t" + String((float)bytes / (1000 * 1000)) + "\n\r");
+  Serial_Print("Volume(GB):\t" + String((float)bytes / (1000 * 1000 * 1000)) + "\n\r");
+  Serial_Print("Used(MB):\t" + String((float)used_bytes / (1000 * 1000)) + "\n\r");
+  Serial_Print("Used(GB):\t" + String((float)used_bytes / (1000 * 1000 * 1000)) + "\n\r");
+  Serial_Print("--------------------------\n\r");
 }
 
 String listDir(fs::FS &fs, String dirname, uint8_t levels) {
   String listing = "";
   int count = 0;
-  Serial_Print("Listing directory: " + dirname + "\n");
+  Serial_Print("Listing directory: " + dirname + "\n\r");
   File root = fs.open(dirname);
   if (!root || !root.isDirectory()) {
-    Serial_Print("Failed to open directory\n");
+    Serial_Print("Failed to open directory\n\r");
     return "-1,";
   }
   File file = root.openNextFile();
   while (file) {
     if (file.isDirectory()) {
-      Serial_Print("  DIR : " + String(file.name()) + "\n");
+      Serial_Print("  DIR : " + String(file.name()) + "\n\r");
       if (levels) listDir(fs, file.name(), levels - 1);
     }
     else {
       count += 1;
-      Serial_Print("  FILE: " + String(file.name()) + "  SIZE: " + String(file.size()) + "\n");
+      Serial_Print("  FILE: " + String(file.name()) + "  SIZE: " + String(file.size()) + "\n\r");
       listing = listing + "," +  String(file.name()) + "," + String(file.size());
     }
     file = root.openNextFile();
@@ -261,19 +261,19 @@ String listDir(fs::FS &fs, String dirname, uint8_t levels) {
 
 void createDir(fs::FS &fs, String path) {
   if (SD.exists(path)) {
-    Serial_Print("Dir " + path + " Exists...\n");
+    Serial_Print("Dir " + path + " Exists...\n\r");
     return;
   }
-  Serial_Print("Creating Dir: " + path + "\n");
-  if (fs.mkdir(path)) Serial_Print("Dir created\n");
-  else Serial_Print("mkdir failed\n");
+  Serial_Print("Creating Dir: " + path + "\n\r");
+  if (fs.mkdir(path)) Serial_Print("Dir created\n\r");
+  else Serial_Print("mkdir failed\n\r");
 }
 
 void removeDir(fs::FS &fs, String path) {
-  Serial_Print("Removing Dir: " + path + "\n");
+  Serial_Print("Removing Dir: " + path + "\n\r");
   File root = fs.open(path);
   if (!root || !root.isDirectory()) {
-    Serial_Print("Failed to open directory\n");
+    Serial_Print("Failed to open directory\n\r");
     return;
   }
   File file = root.openNextFile();
@@ -281,8 +281,8 @@ void removeDir(fs::FS &fs, String path) {
     if (!file.isDirectory()) deleteFile(SD, file.name());
     file = root.openNextFile();
   }
-  if (fs.rmdir(path))Serial_Print("Dir removed\n");
-  else Serial_Print("rmdir failed\n");
+  if (fs.rmdir(path))Serial_Print("Dir removed\n\r");
+  else Serial_Print("rmdir failed\n\r");
 }
 
 void appendFile(fs::FS &fs, String path, String message) {
@@ -294,10 +294,10 @@ void appendFile(fs::FS &fs, String path, String message) {
 
 String readFile(fs::FS &fs, String path) {
   String text = "";
-  Serial_Print("Reading file: " + path + "\n");
+  Serial_Print("Reading file: " + path + "\n\r");
   File file = fs.open(path);
   if (!file) {
-    return "Failed to open file for reading\n";
+    return "Failed to open file for reading\n\r";
   }
   while (file.available()) {
     text = text + (char)file.read();
@@ -307,9 +307,9 @@ String readFile(fs::FS &fs, String path) {
 }
 
 void deleteFile(fs::FS &fs, String path) {
-  Serial_Print("Deleting file: " + path + "\n");
-  if (fs.remove(path))Serial_Print("File deleted\n");
-  else Serial_Print("Delete failed\n");
+  Serial_Print("Deleting file: " + path + "\n\r");
+  if (fs.remove(path))Serial_Print("File deleted\n\r");
+  else Serial_Print("Delete failed\n\r");
 }
 
 void CMD_EVENT() {
@@ -326,45 +326,45 @@ void CMD_EVENT() {
     buf[3] = gps_print ? 0x01 : 0x00;
     buf[4] = ble_print ? 0x01 : 0x00;
     buf[5] = logging_on ? 0x01 : 0x00;
-    Serial_Print("Status: " + String(buf[0]) + String(buf[1]) + String(buf[2]) + String(buf[3]) + String(buf[4]) + String(buf[5]) + "\n");
+    Serial_Print("Status: " + String(buf[0]) + String(buf[1]) + String(buf[2]) + String(buf[3]) + String(buf[4]) + String(buf[5]) + "\n\r");
   }
   else if (receivedChars.indexOf("gps") >= 0) {
     if (!gps_on) {
-      Serial_Print("[start_gps]\n"); gps_on = true;
+      Serial_Print("[start_gps]\n\r"); gps_on = true;
       EEPROM.write(gps_flag_addr, 0x01); EEPROM.commit();
     }
     else {
-      Serial_Print("[end_gps]\n"); gps_on = false;
+      Serial_Print("[end_gps]\n\r"); gps_on = false;
       EEPROM.write(gps_flag_addr, 0x00); EEPROM.commit();
     }
   }
   else if (receivedChars.indexOf("log") >= 0) {
     if (!logging_on) {
-      Serial_Print("[start_logging]\n"); logging_on = true;
+      Serial_Print("[start_logging]\n\r"); logging_on = true;
       EEPROM.write(log_flag_addr, 0x01); EEPROM.commit();
     }
     else {
-      Serial_Print("[end_logging]\n"); logging_on = false;
+      Serial_Print("[end_logging]\n\r"); logging_on = false;
       EEPROM.write(log_flag_addr, 0x00); EEPROM.commit();
     }
   }
   else if (receivedChars.indexOf("print") >= 0) {
     if (!gps_print) {
-      Serial_Print("[start_printing]\n"); gps_print = true;
+      Serial_Print("[start_printing]\n\r"); gps_print = true;
       EEPROM.write(print_flag_addr, 0x01); EEPROM.commit();
     }
     else {
-      Serial_Print("[end_printing]\n"); gps_print = false;
+      Serial_Print("[end_printing]\n\r"); gps_print = false;
       EEPROM.write(print_flag_addr, 0x00); EEPROM.commit();
     }
   }
   else if (receivedChars.indexOf("ble") >= 0) {
     if (!ble_print) {
-      Serial_Print("[start_ble_printing]\n"); ble_print = true;
+      Serial_Print("[start_ble_printing]\n\r"); ble_print = true;
       EEPROM.write(ble_print_flag_addr, 0x01); EEPROM.commit();
     }
     else {
-      Serial_Print("[end_ble_printing]\n"); ble_print = false;
+      Serial_Print("[end_ble_printing]\n\r"); ble_print = false;
       EEPROM.write(ble_print_flag_addr, 0x00); EEPROM.commit();
     }
   }
@@ -374,7 +374,7 @@ void CMD_EVENT() {
     String gps_data_b = String(gps.time.hour()) + "," + String(gps.time.minute()) + "," + String(gps.time.second());
     String gps_data_c = String(gps.satellites.value()) + "," + String(gps.speed.kmph()) + "," + String(gps.course.deg()) + "," + String(gps.altitude.meters()) + "," +  String(gps.hdop.value());
     String packet = gps_valid + "," + gps_data_a  + "," + gps_data_b + "," + gps_data_c;
-    Serial_Print(packet + "\n");
+    Serial_Print(packet + "\n\r");
   }
   else if (receivedChars.indexOf("list") >= 0) {
     listDir(SD, "/" + gnss_dir, 0);
@@ -390,15 +390,15 @@ void CMD_EVENT() {
     uint32_t bytes_high = (bytes >> 32) % 0xFFFFFFFF;
     uint32_t used_bytes_low = used_bytes % 0xFFFFFFFF;
     uint32_t used_bytes_high = (used_bytes >> 32) % 0xFFFFFFFF;
-    Serial_Print(String(bytes_high) + String(bytes_low) + "," + String(used_bytes_high) + String(used_bytes_low) + "\n");
+    Serial_Print(String(bytes_high) + String(bytes_low) + "," + String(used_bytes_high) + String(used_bytes_low) + "\n\r");
   }
   else if (receivedChars.indexOf("reboot") >= 0) {
-    Serial_Print("[rebooting]\n");
+    Serial_Print("[rebooting]\n\r");
     delay(2000);
     ESP.restart();
   }
   else if (receivedChars.indexOf("reset") >= 0) {
-    Serial_Print("[system_reset]\n");
+    Serial_Print("[system_reset]\n\r");
     removeDir(SD, "/" + gnss_dir);
     createDir(SD, "/" + gnss_dir);
     listDir(SD, "/" + gnss_dir, 0);
@@ -411,7 +411,7 @@ void CMD_EVENT() {
     EEPROM.write(print_flag_addr, 0x00);
     EEPROM.write(ble_print_flag_addr, 0x00);
     EEPROM.commit();
-    Serial_Print("[reset_complete]\n");
+    Serial_Print("[reset_complete]\n\r");
   }
 }
 

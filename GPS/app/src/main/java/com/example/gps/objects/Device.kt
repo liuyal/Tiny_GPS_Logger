@@ -1,14 +1,18 @@
 package com.example.gps.objects
 
-import android.app.Application
+import android.bluetooth.BluetoothDevice
+import java.util.*
 
-class Device(service_uuid:String, char_uuid:String, status:BooleanArray) {
+//https://developer.android.com/reference/android/bluetooth/BluetoothDevice
+//https://developer.android.com/reference/android/bluetooth/BluetoothAdapter
 
-    var service_uuid : String = service_uuid
-    var char_uuid : String = char_uuid
-    var status : BooleanArray = status
+class Device(var service_uuid: UUID, var characteristic_uuid: UUID, var device: BluetoothDevice?) {
 
-    init{}
+    var gps_connection_flag: Boolean = false
+    var gps_fix_flag: Boolean = false
+    var gps_flag: Boolean = false
+    var gps_serial_print_flag: Boolean = false
+    var gps_ble_print_flag: Boolean = false
+    var gps_log_flag: Boolean = false
+
 }
-
-//var gps_device : Device = Device("0", "0", booleanArrayOf(false, false, false, false, false, false))
