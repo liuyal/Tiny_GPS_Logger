@@ -27,6 +27,7 @@ class BleService(c: Context, appc: ContextWrapper) {
         }
     }
 
+    //TODO: Added characteristic functions read/write
 
     fun initialize(): Boolean {
         if (mBluetoothManager == null) {

@@ -24,6 +24,9 @@ import com.example.gps.objects.ScanAdapter
 import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator
 import kotlinx.android.synthetic.main.activity_ble.*
 import maes.tech.intentanim.CustomIntent
+import java.io.IOException
+import java.util.*
+import kotlin.collections.ArrayList
 
 class BLEActivity : AppCompatActivity() {
 
@@ -82,12 +85,14 @@ class BLEActivity : AppCompatActivity() {
         select_device_list.addItemDecoration(DividerItemDecoration(select_device_list.context, DividerItemDecoration.VERTICAL))
     }
 
+
     override fun onStart() {
         super.onStart()
         BLE = BleService(this, applicationContext as ContextWrapper)
         BLE?.initialize()
         BLE?.mBluetoothGatt = GlobalApplication.bleGatt
     }
+
 
     override fun onStop() {
         super.onStop()
@@ -104,22 +109,23 @@ class BLEActivity : AppCompatActivity() {
 
     // Selected Scan button
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val id = item.itemId
-        val mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-        if (mBluetoothAdapter == null) {
+        if (BluetoothAdapter.getDefaultAdapter() == null) {
             Toast.makeText(applicationContext, "BlueTooth is not supported!", Toast.LENGTH_SHORT).show()
             return false
-        } else if (!mBluetoothAdapter.isEnabled) {
+        } else if (!BluetoothAdapter.getDefaultAdapter().isEnabled) {
             Toast.makeText(applicationContext, "BlueTooth is not enabled!", Toast.LENGTH_SHORT).show()
             return false
         } else {
             BLE?.disconnect()
             BLE?.close()
-            if (id == R.id.scan_btn) {
+            if (item.itemId == R.id.scan_btn) {
                 if (scanFlag) {
                     bluetoothLeScanner.stopScan(bleScanner)
                     item.title = "SCAN"
                 } else {
+                    deviceList.removeAll(deviceList)
+                    resultsList.removeAll(resultsList)
+                    select_device_list.adapter?.notifyDataSetChanged()
                     bluetoothLeScanner.startScan(bleScanner)
                     item.title = "STOP"
                 }
@@ -132,21 +138,32 @@ class BLEActivity : AppCompatActivity() {
 
     private fun partItemClicked(partItem: BluetoothDevice) {
         bluetoothLeScanner.stopScan(bleScanner)
-        scanFlag = false
+        var isConnected = false
         val index = deviceList.indexOf(partItem)
-        val serviceUUID = resultsList[index].scanRecord?.serviceUuids?.get(0)?.uuid!!
+        val serviceUUID: UUID? = resultsList[index].scanRecord?.serviceUuids?.get(0)?.uuid
         select_device_list.findViewHolderForAdapterPosition(index)?.itemView?.findViewById<Button>(R.id.connect_btn)?.setBackgroundResource(R.drawable.btn_pressed)
 
         Log.d("[DEBUG]", "Select: $index|$partItem|$serviceUUID")
-        val isConnected: Boolean? = BLE?.connect(partItem.address.toString())
 
-        // TODO: add popup
+        try {
+            isConnected = BLE?.connect(partItem.address.toString())!!
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
 
-        if (isConnected!!) {
+        if (isConnected && serviceUUID != null) {
+            // TODO: add success popup
             GlobalApplication.gps_device.service_uuid = serviceUUID
             GlobalApplication.result = resultsList[index]
             GlobalApplication.bleGatt = BLE?.mBluetoothGatt!!
             onSupportNavigateUp()
+        } else if (scanFlag){
+            Toast.makeText(applicationContext, "Invalid Device!", Toast.LENGTH_SHORT).show()
+            select_device_list.findViewHolderForAdapterPosition(index)?.itemView?.findViewById<Button>(R.id.connect_btn)?.setBackgroundResource(R.drawable.btn_unpressed)
+            bluetoothLeScanner.startScan(bleScanner)
+        } else {
+            Toast.makeText(applicationContext, "Invalid Device!", Toast.LENGTH_SHORT).show()
+            select_device_list.findViewHolderForAdapterPosition(index)?.itemView?.findViewById<Button>(R.id.connect_btn)?.setBackgroundResource(R.drawable.btn_unpressed)
         }
     }
 
