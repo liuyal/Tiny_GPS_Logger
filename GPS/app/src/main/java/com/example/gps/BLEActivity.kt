@@ -1,6 +1,5 @@
 package com.example.gps
 
-import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
@@ -10,7 +9,6 @@ import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.content.ContextWrapper
-import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -21,7 +19,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.gps.objects.BleService
 import com.example.gps.objects.GlobalApplication
 import com.example.gps.objects.ScanAdapter
 import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator
@@ -36,8 +33,6 @@ class BLEActivity : AppCompatActivity() {
     private var scanFlag: Boolean = false
     private var deviceList: ArrayList<BluetoothDevice> = ArrayList()
     private var resultsList: ArrayList<ScanResult> = ArrayList()
-    private var BLE: BleService? = null
-
 
     private val bleScanner = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult?) {
@@ -59,9 +54,9 @@ class BLEActivity : AppCompatActivity() {
 
     private val bluetoothLeScanner: BluetoothLeScanner
         get() {
-            BLE?.mBluetoothManager = applicationContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-            BLE?.mBluetoothAdapter = BLE?.mBluetoothManager!!.adapter
-            return BLE?.mBluetoothAdapter!!.bluetoothLeScanner
+            GlobalApplication.BLE?.bleManager = applicationContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+            GlobalApplication.BLE?.bleAdapter = GlobalApplication.BLE?.bleManager!!.adapter
+            return GlobalApplication.BLE?.bleAdapter!!.bluetoothLeScanner
         }
 
 
@@ -81,6 +76,8 @@ class BLEActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ble)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        GlobalApplication.BLE?.context = this
+        GlobalApplication.BLE?.applicationcontext = applicationContext as ContextWrapper
         select_device_list.layoutManager = LinearLayoutManager(select_device_list.context)
         select_device_list.adapter = ScanAdapter(deviceList, resultsList) { partItem: BluetoothDevice -> partItemClicked(partItem) }
         select_device_list.itemAnimator = SlideInLeftAnimator()
@@ -89,18 +86,10 @@ class BLEActivity : AppCompatActivity() {
     }
 
 
-    override fun onStart() {
-        super.onStart()
-        BLE = BleService(this, applicationContext as ContextWrapper)
-        BLE?.initialize()
-        BLE?.mBluetoothGatt = GlobalApplication.bleGatt
-    }
-
-
     override fun onStop() {
         super.onStop()
-        bluetoothLeScanner.stopScan(bleScanner)
         scanFlag = false
+        bluetoothLeScanner.stopScan(bleScanner)
     }
 
 
@@ -119,8 +108,8 @@ class BLEActivity : AppCompatActivity() {
             Toast.makeText(applicationContext, "BlueTooth is not enabled!", Toast.LENGTH_SHORT).show()
             return false
         } else {
-            BLE?.disconnect()
-            BLE?.close()
+            GlobalApplication.BLE?.disconnect()
+            GlobalApplication.BLE?.close()
             if (item.itemId == R.id.scan_btn) {
                 if (scanFlag) {
                     bluetoothLeScanner.stopScan(bleScanner)
@@ -139,26 +128,23 @@ class BLEActivity : AppCompatActivity() {
     }
 
 
-    @SuppressLint("ResourceType", "SetTextI18n")
     private fun partItemClicked(partItem: BluetoothDevice) {
-        bluetoothLeScanner.stopScan(bleScanner)
         var isConnected = false
         val index = deviceList.indexOf(partItem)
         val serviceUUID: UUID? = resultsList[index].scanRecord?.serviceUuids?.get(0)?.uuid
         select_device_list.findViewHolderForAdapterPosition(index)?.itemView?.findViewById<Button>(R.id.connect_btn)?.setBackgroundResource(R.drawable.btn_pressed)
 
-        Log.d("[DEBUG]", "Select: $index|$partItem|$serviceUUID")
-
         try {
-            isConnected = BLE?.connect(partItem.address.toString())!!
+            bluetoothLeScanner.stopScan(bleScanner)
+            isConnected = GlobalApplication.BLE?.connect(partItem.address.toString())!!
         } catch (e: IOException) {
             e.printStackTrace()
         }
 
         if (isConnected && serviceUUID != null) {
-            GlobalApplication.gps_device.service_uuid = serviceUUID
-            GlobalApplication.result = resultsList[index]
-            GlobalApplication.bleGatt = BLE?.mBluetoothGatt!!
+            GlobalApplication.BLE?.service_uuid = serviceUUID
+            GlobalApplication.BLE?.device = partItem
+            GlobalApplication.BLE?.scanResult = resultsList[index]
             createDialog(this, "Success!", "Connected To BLE Device!", "OK")
         } else if (scanFlag) {
             Toast.makeText(applicationContext, "Invalid Device!", Toast.LENGTH_SHORT).show()
@@ -171,7 +157,7 @@ class BLEActivity : AppCompatActivity() {
     }
 
 
-    private fun  createDialog(c: Context, tite: String, msg: String, button: String) {
+    private fun createDialog(c: Context, tite: String, msg: String, button: String) {
         val builder = AlertDialog.Builder(c)
         builder.setTitle(tite)
         builder.setMessage(msg)

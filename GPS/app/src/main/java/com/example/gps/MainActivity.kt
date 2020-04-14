@@ -12,17 +12,14 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.example.gps.objects.BleService
 import com.example.gps.objects.GlobalApplication
+import com.example.gps.objects.bleDevice
 import com.google.android.material.navigation.NavigationView
 import maes.tech.intentanim.CustomIntent
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
-
-    private var BLE: BleService? = null
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,21 +38,39 @@ class MainActivity : AppCompatActivity() {
             }
             true
         }
-
         val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
         val navView: NavigationView = findViewById(R.id.nav_view)
         val navController = findNavController(R.id.nav_host_fragment)
-
         appBarConfiguration = AppBarConfiguration(setOf(R.id.nav_home, R.id.nav_map, R.id.nav_logs), drawerLayout)
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
     }
 
+
     override fun onStart() {
         super.onStart()
-        BLE = BleService(this, applicationContext as ContextWrapper)
-        BLE?.initialize()
-        BLE?.mBluetoothGatt = GlobalApplication.bleGatt
+        if (GlobalApplication.BLE == null){
+            GlobalApplication.BLE = bleDevice(this, applicationContext as ContextWrapper)
+            GlobalApplication.BLE!!.initialize()
+        }
+        else{
+            GlobalApplication.BLE?.context = this
+            GlobalApplication.BLE?.applicationcontext = applicationContext as ContextWrapper
+        }
+
+        GlobalApplication.BLE?.connect("CC:50:E3:9C:5B:A6")
+
+
+
+
+
+
+
+    }
+
+    override fun onStop() {
+        super.onStop()
+        GlobalApplication.BLE?.close()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
