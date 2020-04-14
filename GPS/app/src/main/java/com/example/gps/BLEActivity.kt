@@ -142,7 +142,6 @@ class BLEActivity : AppCompatActivity() {
         }
 
         if (isConnected && serviceUUID != null) {
-            GlobalApplication.BLE?.service_uuid = serviceUUID
             GlobalApplication.BLE?.device = partItem
             GlobalApplication.BLE?.scanResult = resultsList[index]
             createDialog(this, "Success!", "Connected To BLE Device!", "OK")

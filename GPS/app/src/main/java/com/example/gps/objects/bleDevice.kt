@@ -1,5 +1,6 @@
 package com.example.gps.objects
 
+import android.app.Service
 import android.bluetooth.*
 import android.bluetooth.le.ScanResult
 import android.content.Context
@@ -13,11 +14,14 @@ const val STATE_DISCONNECTED = 0
 const val STATE_CONNECTING = 1
 const val STATE_CONNECTED = 2
 
+val SERVICE_UUID = UUID.fromString("000ffdf4-68d9-4e48-a89a-219e581f0d64")
+
 //TODO: Added characteristic functions read/write
 class bleDevice(c: Context, appcontext: ContextWrapper) {
 
     var context: Context = c
     var applicationcontext: ContextWrapper = appcontext
+    var connectionState = STATE_DISCONNECTED
 
     var bleManager: BluetoothManager? = null
     var bleAdapter: BluetoothAdapter? = null
@@ -27,9 +31,8 @@ class bleDevice(c: Context, appcontext: ContextWrapper) {
     var scanResult: ScanResult? = null
     var bleAddress: String? = null
 
-    var connectionState = STATE_DISCONNECTED
-    var service_uuid: UUID? = UUID(0,0)
-    var characteristic_uuid: UUID? = UUID(0,0)
+    var service: BluetoothGattService? = null
+    var characteristic: BluetoothGattCharacteristic? = null
 
     var gps_connection_flag: Boolean = false
     var gps_fix_flag: Boolean = false
@@ -154,6 +157,7 @@ class bleDevice(c: Context, appcontext: ContextWrapper) {
         bleGATT = mBluetoothAdapter.getRemoteDevice(address).connectGatt(context, false, mGattCallback)
         bleAddress = address
         connectionState = STATE_CONNECTING
+        checkSC()
         return true
     }
 
@@ -168,6 +172,26 @@ class bleDevice(c: Context, appcontext: ContextWrapper) {
         if (bleGATT == null) return
         bleGATT!!.close()
         bleGATT = null
+    }
+
+    private fun checkSC() {
+        var serviceList = GlobalApplication.BLE!!.bleGATT?.services
+        val start = System.currentTimeMillis()
+
+        while (serviceList!!.size < 1 && System.currentTimeMillis() - start < 5000) {
+            GlobalApplication.BLE!!.bleGATT?.discoverServices()
+            serviceList = GlobalApplication.BLE!!.bleGATT?.services
+        }
+
+        for (serviceItem in serviceList!!) {
+            if (serviceItem.uuid == SERVICE_UUID) {
+                service = serviceItem
+                if (serviceItem.characteristics.size >= 1) {
+                    characteristic = serviceItem.characteristics[0]
+                    break
+                }
+            }
+        }
     }
 
 }
