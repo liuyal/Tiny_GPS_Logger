@@ -21,4 +21,7 @@
 
 
     <string name="home_second">Home Second</string>
+    <string name="ok">OK</string>
+    <string name="title">Title</string>
+    <string name="dialog">Dialog</string>
 </resources>
