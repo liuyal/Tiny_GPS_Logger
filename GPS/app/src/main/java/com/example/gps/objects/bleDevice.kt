@@ -8,8 +8,6 @@ import android.util.Log
 import java.util.*
 
 //https://developer.android.com/reference/android/bluetooth/BluetoothGatt
-//https://developer.android.com/reference/android/bluetooth/BluetoothDevice
-//https://developer.android.com/reference/android/bluetooth/BluetoothAdapter
 
 const val STATE_DISCONNECTED = 0
 const val STATE_CONNECTING = 1
@@ -24,6 +22,7 @@ class bleDevice(c: Context, appcontext: ContextWrapper) {
     var bleManager: BluetoothManager? = null
     var bleAdapter: BluetoothAdapter? = null
     var bleGATT: BluetoothGatt? = null
+
     var device: BluetoothDevice? = null
     var scanResult: ScanResult? = null
     var bleAddress: String? = null
@@ -170,20 +169,5 @@ class bleDevice(c: Context, appcontext: ContextWrapper) {
         bleGATT!!.close()
         bleGATT = null
     }
-
-
-    fun readCharacteristic(characteristic: BluetoothGattCharacteristic) {
-        if (bleAdapter == null || bleGATT == null) return
-        bleGATT!!.readCharacteristic(characteristic)
-    }
-
-
-    fun setCharacteristicNotification(characteristic: BluetoothGattCharacteristic, enabled: Boolean) {
-        if (bleAdapter == null || bleGATT == null) return
-    }
-
-
-
-
 
 }

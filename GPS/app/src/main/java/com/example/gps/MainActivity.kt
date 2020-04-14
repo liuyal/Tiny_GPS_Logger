@@ -4,6 +4,7 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
@@ -46,7 +47,6 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
     }
 
-
     override fun onStart() {
         super.onStart()
         if (GlobalApplication.BLE == null){
@@ -57,15 +57,6 @@ class MainActivity : AppCompatActivity() {
             GlobalApplication.BLE?.context = this
             GlobalApplication.BLE?.applicationcontext = applicationContext as ContextWrapper
         }
-
-        GlobalApplication.BLE?.connect("CC:50:E3:9C:5B:A6")
-
-
-
-
-
-
-
     }
 
     override fun onStop() {
