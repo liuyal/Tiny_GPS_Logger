@@ -57,6 +57,7 @@ class MainActivity : AppCompatActivity() {
             GlobalApplication.BLE?.context = this
             GlobalApplication.BLE?.applicationcontext = applicationContext as ContextWrapper
         }
+        GlobalApplication.BLE?.connect("CC:50:E3:9C:5B:A6")
     }
 
     override fun onStop() {

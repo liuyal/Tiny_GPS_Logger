@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -12,12 +13,12 @@ import androidx.lifecycle.ViewModelProviders
 import com.example.gps.R
 import com.example.gps.objects.GlobalApplication
 import kotlinx.android.synthetic.main.fragment_home.view.*
-import java.util.*
 
 class HomeFragment : Fragment() {
 
     private lateinit var homeViewModel: HomeViewModel
 
+    @ExperimentalUnsignedTypes
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         homeViewModel = ViewModelProviders.of(this).get(HomeViewModel::class.java)
         val view = inflater.inflate(R.layout.fragment_home, container, false)
@@ -26,25 +27,26 @@ class HomeFragment : Fragment() {
 
         view.test_button.setOnClickListener { View ->
             Log.d("", "Clicked button")
-            Test()
+            val data: EditText? = view.findViewById(R.id.editText)
+            val value = ByteArray(1)
+            value[0] = data?.text.toString().toByte()
+            GlobalApplication.BLE?.writeValue(value)
         }
 
         view.test_button2.setOnClickListener { View ->
             Log.d("", "Clicked button 2")
-            GlobalApplication.BLE!!.disconnect()
-        }
+            val returnVal = GlobalApplication.BLE?.readValue()
 
+            if (returnVal != null) {
+                for (it in returnVal){
+                    Log.d("", it.toString())
+                }
+            }
+
+        }
         return view
     }
 
-
-    private fun Test() {
-
-        GlobalApplication.BLE?.connect("CC:50:E3:9C:5B:A6")
-
-        var x = GlobalApplication.BLE
-
-        println()
-    }
-
+    @ExperimentalUnsignedTypes
+    fun ByteArray.toHexString() = asUByteArray().joinToString("") { it.toString(16).padStart(2, '0') }
 }

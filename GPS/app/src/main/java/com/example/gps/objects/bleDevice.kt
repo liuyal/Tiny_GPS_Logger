@@ -174,11 +174,12 @@ class bleDevice(c: Context, appcontext: ContextWrapper) {
         bleGATT = null
     }
 
-    private fun checkSC() {
+    fun checkSC() {
         var serviceList = GlobalApplication.BLE!!.bleGATT?.services
         val start = System.currentTimeMillis()
 
-        while (serviceList!!.size < 1 && System.currentTimeMillis() - start < 5000) {
+        // TODO add timeout handler
+        while (serviceList != null && serviceList.size < 1 && System.currentTimeMillis() - start < 5000)  {
             GlobalApplication.BLE!!.bleGATT?.discoverServices()
             serviceList = GlobalApplication.BLE!!.bleGATT?.services
         }
@@ -193,5 +194,26 @@ class bleDevice(c: Context, appcontext: ContextWrapper) {
             }
         }
     }
+
+    fun writeValue(value: ByteArray){
+        if (characteristic == null) GlobalApplication.BLE?.checkSC()
+        characteristic!!.value = value
+        GlobalApplication.BLE?.bleGATT?.writeCharacteristic(characteristic)
+    }
+
+    fun readValue(): ByteArray? {
+        if (characteristic == null) GlobalApplication.BLE?.checkSC()
+        GlobalApplication.BLE?.bleGATT?.readCharacteristic(characteristic)
+        return characteristic?.value
+    }
+
+
+    // First make sure you never have more than one outstanding GATT request at a time. See Android BLE BluetoothGatt.writeDescriptor() return sometimes false.
+    // When you get the onCharacteristicChanged, you can use getValue directly on the characteristic object to get the notified value.
+    // After you call readCharacteristic, you need to wait for onCharacteristicRead before you can call getValue.
+
+
+
+
 
 }
