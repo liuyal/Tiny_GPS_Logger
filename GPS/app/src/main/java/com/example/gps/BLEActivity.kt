@@ -137,7 +137,7 @@ class BLEActivity : AppCompatActivity() {
         try {
             bluetoothLeScanner.stopScan(bleScanner)
             isConnected = GlobalApplication.BLE?.connect(partItem.address.toString())!!
-        } catch (e: IOException) {
+        } catch (e: Throwable) {
             e.printStackTrace()
         }
 

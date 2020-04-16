@@ -1,8 +1,11 @@
 package com.example.gps
 
+import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
+import android.os.AsyncTask
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
@@ -57,7 +60,14 @@ class MainActivity : AppCompatActivity() {
             GlobalApplication.BLE?.context = this
             GlobalApplication.BLE?.applicationcontext = applicationContext as ContextWrapper
         }
-        GlobalApplication.BLE?.connect("CC:50:E3:9C:5B:A6")
+
+        try {
+            val macAddress = GlobalApplication.BLE?.loadDBMAC()
+            GlobalApplication.BLE?.connect(macAddress)
+        } catch (e: Throwable){
+            // TODO: ADD if device is missing handler
+            Log.d("", "Unable to connect to BLE Device")
+        }
     }
 
     override fun onStop() {
@@ -74,4 +84,5 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
+
 }

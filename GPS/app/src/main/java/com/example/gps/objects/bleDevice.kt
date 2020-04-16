@@ -1,10 +1,10 @@
 package com.example.gps.objects
 
-import android.app.Service
 import android.bluetooth.*
 import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.content.ContextWrapper
+import android.os.AsyncTask
 import android.util.Log
 import java.util.*
 
@@ -13,6 +13,7 @@ import java.util.*
 const val STATE_DISCONNECTED = 0
 const val STATE_CONNECTING = 1
 const val STATE_CONNECTED = 2
+const val TIME_OUT = 5000
 
 val SERVICE_UUID = UUID.fromString("000ffdf4-68d9-4e48-a89a-219e581f0d64")
 
@@ -33,6 +34,7 @@ class bleDevice(c: Context, appcontext: ContextWrapper) {
 
     var service: BluetoothGattService? = null
     var characteristic: BluetoothGattCharacteristic? = null
+    var transactionSuccess: Boolean = false
 
     var gps_connection_flag: Boolean = false
     var gps_fix_flag: Boolean = false
@@ -72,6 +74,7 @@ class bleDevice(c: Context, appcontext: ContextWrapper) {
             super.onCharacteristicRead(gatt, characteristic, status)
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.d("", "onCharacteristicRead received: $status")
+                transactionSuccess = true
             }
         }
 
@@ -79,6 +82,7 @@ class bleDevice(c: Context, appcontext: ContextWrapper) {
             super.onCharacteristicWrite(gatt, characteristic, status)
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.d("", "onCharacteristicWrite received: $status")
+                transactionSuccess = true
             }
         }
 
@@ -86,6 +90,7 @@ class bleDevice(c: Context, appcontext: ContextWrapper) {
             super.onDescriptorRead(gatt, descriptor, status)
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.d("", "onDescriptorRead received: $status")
+                transactionSuccess = true
             }
         }
 
@@ -93,6 +98,7 @@ class bleDevice(c: Context, appcontext: ContextWrapper) {
             super.onDescriptorWrite(gatt, descriptor, status)
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.d("", "onDescriptorWrite received: $status")
+                transactionSuccess = true
             }
         }
 
@@ -134,12 +140,12 @@ class bleDevice(c: Context, appcontext: ContextWrapper) {
 
 
     fun initialize(): Boolean {
-        if (bleManager == null) {
-            bleManager = applicationcontext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-            if (bleManager == null)  return false
+        if (this.bleManager == null) {
+            this.bleManager = applicationcontext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+            if (this.bleManager == null) return false
         }
-        bleAdapter = bleManager!!.adapter
-        if (bleAdapter == null) return false
+        this.bleAdapter = this.bleManager!!.adapter
+        if (this.bleAdapter == null) return false
         return true
     }
 
@@ -147,73 +153,112 @@ class bleDevice(c: Context, appcontext: ContextWrapper) {
     fun connect(address: String?): Boolean {
         val mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
         if (mBluetoothAdapter == null || address == null) return false
-        if (bleAddress != null && address == bleAddress && bleGATT != null) {
-            if (bleGATT!!.connect()) {
-                connectionState = STATE_CONNECTING
+        if (this.bleAddress != null && address == this.bleAddress && this.bleGATT != null) {
+            if (this.bleGATT!!.connect()) {
+                this.connectionState = STATE_CONNECTING
                 return true
             } else return false
         }
         if (mBluetoothAdapter.getRemoteDevice(address) == null) return false
-        bleGATT = mBluetoothAdapter.getRemoteDevice(address).connectGatt(context, false, mGattCallback)
-        bleAddress = address
-        connectionState = STATE_CONNECTING
+        this.bleGATT = mBluetoothAdapter.getRemoteDevice(address).connectGatt(context, false, mGattCallback)
+        this.bleAddress = address
+        this.connectionState = STATE_CONNECTING
         checkSC()
+        updateDBMAC(address)
         return true
     }
 
 
     fun disconnect() {
-        if (this.bleAdapter == null || bleGATT == null) return
-        bleGATT!!.disconnect()
+        if (this.bleAdapter == null || this.bleGATT == null) return
+        this.bleGATT!!.disconnect()
     }
 
 
     fun close() {
-        if (bleGATT == null) return
-        bleGATT!!.close()
-        bleGATT = null
+        if (this.bleGATT == null) return
+        this.bleGATT!!.close()
+        this.bleGATT = null
     }
 
-    fun checkSC() {
+    private fun checkSC(timeout: Boolean = true): Boolean {
         var serviceList = GlobalApplication.BLE!!.bleGATT?.services
         val start = System.currentTimeMillis()
 
-        // TODO add timeout handler
-        while (serviceList != null && serviceList.size < 1 && System.currentTimeMillis() - start < 5000)  {
+        while (serviceList != null && serviceList.size < 1) {
             GlobalApplication.BLE!!.bleGATT?.discoverServices()
             serviceList = GlobalApplication.BLE!!.bleGATT?.services
+            if (timeout && System.currentTimeMillis() - start > TIME_OUT) break
         }
 
-        for (serviceItem in serviceList!!) {
+        if (serviceList == null || serviceList.size < 1) return false
+        for (serviceItem in serviceList) {
             if (serviceItem.uuid == SERVICE_UUID) {
-                service = serviceItem
+                this.service = serviceItem
                 if (serviceItem.characteristics.size >= 1) {
-                    characteristic = serviceItem.characteristics[0]
+                    this.characteristic = serviceItem.characteristics[0]
                     break
                 }
             }
         }
+        if (this.service == null || this.characteristic == null) return false
+        return true
     }
 
-    fun writeValue(value: ByteArray){
-        if (characteristic == null) GlobalApplication.BLE?.checkSC()
-        characteristic!!.value = value
-        GlobalApplication.BLE?.bleGATT?.writeCharacteristic(characteristic)
+    fun writeValue(value: ByteArray): Boolean {
+        var serviceCheck: Boolean?
+        val start = System.currentTimeMillis()
+        this.transactionSuccess = false
+
+        if (this.service == null || this.characteristic == null) {
+            serviceCheck = GlobalApplication.BLE?.checkSC()
+        } else serviceCheck = true
+
+        if (serviceCheck!!) {
+            this.characteristic!!.value = value
+            GlobalApplication.BLE?.bleGATT?.writeCharacteristic(this.characteristic)
+        } else return false
+
+        while (!this.transactionSuccess) {
+            if (System.currentTimeMillis() - start > TIME_OUT) return false
+        }
+        this.transactionSuccess = false
+        return true
     }
 
     fun readValue(): ByteArray? {
-        if (characteristic == null) GlobalApplication.BLE?.checkSC()
-        GlobalApplication.BLE?.bleGATT?.readCharacteristic(characteristic)
-        return characteristic?.value
+        var serviceCheck: Boolean
+        val start = System.currentTimeMillis()
+        this.transactionSuccess = false
+
+        if (this.service == null || this.characteristic == null) {
+            serviceCheck = GlobalApplication.BLE?.checkSC()!!
+        } else serviceCheck = true
+
+        if (serviceCheck) {
+            GlobalApplication.BLE?.bleGATT?.readCharacteristic(this.characteristic)
+        } else return null
+
+        while (!this.transactionSuccess) {
+            if (System.currentTimeMillis() - start > TIME_OUT) return null
+        }
+        this.transactionSuccess = false
+        return this.characteristic?.value
     }
 
+    private fun updateDBMAC(address: String?) {
+        val dbHandler = sqlitedb(context, null)
+        dbHandler.clearDBMAC()
+        if (address != null) dbHandler.addMAC(address)
+    }
 
-    // First make sure you never have more than one outstanding GATT request at a time. See Android BLE BluetoothGatt.writeDescriptor() return sometimes false.
-    // When you get the onCharacteristicChanged, you can use getValue directly on the characteristic object to get the notified value.
-    // After you call readCharacteristic, you need to wait for onCharacteristicRead before you can call getValue.
-
-
-
+    fun loadDBMAC(): String {
+        val dbHandler = sqlitedb(context, null)
+        val cursor = dbHandler.getMAC()
+        cursor!!.moveToFirst()
+        this.bleAddress = cursor.getString(cursor.getColumnIndex(sqlitedb.COLUMN_NAME))
+        return this.bleAddress!!
+    }
 
 
 }
