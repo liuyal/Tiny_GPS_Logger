@@ -18,6 +18,7 @@ import kotlinx.android.synthetic.main.fragment_home.view.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
+// TODO Implement UI
 class HomeFragment : Fragment() {
 
     private lateinit var homeViewModel: HomeViewModel
@@ -31,24 +32,16 @@ class HomeFragment : Fragment() {
 
         view.test_button.setOnClickListener { View ->
             Log.d("", "Clicked Send button")
-
-            val data: EditText? = view.findViewById(R.id.editText)
-            val value = ByteArray(1)
-            value[0] = data?.text.toString().toByte()
-
             GlobalScope.launch {
-                val c = GlobalApplication.BLE?.writeValue(value)
-                Log.d("", c.toString())
+                 GlobalApplication.BLE?.getDeviceStatus()
             }
         }
 
         view.test_button2.setOnClickListener { View ->
             Log.d("", "Clicked Read button")
-            GlobalScope.launch {
-                val returnVal = GlobalApplication.BLE?.readValue()
-                println(returnVal!!.contentToString())
-                println(returnVal.toString(Charsets.UTF_8))
-            }
+            GlobalScope.launch {}
+
+
         }
         return view
     }

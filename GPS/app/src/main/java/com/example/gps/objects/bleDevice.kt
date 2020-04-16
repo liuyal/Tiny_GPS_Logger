@@ -4,16 +4,19 @@ import android.bluetooth.*
 import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.content.ContextWrapper
-import android.os.AsyncTask
 import android.util.Log
 import java.util.*
 
 //https://developer.android.com/reference/android/bluetooth/BluetoothGatt
 
-const val STATE_DISCONNECTED = 0
-const val STATE_CONNECTING = 1
-const val STATE_CONNECTED = 2
-const val TIME_OUT = 5000
+const val GET_GPS_STATUS_CODE: Byte = 0x01
+const val SET_GPS_ON_CODE: Byte = 0x02
+const val SET_GPS_OFF_CODE: Byte = 0x03
+
+const val STATE_DISCONNECTED: Int = 0
+const val STATE_CONNECTING: Int = 1
+const val STATE_CONNECTED: Int = 2
+const val TIME_OUT: Int = 5000
 
 val SERVICE_UUID = UUID.fromString("000ffdf4-68d9-4e48-a89a-219e581f0d64")
 
@@ -35,6 +38,7 @@ class bleDevice(c: Context, appcontext: ContextWrapper) {
     var service: BluetoothGattService? = null
     var characteristic: BluetoothGattCharacteristic? = null
     var transactionSuccess: Boolean = false
+    var dbHandler: SqliteDB? = null
 
     var gps_connection_flag: Boolean = false
     var gps_fix_flag: Boolean = false
@@ -146,6 +150,7 @@ class bleDevice(c: Context, appcontext: ContextWrapper) {
         }
         this.bleAdapter = this.bleManager!!.adapter
         if (this.bleAdapter == null) return false
+        dbHandler = SqliteDB(context, null)
         return true
     }
 
@@ -166,6 +171,20 @@ class bleDevice(c: Context, appcontext: ContextWrapper) {
         checkSC()
         updateDBMAC(address)
         return true
+    }
+
+
+    private fun updateDBMAC(address: String?) {
+        dbHandler?.clearTable(SqliteDB.macTable)
+        if (address != null) dbHandler?.insertDB(address)
+    }
+
+
+    fun loadDBMAC(): String {
+        val cursor = dbHandler?.selectFromDB()
+        cursor!!.moveToFirst()
+        this.bleAddress = cursor.getString(cursor.getColumnIndex(SqliteDB.macColumn))
+        return this.bleAddress!!
     }
 
 
@@ -244,17 +263,34 @@ class bleDevice(c: Context, appcontext: ContextWrapper) {
         return this.characteristic?.value
     }
 
-    private fun updateDBMAC(address: String?) {
-        val dbHandler = sqlitedb(context, null)
-        dbHandler.clearDBMAC()
-        if (address != null) dbHandler.addMAC(address)
+
+    fun getDeviceStatus(): Boolean {
+        val value = ByteArray(1)
+        value[0] = GET_GPS_STATUS_CODE
+        val success = writeValue(value)
+
+        val returnVal = readValue()
+
+        println(returnVal!!.contentToString())
+        println(returnVal.toString(Charsets.UTF_8))
+
+        return true
     }
 
-    fun loadDBMAC(): String {
-        val dbHandler = sqlitedb(context, null)
-        val cursor = dbHandler.getMAC()
-        cursor!!.moveToFirst()
-        this.bleAddress = cursor.getString(cursor.getColumnIndex(sqlitedb.COLUMN_NAME))
-        return this.bleAddress!!
+    fun setGPSon(): Boolean {
+        return true
     }
+
+    fun setGPSoff(): Boolean {
+        return true
+    }
+
+    fun setLoggingon(): Boolean {
+        return true
+    }
+
+    fun setLoggingoff(): Boolean {
+        return true
+    }
+
 }
