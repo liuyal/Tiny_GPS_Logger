@@ -5,7 +5,6 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import java.io.IOException
 
 class sqlitedb (context: Context, factory: SQLiteDatabase.CursorFactory?) : SQLiteOpenHelper(context, DATABASE_NAME, factory, DATABASE_VERSION) {
 
@@ -17,7 +16,7 @@ class sqlitedb (context: Context, factory: SQLiteDatabase.CursorFactory?) : SQLi
     }
 
     override fun onCreate(db: SQLiteDatabase) {
-        val mkTable = "CREATE TABLE $TABLE_NAME($COLUMN_NAME varchar(18)PRIMARY KEY)"
+        val mkTable = "CREATE TABLE $TABLE_NAME($COLUMN_NAME varchar(18) PRIMARY KEY)"
         db.execSQL(mkTable)
     }
 
@@ -27,9 +26,9 @@ class sqlitedb (context: Context, factory: SQLiteDatabase.CursorFactory?) : SQLi
     }
 
     fun clearDBMAC() {
-        val db = this.writableDatabase
         val clearTable = "DROP TABLE $TABLE_NAME"
-        val mkTable = "CREATE TABLE $TABLE_NAME($COLUMN_NAME varchar(18)PRIMARY KEY)"
+        val mkTable = "CREATE TABLE $TABLE_NAME($COLUMN_NAME varchar(18) PRIMARY KEY)"
+        val db = this.writableDatabase
         try {
             db.execSQL(clearTable)
             db.execSQL(mkTable)
@@ -40,8 +39,8 @@ class sqlitedb (context: Context, factory: SQLiteDatabase.CursorFactory?) : SQLi
 
     fun addMAC(mac: String) {
         val values = ContentValues()
-        values.put(COLUMN_NAME, mac)
         val db = this.writableDatabase
+        values.put(COLUMN_NAME, mac)
         db.insert(TABLE_NAME, null, values)
         db.close()
     }
@@ -50,5 +49,7 @@ class sqlitedb (context: Context, factory: SQLiteDatabase.CursorFactory?) : SQLi
         val db = this.readableDatabase
         return db.rawQuery("SELECT * FROM $TABLE_NAME", null)
     }
+
+
 
 }

@@ -206,13 +206,12 @@ class bleDevice(c: Context, appcontext: ContextWrapper) {
     }
 
     fun writeValue(value: ByteArray): Boolean {
-        var serviceCheck: Boolean?
         val start = System.currentTimeMillis()
         this.transactionSuccess = false
 
-        if (this.service == null || this.characteristic == null) {
-            serviceCheck = GlobalApplication.BLE?.checkSC()
-        } else serviceCheck = true
+        val serviceCheck: Boolean = if (this.service == null || this.characteristic == null) {
+            GlobalApplication.BLE?.checkSC()!!
+        } else true
 
         if (serviceCheck!!) {
             this.characteristic!!.value = value
@@ -227,13 +226,12 @@ class bleDevice(c: Context, appcontext: ContextWrapper) {
     }
 
     fun readValue(): ByteArray? {
-        var serviceCheck: Boolean
         val start = System.currentTimeMillis()
         this.transactionSuccess = false
 
-        if (this.service == null || this.characteristic == null) {
-            serviceCheck = GlobalApplication.BLE?.checkSC()!!
-        } else serviceCheck = true
+        val serviceCheck: Boolean = if (this.service == null || this.characteristic == null) {
+            GlobalApplication.BLE?.checkSC()!!
+        } else true
 
         if (serviceCheck) {
             GlobalApplication.BLE?.bleGATT?.readCharacteristic(this.characteristic)
@@ -259,6 +257,4 @@ class bleDevice(c: Context, appcontext: ContextWrapper) {
         this.bleAddress = cursor.getString(cursor.getColumnIndex(sqlitedb.COLUMN_NAME))
         return this.bleAddress!!
     }
-
-
 }

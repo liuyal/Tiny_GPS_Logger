@@ -48,16 +48,10 @@ class HomeFragment : Fragment() {
                 val returnVal = GlobalApplication.BLE?.readValue()
                 println(returnVal!!.contentToString())
                 println(returnVal.toString(Charsets.UTF_8))
-
             }
-
-            val test = GlobalApplication.BLE?.loadDBMAC()
-            Log.d("", test!!)
-
         }
         return view
     }
-
 
 
     // TODO: periodic functions for device status checking
