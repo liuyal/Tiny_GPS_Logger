@@ -6,7 +6,6 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
-import android.os.Handler
 import android.os.SystemClock.sleep
 import android.util.Log
 import android.view.Menu
@@ -19,20 +18,16 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.example.gps.objects.GlobalApplication
 import com.example.gps.objects.BLEDevice
-import com.example.gps.objects.STATE_DISCONNECTED
+import com.example.gps.objects.GlobalApplication
+import com.example.gps.objects.STATE_CONNECTED
 import com.example.gps.objects.TIME_OUT
 import com.google.android.material.navigation.NavigationView
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import maes.tech.intentanim.CustomIntent
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
-    private val gpsStatusHandler = Handler()
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,7 +79,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // TODO: modify UI to indicate no matching device
-    private fun disconnectionHandler() {
+    fun disconnectionHandler() {
         Toast.makeText(applicationContext, "Unable to connect to Default BLE Device!", Toast.LENGTH_SHORT).show()
         Log.d("", "Unable to connect to BLE Device")
     }
@@ -99,47 +94,47 @@ class MainActivity : AppCompatActivity() {
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 
-    // TODO: periodic function Template
-    private class RunTask(c: Context) : AsyncTask<Void, Void, String>() {
-        private val context: Context = c
-        private var connected = false
 
-        override fun onPreExecute() {
-            super.onPreExecute()
-            val macAddress = GlobalApplication.BLE?.loadDBMAC()
-            connected = GlobalApplication.BLE?.connect(macAddress)!!
-        }
+    class RunTask(var c: Context) : AsyncTask<Void, Void, String>() {
+        private var errorFlag: Boolean = false
+        private var connectFlag: Boolean = false
 
         override fun doInBackground(vararg p0: Void?): String? {
+            val macAddress = GlobalApplication.BLE?.loadDBMAC()
+            connectFlag = GlobalApplication.BLE?.connect(macAddress)!!
+            if (!connectFlag) return null
 
-            if (connected) {
-                try{
-                    while (true) {
+            while (!isCancelled) {
+                Log.e("RECTASK", isCancelled.toString())
+                try {
+                    if (GlobalApplication.BLE?.connectionState == STATE_CONNECTED) {
+//                        if () return null
                         GlobalApplication.BLE?.fetchDeviceStatus()
                         sleep((5 * TIME_OUT).toLong())
-                    }
+                    } else throw IllegalArgumentException("CONNECTION ERROR")
                 } catch (e: Throwable) {
-                    Log.d("", "ERROR Fetching Status!")
+                    errorFlag = true
+                    return null
                 }
-            } else {
-                Log.d("", "Failed to connect to Device!")
             }
             return null
         }
-        
+
         override fun onProgressUpdate(vararg values: Void?) {
             super.onProgressUpdate(*values)
         }
 
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
-            Log.d("", "Fetching Status!")
+            if (!connectFlag) Log.d("", "CONNECTION ERROR!")
+            if (errorFlag) Log.d("", "ERROR Fetching Status!")
+            // TODO: modify UI
+            // TODO: if fail restart option
         }
-
-
 
         override fun onCancelled(result: String?) {
             super.onCancelled(result)
+            Log.e("RECTASK", isCancelled.toString())
             Log.d("", "Task Cancelled")
         }
     }
