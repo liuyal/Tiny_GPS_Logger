@@ -1,11 +1,10 @@
 package com.example.gps
 
 import android.bluetooth.BluetoothAdapter
-import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
-import android.os.AsyncTask
 import android.os.Bundle
+import android.os.Handler
 import android.os.SystemClock.sleep
 import android.util.Log
 import android.view.Menu
@@ -25,14 +24,15 @@ import com.example.gps.objects.TIME_OUT
 import com.google.android.material.navigation.NavigationView
 import maes.tech.intentanim.CustomIntent
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity()  {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
+
+    var thread: Thread? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
@@ -54,6 +54,7 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
     }
 
+
     override fun onStart() {
         super.onStart()
         if (BluetoothAdapter.getDefaultAdapter() == null) {
@@ -68,21 +69,35 @@ class MainActivity : AppCompatActivity() {
                 GlobalApplication.BLE?.context = this
                 GlobalApplication.BLE?.applicationContext = applicationContext as ContextWrapper
             }
-            RunTask(this).execute()
+            thread = Thread(Runnable {backgroundTask() })
+            thread!!.start()
         }
     }
 
     override fun onStop() {
         super.onStop()
-        RunTask(this).cancel(true)
+        thread?.interrupt()
         GlobalApplication.BLE?.close()
     }
 
-    // TODO: modify UI to indicate no matching device
-    fun disconnectionHandler() {
-        Toast.makeText(applicationContext, "Unable to connect to Default BLE Device!", Toast.LENGTH_SHORT).show()
-        Log.d("", "Unable to connect to BLE Device")
+    fun backgroundTask() {
+        val macAddress = GlobalApplication.BLE?.loadDBMAC()
+        if (GlobalApplication.BLE?.connectionState != STATE_CONNECTED || GlobalApplication.BLE?.bleGATT == null) GlobalApplication.BLE?.connect(macAddress)!!
+        Log.d("", "Thread start")
+        while (true) {
+            try {
+                if (GlobalApplication.BLE?.connectionState == STATE_CONNECTED || GlobalApplication.BLE?.bleGATT != null) {
+                    GlobalApplication.BLE?.fetchDeviceStatus()
+                    Thread.sleep((5 * TIME_OUT).toLong())
+                } else throw IllegalArgumentException("CONNECTION STOPPED")
+            } catch (e: Throwable) {
+                if (e.localizedMessage != null) Log.e("", e.localizedMessage!!.toString())
+                break
+            }
+        }
+        Log.d("", "Thread Done")
     }
+
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
@@ -93,50 +108,4 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
-
-
-    class RunTask(var c: Context) : AsyncTask<Void, Void, String>() {
-        private var errorFlag: Boolean = false
-        private var connectFlag: Boolean = false
-
-        override fun doInBackground(vararg p0: Void?): String? {
-            val macAddress = GlobalApplication.BLE?.loadDBMAC()
-            connectFlag = GlobalApplication.BLE?.connect(macAddress)!!
-            if (!connectFlag) return null
-
-            while (!isCancelled) {
-                Log.e("RECTASK", isCancelled.toString())
-                try {
-                    if (GlobalApplication.BLE?.connectionState == STATE_CONNECTED) {
-//                        if () return null
-                        GlobalApplication.BLE?.fetchDeviceStatus()
-                        sleep((5 * TIME_OUT).toLong())
-                    } else throw IllegalArgumentException("CONNECTION ERROR")
-                } catch (e: Throwable) {
-                    errorFlag = true
-                    return null
-                }
-            }
-            return null
-        }
-
-        override fun onProgressUpdate(vararg values: Void?) {
-            super.onProgressUpdate(*values)
-        }
-
-        override fun onPostExecute(result: String?) {
-            super.onPostExecute(result)
-            if (!connectFlag) Log.d("", "CONNECTION ERROR!")
-            if (errorFlag) Log.d("", "ERROR Fetching Status!")
-            // TODO: modify UI
-            // TODO: if fail restart option
-        }
-
-        override fun onCancelled(result: String?) {
-            super.onCancelled(result)
-            Log.e("RECTASK", isCancelled.toString())
-            Log.d("", "Task Cancelled")
-        }
-    }
-
 }

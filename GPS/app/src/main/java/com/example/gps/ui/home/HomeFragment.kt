@@ -13,6 +13,7 @@ import com.example.gps.MainActivity
 import com.example.gps.R
 import kotlinx.android.synthetic.main.fragment_home.view.*
 
+
 // TODO Implement UI
 class HomeFragment : Fragment() {
 
@@ -25,13 +26,29 @@ class HomeFragment : Fragment() {
         homeViewModel.text.observe(viewLifecycleOwner, Observer { textView.text = it })
 
         view.test_button.setOnClickListener { View ->
-            Log.d("", "Clicked Send button")
+            Log.d("", "Clicked S button")
+            val main = activity as MainActivity?
+            main?.thread?.interrupt()
+            main?.thread = null
         }
 
         view.test_button2.setOnClickListener { View ->
+            Log.d("", "Clicked C button")
+            val main = activity as MainActivity?
+            main?.thread = Thread(Runnable { main?.backgroundTask() })
+            main?.thread?.start()
         }
 
         return view
     }
+
+
+    // TODO: modify UI to indicate no matching device
+    // UI Thread
+    private fun disconnectionHandler() {
+//        Toast.makeText(applicationContext, "Unable to connect to Default BLE Device!", Toast.LENGTH_SHORT).show()
+        Log.e("", "Unable to connect to BLE Device")
+    }
+
 
 }

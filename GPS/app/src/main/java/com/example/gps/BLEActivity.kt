@@ -16,6 +16,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Button
 import android.widget.Toast
+import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -127,7 +128,7 @@ class BLEActivity : AppCompatActivity() {
         }
     }
 
-
+    @UiThread
     private fun partItemClicked(partItem: BluetoothDevice) {
         var isConnected = false
         val index = deviceList.indexOf(partItem)
@@ -155,7 +156,7 @@ class BLEActivity : AppCompatActivity() {
         }
     }
 
-
+    @UiThread
     private fun createDialog(c: Context, tite: String, msg: String, button: String) {
         val builder = AlertDialog.Builder(c)
         builder.setTitle(tite)
