@@ -24,7 +24,6 @@ import com.example.gps.objects.ScanAdapter
 import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator
 import kotlinx.android.synthetic.main.activity_ble.*
 import maes.tech.intentanim.CustomIntent
-import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -77,7 +76,7 @@ class BLEActivity : AppCompatActivity() {
         setContentView(R.layout.activity_ble)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         GlobalApplication.BLE?.context = this
-        GlobalApplication.BLE?.applicationcontext = applicationContext as ContextWrapper
+        GlobalApplication.BLE?.applicationContext = applicationContext as ContextWrapper
         select_device_list.layoutManager = LinearLayoutManager(select_device_list.context)
         select_device_list.adapter = ScanAdapter(deviceList, resultsList) { partItem: BluetoothDevice -> partItemClicked(partItem) }
         select_device_list.itemAnimator = SlideInLeftAnimator()
@@ -108,6 +107,7 @@ class BLEActivity : AppCompatActivity() {
             Toast.makeText(applicationContext, "BlueTooth is not enabled!", Toast.LENGTH_SHORT).show()
             return false
         } else {
+            GlobalApplication.BLE?.initialize()
             GlobalApplication.BLE?.disconnect()
             GlobalApplication.BLE?.close()
             if (item.itemId == R.id.scan_btn) {

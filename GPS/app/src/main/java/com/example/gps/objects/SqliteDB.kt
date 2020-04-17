@@ -17,17 +17,20 @@ class SqliteDB(context: Context, factory: SQLiteDatabase.CursorFactory?) : SQLit
 
 
     override fun onCreate(db: SQLiteDatabase) {
+        createTable(macTable)
     }
 
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        db.execSQL("DROP TABLE IF EXISTS $macTable")
+        onCreate(db)
     }
 
 
     private fun createTable(table: String) {
         val db = this.writableDatabase
-        if (table == macTable){
-            db.execSQL("CREATE TABLE $macTable($macColumn varchar(18) PRIMARY KEY)")
+        if (table == macTable) {
+            db.execSQL("CREATE TABLE IF NOT EXISTS $macTable($macColumn varchar(18) PRIMARY KEY)")
         }
     }
 
@@ -35,29 +38,34 @@ class SqliteDB(context: Context, factory: SQLiteDatabase.CursorFactory?) : SQLit
     fun clearTable(table: String): Boolean {
         val db = this.writableDatabase
         try {
-            db.execSQL("DROP TABLE $table")
+            db.execSQL("DROP TABLE IF EXISTS $table")
             this.createTable(table)
-        } catch (e: Throwable){
+        } catch (e: Throwable) {
             this.createTable(table)
         }
         return true
     }
 
 
-    // TODO: Make into generic functions
-    fun insertDB(mac: String) {
-        val values = ContentValues()
+    fun insertDB(table: String, columns: ArrayList<String>, data: ArrayList<String>) {
+        val values: ArrayList<ContentValues> = ArrayList()
         val db = this.writableDatabase
-        values.put(macColumn, mac)
-        db.insert(macTable, null, values)
-        db.close()
+        for (i in 0 until data.size) {
+            val node = ContentValues()
+            node.put(columns[i], data[i])
+            values.add(node)
+        }
+        for (i in 0 until data.size) {
+            db.insert(table, null, values[i])
+            db.close()
+        }
     }
 
 
-    // TODO: Make into generic functions
-    fun selectFromDB(): Cursor? {
+    fun selectFromDB(table: String): Cursor? {
         val db = this.readableDatabase
-        return db.rawQuery("SELECT * FROM $macTable", null)
+        return db.rawQuery("SELECT * FROM $table", null)
     }
+
 
 }
