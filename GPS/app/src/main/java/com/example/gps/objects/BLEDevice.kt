@@ -4,7 +4,6 @@ import android.bluetooth.*
 import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.content.ContextWrapper
-import android.os.SystemClock.sleep
 import android.util.Log
 import java.util.*
 
@@ -14,8 +13,8 @@ const val GPS_CHECK_CODE: Byte = 0x00
 const val GET_GPS_STATUS_CODE: Byte = 0x01
 const val SET_GPS_ON_CODE: Byte = 0x02
 const val SET_GPS_OFF_CODE: Byte = 0x03
-const val SET_GPG_LOGGIN_ON_CODE: Byte = 0x04
-const val SET_GPG_LOGGIN_OFF_CODE: Byte = 0x05
+const val SET_GPG_LOGGING_ON_CODE: Byte = 0x04
+const val SET_GPG_LOGGING_OFF_CODE: Byte = 0x05
 const val SET_GPS_BLE_PRINT_ON_CODE: Byte = 0x06
 const val SET_GPS_BLE_PRINT_OFF_CODE: Byte = 0x07
 const val GET_GPS_DATA_CODE: Byte = 0x08
@@ -39,11 +38,11 @@ const val STATE_CONNECTED: Int = 2
 
 const val TIME_OUT: Int = 2000
 const val DEVICE_CODE_NAME: String = "ESP32_GPS"
+const val oneByte: Byte = 1
 
 val SERVICE_UUID: UUID = UUID.fromString("000ffdf4-68d9-4e48-a89a-219e581f0d64")
 val CHARACTERISTIC_UUID: UUID = UUID.fromString("44a80b83-c605-4406-8e50-fc42f03b6d38")
 
-//TODO: Added characteristic functions read/write
 class BLEDevice(c: Context, applicationContext: ContextWrapper) {
 
     var context: Context = c
@@ -63,7 +62,7 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
     var transactionSuccess: Boolean = false
     var dbHandler: SqliteDB? = null
 
-    var gps_status_flags: BooleanArray? = BooleanArray(NUMBER_OF_FLAGS)
+    var gpsStatusFlags: BooleanArray? = BooleanArray(NUMBER_OF_FLAGS)
 
     private val mGattCallback = object : BluetoothGattCallback() {
 
@@ -160,7 +159,6 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
         }
     }
 
-
     fun initialize(): Boolean {
         if (this.bleManager == null) {
             this.bleManager = this.applicationContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -169,10 +167,9 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
         this.bleAdapter = this.bleManager!!.adapter
         if (this.bleAdapter == null) return false
         dbHandler = SqliteDB(context, null)
-        this.gps_status_flags?.fill(false, 0, NUMBER_OF_FLAGS)
+        this.gpsStatusFlags?.fill(false, 0, NUMBER_OF_FLAGS)
         return true
     }
-
 
     fun connect(address: String?): Boolean {
         val mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
@@ -194,14 +191,12 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
         return true
     }
 
-
     private fun updateDBMAC(address: String?) {
         dbHandler?.clearTable(SqliteDB.macTable)
         if (address != null) {
             dbHandler?.insertDB(SqliteDB.macTable, arrayListOf(SqliteDB.macColumn), arrayListOf(address))
         }
     }
-
 
     fun loadDBMAC(): String {
         val cursor = dbHandler?.selectFromDB(SqliteDB.macTable)
@@ -210,12 +205,10 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
         return this.bleAddress!!
     }
 
-
     fun disconnect() {
         if (this.bleAdapter == null || this.bleGATT == null) return
         this.bleGATT!!.disconnect()
     }
-
 
     fun close() {
         if (this.bleGATT == null) return
@@ -241,7 +234,6 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
                 } else foundService = false
             }
             if (timeout && System.currentTimeMillis() - start > TIME_OUT) break
-            sleep(10)
         }
         if (serviceList == null || serviceList.size < 1) return false
         for (serviceItem in serviceList) {
@@ -262,11 +254,10 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
     private fun writeValue(value: ByteArray): Boolean {
         this.transactionSuccess = false
         val start = System.currentTimeMillis()
-        var serviceCheck: Boolean
 
-        if (this.service == null || this.characteristic == null) {
-            serviceCheck = GlobalApplication.BLE?.serviceChecks()!!
-        } else serviceCheck = true
+        val serviceCheck: Boolean = if (this.service == null || this.characteristic == null) {
+            GlobalApplication.BLE?.serviceChecks()!!
+        } else true
 
         if (serviceCheck) {
             this.characteristic!!.value = value
@@ -283,11 +274,10 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
     private fun readValue(): ByteArray? {
         this.transactionSuccess = false
         val start = System.currentTimeMillis()
-        var serviceCheck: Boolean
 
-        if (this.service == null || this.characteristic == null) {
-            serviceCheck = GlobalApplication.BLE?.serviceChecks()!!
-        } else serviceCheck = true
+        val serviceCheck: Boolean = if (this.service == null || this.characteristic == null) {
+            GlobalApplication.BLE?.serviceChecks()!!
+        } else true
 
         if (serviceCheck) {
             GlobalApplication.BLE?.bleGATT?.readCharacteristic(this.characteristic)
@@ -307,78 +297,147 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
     private fun GPSCheck(): Boolean {
         writeValue(byteArrayOf(GPS_CHECK_CODE))
         val returnVal = readValue()
-        val returnValString = returnVal?.toString(Charsets.UTF_8)
-        if (returnValString != null && !returnValString.contains(DEVICE_CODE_NAME, ignoreCase = true)) return false
-        if (returnVal != null) {
+        if (returnVal != null && returnVal.toString(Charsets.UTF_8).contains(DEVICE_CODE_NAME, ignoreCase = true)) {
             Log.d("", returnVal.contentToString())
             Log.d("", returnVal.toString(Charsets.UTF_8))
-        }
+        } else return false
         return true
     }
 
     fun fetchDeviceStatus(): Boolean {
         writeValue(byteArrayOf(GET_GPS_STATUS_CODE))
         val returnVal = readValue()
-
-        this.gps_status_flags?.fill(false, 0, NUMBER_OF_FLAGS)
+        this.gpsStatusFlags?.fill(false, 0, NUMBER_OF_FLAGS)
         if (returnVal != null && returnVal.size == NUMBER_OF_FLAGS) {
-            this.gps_status_flags?.set(GPS_CONNECTION_FLAG_INDEX, returnVal[GPS_CONNECTION_FLAG_INDEX].toInt().toBoolean())
-            this.gps_status_flags?.set(GPS_FIX_FLAG_INDEX, returnVal[GPS_FIX_FLAG_INDEX].toInt().toBoolean())
-            this.gps_status_flags?.set(GPS_ON_FLAG_INDEX, returnVal[GPS_ON_FLAG_INDEX].toInt().toBoolean())
-            this.gps_status_flags?.set(GPS_SERIAL_PRINT_FLAG_INDEX, returnVal[GPS_SERIAL_PRINT_FLAG_INDEX].toInt().toBoolean())
-            this.gps_status_flags?.set(GPS_BLE_PRINT_FLAG_INDEX, returnVal[GPS_BLE_PRINT_FLAG_INDEX].toInt().toBoolean())
-            this.gps_status_flags?.set(GPS_LOGGING_FLAG_INDEX, returnVal[GPS_LOGGING_FLAG_INDEX].toInt().toBoolean())
+            this.gpsStatusFlags?.set(GPS_CONNECTION_FLAG_INDEX, returnVal[GPS_CONNECTION_FLAG_INDEX].toInt().toBoolean())
+            this.gpsStatusFlags?.set(GPS_FIX_FLAG_INDEX, returnVal[GPS_FIX_FLAG_INDEX].toInt().toBoolean())
+            this.gpsStatusFlags?.set(GPS_ON_FLAG_INDEX, returnVal[GPS_ON_FLAG_INDEX].toInt().toBoolean())
+            this.gpsStatusFlags?.set(GPS_SERIAL_PRINT_FLAG_INDEX, returnVal[GPS_SERIAL_PRINT_FLAG_INDEX].toInt().toBoolean())
+            this.gpsStatusFlags?.set(GPS_BLE_PRINT_FLAG_INDEX, returnVal[GPS_BLE_PRINT_FLAG_INDEX].toInt().toBoolean())
+            this.gpsStatusFlags?.set(GPS_LOGGING_FLAG_INDEX, returnVal[GPS_LOGGING_FLAG_INDEX].toInt().toBoolean())
+            Log.d("", returnVal.contentToString())
+            Log.d("", returnVal.toString(Charsets.UTF_8))
         } else return false
-        Log.d("", returnVal.contentToString())
-        Log.d("", returnVal.toString(Charsets.UTF_8))
         return true
     }
 
     fun GPSon(): Boolean {
+        writeValue(byteArrayOf(SET_GPS_ON_CODE))
+        val returnVal = readValue()
+        if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
+            Log.d("", returnVal.contentToString())
+            Log.d("", returnVal.toString(Charsets.UTF_8))
+        } else return false
         return true
     }
 
     fun GPSoff(): Boolean {
+        writeValue(byteArrayOf(SET_GPS_OFF_CODE))
+        val returnVal = readValue()
+        if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
+            Log.d("", returnVal.contentToString())
+            Log.d("", returnVal.toString(Charsets.UTF_8))
+        } else return false
         return true
     }
 
     fun GPSloggingOn(): Boolean {
+        writeValue(byteArrayOf(SET_GPG_LOGGING_ON_CODE))
+        val returnVal = readValue()
+        if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
+            Log.d("", returnVal.contentToString())
+            Log.d("", returnVal.toString(Charsets.UTF_8))
+        } else return false
         return true
     }
 
     fun GPSloggingOff(): Boolean {
+        writeValue(byteArrayOf(SET_GPG_LOGGING_OFF_CODE))
+        val returnVal = readValue()
+        if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
+            Log.d("", returnVal.contentToString())
+            Log.d("", returnVal.toString(Charsets.UTF_8))
+        } else return false
         return true
     }
 
     fun BLEPrintOn(): Boolean {
+        writeValue(byteArrayOf(SET_GPS_BLE_PRINT_ON_CODE))
+        val returnVal = readValue()
+        if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
+            Log.d("", returnVal.contentToString())
+            Log.d("", returnVal.toString(Charsets.UTF_8))
+        } else return false
         return true
     }
 
     fun BLEPrintOff(): Boolean {
+        writeValue(byteArrayOf(SET_GPS_BLE_PRINT_OFF_CODE))
+        val returnVal = readValue()
+        if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
+            Log.d("", returnVal.contentToString())
+            Log.d("", returnVal.toString(Charsets.UTF_8))
+        } else return false
         return true
     }
 
+
     fun fetchGPSdata(): String {
-        return "0"
+        writeValue(byteArrayOf(GET_GPS_DATA_CODE))
+        val returnVal = readValue()
+        // TODO: add data checks
+        if (returnVal != null) {
+            Log.d("", returnVal.contentToString())
+            Log.d("", returnVal.toString(Charsets.UTF_8))
+        } else return ""
+        return returnVal.toString(Charsets.UTF_8)
     }
 
     fun listLogFiles(): String {
-        return "0"
+        writeValue(byteArrayOf(LIST_LOG_FILES_CODE))
+        val returnVal = readValue()
+        // TODO: add data checks
+        if (returnVal != null) {
+            Log.d("", returnVal.contentToString())
+            Log.d("", returnVal.toString(Charsets.UTF_8))
+        } else return ""
+        return returnVal.toString(Charsets.UTF_8)
     }
 
     fun readLogFile(index: Int): String {
+        writeValue(byteArrayOf(READ_LOG_FILE_CODE))
+        val returnVal = readValue()
+        // TODO: add data checks
         return "0"
     }
 
     fun SDCardStatus(): String {
-        return "0"
+        writeValue(byteArrayOf(GET_SDCARD_STATUS_CODE))
+        val returnVal = readValue()
+        if (returnVal != null) {
+            Log.d("", returnVal.contentToString())
+            Log.d("", returnVal.toString(Charsets.UTF_8))
+        } else return ""
+        return returnVal.toString(Charsets.UTF_8)
     }
 
     fun GPSReboot(): Boolean {
+        writeValue(byteArrayOf(GPS_REBOOT_CODE))
+        val returnVal = readValue()
+        if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
+            Log.d("", returnVal.contentToString())
+            Log.d("", returnVal.toString(Charsets.UTF_8))
+        } else return false
         return true
     }
 
     fun GPSReset(): Boolean {
+        writeValue(byteArrayOf(GPS_RESET_CODE))
+        val returnVal = readValue()
+        if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
+            Log.d("", returnVal.contentToString())
+            Log.d("", returnVal.toString(Charsets.UTF_8))
+        } else return false
         return true
     }
 

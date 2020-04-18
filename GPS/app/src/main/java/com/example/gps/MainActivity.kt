@@ -4,8 +4,6 @@ import android.bluetooth.BluetoothAdapter
 import android.content.ContextWrapper
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.SystemClock.sleep
 import android.util.Log
 import android.view.Menu
 import android.widget.Toast
@@ -24,11 +22,11 @@ import com.example.gps.objects.TIME_OUT
 import com.google.android.material.navigation.NavigationView
 import maes.tech.intentanim.CustomIntent
 
-class MainActivity : AppCompatActivity()  {
+class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
 
-    var thread: Thread? = null
+    var statueCheckThread: Thread? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,14 +67,15 @@ class MainActivity : AppCompatActivity()  {
                 GlobalApplication.BLE?.context = this
                 GlobalApplication.BLE?.applicationContext = applicationContext as ContextWrapper
             }
-            thread = Thread(Runnable {backgroundTask() })
-            thread!!.start()
+            statueCheckThread = Thread(Runnable { backgroundTask() })
+            statueCheckThread!!.start()
         }
     }
 
     override fun onStop() {
         super.onStop()
-        thread?.interrupt()
+        statueCheckThread?.interrupt()
+        statueCheckThread = null
         GlobalApplication.BLE?.close()
     }
 
@@ -103,6 +102,7 @@ class MainActivity : AppCompatActivity()  {
         menuInflater.inflate(R.menu.main_menu, menu)
         return true
     }
+
 
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment)

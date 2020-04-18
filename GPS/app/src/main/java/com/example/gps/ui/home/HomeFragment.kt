@@ -11,6 +11,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.gps.MainActivity
 import com.example.gps.R
+import com.example.gps.objects.GlobalApplication
 import kotlinx.android.synthetic.main.fragment_home.view.*
 
 
@@ -25,26 +26,48 @@ class HomeFragment : Fragment() {
         val textView: TextView = view.findViewById(R.id.text_home)
         homeViewModel.text.observe(viewLifecycleOwner, Observer { textView.text = it })
 
+
         view.test_button.setOnClickListener { View ->
             Log.d("", "Clicked S button")
+
             val main = activity as MainActivity?
-            main?.thread?.interrupt()
-            main?.thread = null
+            main?.statueCheckThread?.interrupt()
+            main?.statueCheckThread = null
+
+            GlobalApplication.BLE?.GPSoff()
+
+            main?.statueCheckThread = Thread(Runnable { main?.backgroundTask() })
+            main?.statueCheckThread?.start()
         }
+
 
         view.test_button2.setOnClickListener { View ->
             Log.d("", "Clicked C button")
+
             val main = activity as MainActivity?
-            main?.thread = Thread(Runnable { main?.backgroundTask() })
-            main?.thread?.start()
+            main?.statueCheckThread?.interrupt()
+            main?.statueCheckThread = null
+
+            GlobalApplication.BLE?.GPSon()
+
+            main?.statueCheckThread = Thread(Runnable { main?.backgroundTask() })
+            main?.statueCheckThread?.start()
         }
 
         return view
     }
 
 
+
+
+
+
+
+
+
+
     // TODO: modify UI to indicate no matching device
-    // UI Thread
+    // UI Thread to pull data from main thread or Global BLE
     private fun disconnectionHandler() {
 //        Toast.makeText(applicationContext, "Unable to connect to Default BLE Device!", Toast.LENGTH_SHORT).show()
         Log.e("", "Unable to connect to BLE Device")

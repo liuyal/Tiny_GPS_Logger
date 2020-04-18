@@ -78,7 +78,7 @@ class BLE_Callbacks: public BLECharacteristicCallbacks {
         Serial_Print("\n\r");
 
         if (value[0] == 0x00) {
-          String packet = "ESP32_GPS";
+          String packet = "[ESP32_GPS]";
           byte buf[packet.length() + 1];
           packet.getBytes(buf, sizeof(buf));
           pCharacteristic->setValue(buf, sizeof(buf));
@@ -145,7 +145,7 @@ class BLE_Callbacks: public BLECharacteristicCallbacks {
           String gps_data_b = String(gps.time.hour()) + "," + String(gps.time.minute()) + "," + String(gps.time.second());
           String gps_data_c = String(gps.satellites.value()) + "," + String(gps.speed.kmph()) + "," + String(gps.course.deg());
           String gps_data_d = String(gps.altitude.meters()) + "," +  String(gps.hdop.value());
-          String packet = gps_valid + "," + gps_data_a  + "," + gps_data_b + "," + gps_data_c + "," + gps_data_d;
+          String packet = "[" + gps_valid + "," + gps_data_a  + "," + gps_data_b + "," + gps_data_c + "," + gps_data_d + "]";
           byte buf[packet.length() + 1];
           packet.getBytes(buf, sizeof(buf));
           pCharacteristic->setValue(buf, sizeof(buf));
@@ -153,7 +153,7 @@ class BLE_Callbacks: public BLECharacteristicCallbacks {
           Serial_Print(packet + "\n\r");
         }
         else if (value[0] == 0x09) {
-          String listing = listDir(SD, "/" + gnss_dir, 0);
+          String listing = "[" + listDir(SD, "/" + gnss_dir, 0) + "]";
           byte buf[listing.length() + 1];
           listing.getBytes(buf, sizeof(buf));
           pCharacteristic->setValue(buf, sizeof(buf));
@@ -171,7 +171,7 @@ class BLE_Callbacks: public BLECharacteristicCallbacks {
           uint32_t bytes_high = (bytes >> 32) % 0xFFFFFFFF;
           uint32_t used_bytes_low = used_bytes % 0xFFFFFFFF;
           uint32_t used_bytes_high = (used_bytes >> 32) % 0xFFFFFFFF;
-          String sdcard = String(bytes_high) + String(bytes_low) + "," + String(used_bytes_high) + String(used_bytes_low);
+          String sdcard = "[" + String(bytes_high) + String(bytes_low) + "," + String(used_bytes_high) + String(used_bytes_low) + "]";
           byte buf[sdcard.length() + 1];
           sdcard.getBytes(buf, sizeof(buf));
           pCharacteristic->setValue(buf, sizeof(buf));
@@ -402,7 +402,7 @@ void CMD_EVENT() {
     String gps_data_b = String(gps.time.hour()) + "," + String(gps.time.minute()) + "," + String(gps.time.second());
     String gps_data_c = String(gps.satellites.value()) + "," + String(gps.speed.kmph()) + "," + String(gps.course.deg());
     String gps_data_d = String(gps.altitude.meters()) + "," +  String(gps.hdop.value());
-    String packet = gps_valid + "," + gps_data_a  + "," + gps_data_b + "," + gps_data_c + "," + gps_data_d;
+    String packet = "[" + gps_valid + "," + gps_data_a  + "," + gps_data_b + "," + gps_data_c + "," + gps_data_d + "]";
     Serial_Print(packet + "\n\r");
   }
   else if (receivedChars.indexOf("list") >= 0) {
@@ -419,7 +419,8 @@ void CMD_EVENT() {
     uint32_t bytes_high = (bytes >> 32) % 0xFFFFFFFF;
     uint32_t used_bytes_low = used_bytes % 0xFFFFFFFF;
     uint32_t used_bytes_high = (used_bytes >> 32) % 0xFFFFFFFF;
-    Serial_Print(String(bytes_high) + String(bytes_low) + "," + String(used_bytes_high) + String(used_bytes_low) + "\n\r");
+    String sdcard = "[" + String(bytes_high) + String(bytes_low) + "," + String(used_bytes_high) + String(used_bytes_low) + "]";
+    Serial_Print(sdcard);
   }
   else if (receivedChars.indexOf("reboot") >= 0) {
     Serial_Print("[rebooting]\n\r");

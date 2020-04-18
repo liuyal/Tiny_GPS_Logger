@@ -51,14 +51,12 @@ class BLEActivity : AppCompatActivity() {
         }
     }
 
-
     private val bluetoothLeScanner: BluetoothLeScanner
         get() {
             GlobalApplication.BLE?.bleManager = applicationContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
             GlobalApplication.BLE?.bleAdapter = GlobalApplication.BLE?.bleManager!!.adapter
             return GlobalApplication.BLE?.bleAdapter!!.bluetoothLeScanner
         }
-
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         when (requestCode) {
@@ -70,7 +68,6 @@ class BLEActivity : AppCompatActivity() {
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,21 +82,17 @@ class BLEActivity : AppCompatActivity() {
         select_device_list.addItemDecoration(DividerItemDecoration(select_device_list.context, DividerItemDecoration.VERTICAL))
     }
 
-
     override fun onStop() {
         super.onStop()
         scanFlag = false
         bluetoothLeScanner.stopScan(bleScanner)
     }
 
-
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.ble_menu, menu);
         return super.onCreateOptionsMenu(menu)
     }
 
-
-    // Selected Scan button
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (BluetoothAdapter.getDefaultAdapter() == null) {
             Toast.makeText(applicationContext, "BlueTooth is not supported!", Toast.LENGTH_SHORT).show()
@@ -168,8 +161,6 @@ class BLEActivity : AppCompatActivity() {
         builder.create().show()
     }
 
-
-    // back to main activity
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         supportFragmentManager.popBackStack()
