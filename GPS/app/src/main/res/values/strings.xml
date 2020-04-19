@@ -8,7 +8,7 @@
     <string name="action_settings">Scan for Devices</string>
     <string name="BLE_settings">BLE Settings</string>
 
-    <string name="menu_home">Home</string>
+    <string name="menu_home">Dashboard</string>
     <string name="menu_map">Map</string>
     <string name="menu_log">Logs</string>
 

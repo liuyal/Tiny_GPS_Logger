@@ -33,6 +33,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
+        supportActionBar?.elevation = 0F
 
         toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
@@ -87,7 +88,7 @@ class MainActivity : AppCompatActivity() {
             try {
                 if (GlobalApplication.BLE?.connectionState == STATE_CONNECTED || GlobalApplication.BLE?.bleGATT != null) {
                     GlobalApplication.BLE?.fetchDeviceStatus()
-                    Thread.sleep((5 * TIME_OUT).toLong())
+                    Thread.sleep((15 * TIME_OUT).toLong())
                 } else throw IllegalArgumentException("CONNECTION STOPPED")
             } catch (e: Throwable) {
                 if (e.localizedMessage != null) Log.e("", e.localizedMessage!!.toString())

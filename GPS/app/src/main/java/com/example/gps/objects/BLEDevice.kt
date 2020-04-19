@@ -5,6 +5,7 @@ import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.content.ContextWrapper
 import android.util.Log
+import java.lang.Thread.sleep
 import java.util.*
 
 //https://developer.android.com/reference/android/bluetooth/BluetoothGatt
@@ -36,7 +37,7 @@ const val STATE_DISCONNECTED: Int = 0
 const val STATE_CONNECTING: Int = 1
 const val STATE_CONNECTED: Int = 2
 
-const val TIME_OUT: Int = 2000
+const val TIME_OUT: Int = 1000
 const val DEVICE_CODE_NAME: String = "ESP32_GPS"
 const val oneByte: Byte = 1
 
@@ -233,7 +234,7 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
                     }
                 } else foundService = false
             }
-            if (timeout && System.currentTimeMillis() - start > TIME_OUT) break
+            if (timeout && System.currentTimeMillis() - start > 2*TIME_OUT) break
         }
         if (serviceList == null || serviceList.size < 1) return false
         for (serviceItem in serviceList) {
@@ -385,7 +386,7 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
     fun fetchGPSdata(): String {
         writeValue(byteArrayOf(GET_GPS_DATA_CODE))
         val returnVal = readValue()
-        // TODO: add data checks
+        // TODO: add data checks delimiters []
         if (returnVal != null) {
             Log.d("", returnVal.contentToString())
             Log.d("", returnVal.toString(Charsets.UTF_8))
@@ -396,7 +397,7 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
     fun listLogFiles(): String {
         writeValue(byteArrayOf(LIST_LOG_FILES_CODE))
         val returnVal = readValue()
-        // TODO: add data checks
+        // TODO: add data checks delimiters []
         if (returnVal != null) {
             Log.d("", returnVal.contentToString())
             Log.d("", returnVal.toString(Charsets.UTF_8))
@@ -407,7 +408,7 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
     fun readLogFile(index: Int): String {
         writeValue(byteArrayOf(READ_LOG_FILE_CODE))
         val returnVal = readValue()
-        // TODO: add data checks
+        // TODO: add data checks no delimiters
         return "0"
     }
 

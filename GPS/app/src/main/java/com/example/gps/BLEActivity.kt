@@ -73,23 +73,26 @@ class BLEActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ble)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.elevation = 0F
         GlobalApplication.BLE?.context = this
         GlobalApplication.BLE?.applicationContext = applicationContext as ContextWrapper
         select_device_list.layoutManager = LinearLayoutManager(select_device_list.context)
         select_device_list.adapter = ScanAdapter(deviceList, resultsList) { partItem: BluetoothDevice -> partItemClicked(partItem) }
         select_device_list.itemAnimator = SlideInLeftAnimator()
-        select_device_list.itemAnimator?.addDuration = 350
+        select_device_list.itemAnimator?.addDuration = 150
         select_device_list.addItemDecoration(DividerItemDecoration(select_device_list.context, DividerItemDecoration.VERTICAL))
     }
 
     override fun onStop() {
         super.onStop()
         scanFlag = false
-        bluetoothLeScanner.stopScan(bleScanner)
+        if (BluetoothAdapter.getDefaultAdapter() != null) {
+            bluetoothLeScanner.stopScan(bleScanner)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.ble_menu, menu);
+        menuInflater.inflate(R.menu.ble_menu, menu)
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -127,14 +130,16 @@ class BLEActivity : AppCompatActivity() {
         val index = deviceList.indexOf(partItem)
         val serviceUUID: UUID? = resultsList[index].scanRecord?.serviceUuids?.get(0)?.uuid
         select_device_list.findViewHolderForAdapterPosition(index)?.itemView?.findViewById<Button>(R.id.connect_btn)?.setBackgroundResource(R.drawable.btn_pressed)
-
+        
+        // TODO: change button color
+        // TODO: Thread connect
         try {
             bluetoothLeScanner.stopScan(bleScanner)
+
             isConnected = GlobalApplication.BLE?.connect(partItem.address.toString())!!
         } catch (e: Throwable) {
             e.printStackTrace()
         }
-
         if (isConnected && serviceUUID != null) {
             GlobalApplication.BLE?.device = partItem
             GlobalApplication.BLE?.scanResult = resultsList[index]
