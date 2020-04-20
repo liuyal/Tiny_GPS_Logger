@@ -6,12 +6,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.gps.MainActivity
 import com.example.gps.R
-import com.example.gps.objects.GlobalApplication
 import kotlinx.android.synthetic.main.fragment_home.view.*
 
 
@@ -28,50 +28,34 @@ class HomeFragment : Fragment() {
 
 
         view.test_button.setOnClickListener { View ->
-            Log.d("", "Clicked S button")
-
-            val main = activity as MainActivity?
-            main?.statueCheckThread?.interrupt()
-            main?.statueCheckThread = null
-
-            GlobalApplication.BLE?.GPSoff()
-
-            main?.statueCheckThread = Thread(Runnable { main?.backgroundTask() })
-            main?.statueCheckThread?.start()
+            Log.d("HOME", "Clicked S button")
         }
 
-
         view.test_button2.setOnClickListener { View ->
-            Log.d("", "Clicked C button")
-
-            val main = activity as MainActivity?
-            main?.statueCheckThread?.interrupt()
-            main?.statueCheckThread = null
-
-            GlobalApplication.BLE?.GPSon()
-
-            main?.statueCheckThread = Thread(Runnable { main?.backgroundTask() })
-            main?.statueCheckThread?.start()
+            Log.d("HOME", "Clicked C button")
         }
 
         return view
     }
 
 
-
-
-
-
-
-
-
-
-    // TODO: modify UI to indicate no matching device
-    // UI Thread to pull data from main thread or Global BLE
-    private fun disconnectionHandler() {
-//        Toast.makeText(applicationContext, "Unable to connect to Default BLE Device!", Toast.LENGTH_SHORT).show()
-        Log.e("", "Unable to connect to BLE Device")
+    override fun onStart() {
+        super.onStart()
+        val main = activity as MainActivity?
+        main?.statueCheckThread = null
+        main?.statueCheckThread = Thread(Runnable { main?.checkTask() })
+        main?.statueCheckThread!!.start()
+        Log.d("HOME", "Start h Fragment")
     }
 
 
+    override fun onStop() {
+        super.onStop()
+        val main = activity as MainActivity?
+        if (main?.statueCheckThread != null) {
+            main.statueCheckThread?.interrupt()
+            main.statueCheckThread = null
+        }
+        Log.d("HOME", "Stopped h Fragment")
+    }
 }

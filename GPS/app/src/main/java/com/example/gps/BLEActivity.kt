@@ -79,13 +79,13 @@ class BLEActivity : AppCompatActivity() {
         select_device_list.layoutManager = LinearLayoutManager(select_device_list.context)
         select_device_list.adapter = ScanAdapter(deviceList, resultsList) { partItem: BluetoothDevice -> partItemClicked(partItem) }
         select_device_list.itemAnimator = SlideInLeftAnimator()
-        select_device_list.itemAnimator?.addDuration = 150
+        select_device_list.itemAnimator?.addDuration = 200
         select_device_list.addItemDecoration(DividerItemDecoration(select_device_list.context, DividerItemDecoration.VERTICAL))
     }
 
     override fun onStop() {
         super.onStop()
-        scanFlag = false
+        this.scanFlag = false
         if (BluetoothAdapter.getDefaultAdapter() != null) {
             bluetoothLeScanner.stopScan(bleScanner)
         }
@@ -108,17 +108,17 @@ class BLEActivity : AppCompatActivity() {
             GlobalApplication.BLE?.disconnect()
             GlobalApplication.BLE?.close()
             if (item.itemId == R.id.scan_btn) {
-                if (scanFlag) {
-                    bluetoothLeScanner.stopScan(bleScanner)
+                if (this.scanFlag) {
+                    this.bluetoothLeScanner.stopScan(bleScanner)
                     item.title = "SCAN"
                 } else {
-                    deviceList.removeAll(deviceList)
-                    resultsList.removeAll(resultsList)
+                    this.deviceList.removeAll(deviceList)
+                    this.resultsList.removeAll(resultsList)
                     select_device_list.adapter?.notifyDataSetChanged()
-                    bluetoothLeScanner.startScan(bleScanner)
+                    this.bluetoothLeScanner.startScan(bleScanner)
                     item.title = "STOP"
                 }
-                scanFlag = !scanFlag
+                this.scanFlag = !this.scanFlag
             }
             return super.onOptionsItemSelected(item)
         }
@@ -129,30 +129,32 @@ class BLEActivity : AppCompatActivity() {
         var isConnected = false
         val index = deviceList.indexOf(partItem)
         val serviceUUID: UUID? = resultsList[index].scanRecord?.serviceUuids?.get(0)?.uuid
-        select_device_list.findViewHolderForAdapterPosition(index)?.itemView?.findViewById<Button>(R.id.connect_btn)?.setBackgroundResource(R.drawable.btn_pressed)
-        
-        // TODO: change button color
-        // TODO: Thread connect
-        try {
-            bluetoothLeScanner.stopScan(bleScanner)
 
+        select_device_list.findViewHolderForAdapterPosition(index)?.itemView?.findViewById<Button>(R.id.connect_btn)?.setBackgroundResource(R.drawable.btn_pressed)
+
+        // TODO: loading dialog
+
+        try {
+            this.bluetoothLeScanner.stopScan(this.bleScanner)
             isConnected = GlobalApplication.BLE?.connect(partItem.address.toString())!!
         } catch (e: Throwable) {
             e.printStackTrace()
         }
+
         if (isConnected && serviceUUID != null) {
             GlobalApplication.BLE?.device = partItem
-            GlobalApplication.BLE?.scanResult = resultsList[index]
+            GlobalApplication.BLE?.scanResult = this.resultsList[index]
             createDialog(this, "Success!", "Connected To BLE Device!", "OK")
-        } else if (scanFlag) {
+        } else if (this.scanFlag) {
             Toast.makeText(applicationContext, "Invalid Device!", Toast.LENGTH_SHORT).show()
             select_device_list.findViewHolderForAdapterPosition(index)?.itemView?.findViewById<Button>(R.id.connect_btn)?.setBackgroundResource(R.drawable.btn_unpressed)
-            bluetoothLeScanner.startScan(bleScanner)
+            this.bluetoothLeScanner.startScan(bleScanner)
         } else {
             Toast.makeText(applicationContext, "Invalid Device!", Toast.LENGTH_SHORT).show()
             select_device_list.findViewHolderForAdapterPosition(index)?.itemView?.findViewById<Button>(R.id.connect_btn)?.setBackgroundResource(R.drawable.btn_unpressed)
         }
     }
+
 
     @UiThread
     private fun createDialog(c: Context, tite: String, msg: String, button: String) {

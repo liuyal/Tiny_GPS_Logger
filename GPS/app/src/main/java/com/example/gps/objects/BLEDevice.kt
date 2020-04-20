@@ -234,7 +234,7 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
                     }
                 } else foundService = false
             }
-            if (timeout && System.currentTimeMillis() - start > 2*TIME_OUT) break
+            if (timeout && System.currentTimeMillis() - start > 3*TIME_OUT) break
         }
         if (serviceList == null || serviceList.size < 1) return false
         for (serviceItem in serviceList) {
@@ -266,7 +266,7 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
         } else return false
 
         while (!this.transactionSuccess) {
-            if (System.currentTimeMillis() - start > TIME_OUT) return false
+            if (System.currentTimeMillis() - start > 2*TIME_OUT) return false
         }
         this.transactionSuccess = false
         return true
@@ -285,7 +285,7 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
         } else return null
 
         while (!this.transactionSuccess) {
-            if (System.currentTimeMillis() - start > TIME_OUT) return null
+            if (System.currentTimeMillis() - start > 2*TIME_OUT) return null
         }
         this.transactionSuccess = false
         return this.characteristic?.value
@@ -326,8 +326,8 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
         writeValue(byteArrayOf(SET_GPS_ON_CODE))
         val returnVal = readValue()
         if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
-            Log.d("", returnVal.contentToString())
-            Log.d("", returnVal.toString(Charsets.UTF_8))
+            Log.d("BLE Device", returnVal.contentToString())
+            Log.d("BLE Device", returnVal.toString(Charsets.UTF_8))
         } else return false
         return true
     }
@@ -336,8 +336,8 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
         writeValue(byteArrayOf(SET_GPS_OFF_CODE))
         val returnVal = readValue()
         if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
-            Log.d("", returnVal.contentToString())
-            Log.d("", returnVal.toString(Charsets.UTF_8))
+            Log.d("BLE Device", returnVal.contentToString())
+            Log.d("BLE Device", returnVal.toString(Charsets.UTF_8))
         } else return false
         return true
     }
@@ -346,8 +346,8 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
         writeValue(byteArrayOf(SET_GPG_LOGGING_ON_CODE))
         val returnVal = readValue()
         if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
-            Log.d("", returnVal.contentToString())
-            Log.d("", returnVal.toString(Charsets.UTF_8))
+            Log.d("BLE Device", returnVal.contentToString())
+            Log.d("BLE Device", returnVal.toString(Charsets.UTF_8))
         } else return false
         return true
     }
@@ -356,8 +356,8 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
         writeValue(byteArrayOf(SET_GPG_LOGGING_OFF_CODE))
         val returnVal = readValue()
         if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
-            Log.d("", returnVal.contentToString())
-            Log.d("", returnVal.toString(Charsets.UTF_8))
+            Log.d("BLE Device", returnVal.contentToString())
+            Log.d("BLE Device", returnVal.toString(Charsets.UTF_8))
         } else return false
         return true
     }
@@ -366,8 +366,8 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
         writeValue(byteArrayOf(SET_GPS_BLE_PRINT_ON_CODE))
         val returnVal = readValue()
         if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
-            Log.d("", returnVal.contentToString())
-            Log.d("", returnVal.toString(Charsets.UTF_8))
+            Log.d("BLE Device", returnVal.contentToString())
+            Log.d("BLE Device", returnVal.toString(Charsets.UTF_8))
         } else return false
         return true
     }
@@ -376,20 +376,19 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
         writeValue(byteArrayOf(SET_GPS_BLE_PRINT_OFF_CODE))
         val returnVal = readValue()
         if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
-            Log.d("", returnVal.contentToString())
-            Log.d("", returnVal.toString(Charsets.UTF_8))
+            Log.d("BLE Device", returnVal.contentToString())
+            Log.d("BLE Device", returnVal.toString(Charsets.UTF_8))
         } else return false
         return true
     }
-
 
     fun fetchGPSdata(): String {
         writeValue(byteArrayOf(GET_GPS_DATA_CODE))
         val returnVal = readValue()
         // TODO: add data checks delimiters []
         if (returnVal != null) {
-            Log.d("", returnVal.contentToString())
-            Log.d("", returnVal.toString(Charsets.UTF_8))
+            Log.d("BLE Device", returnVal.contentToString())
+            Log.d("BLE Device", returnVal.toString(Charsets.UTF_8))
         } else return ""
         return returnVal.toString(Charsets.UTF_8)
     }
@@ -399,8 +398,8 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
         val returnVal = readValue()
         // TODO: add data checks delimiters []
         if (returnVal != null) {
-            Log.d("", returnVal.contentToString())
-            Log.d("", returnVal.toString(Charsets.UTF_8))
+            Log.d("BLE Device", returnVal.contentToString())
+            Log.d("BLE Device", returnVal.toString(Charsets.UTF_8))
         } else return ""
         return returnVal.toString(Charsets.UTF_8)
     }
@@ -416,8 +415,8 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
         writeValue(byteArrayOf(GET_SDCARD_STATUS_CODE))
         val returnVal = readValue()
         if (returnVal != null) {
-            Log.d("", returnVal.contentToString())
-            Log.d("", returnVal.toString(Charsets.UTF_8))
+            Log.d("BLE Device", returnVal.contentToString())
+            Log.d("BLE Device", returnVal.toString(Charsets.UTF_8))
         } else return ""
         return returnVal.toString(Charsets.UTF_8)
     }
@@ -426,8 +425,8 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
         writeValue(byteArrayOf(GPS_REBOOT_CODE))
         val returnVal = readValue()
         if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
-            Log.d("", returnVal.contentToString())
-            Log.d("", returnVal.toString(Charsets.UTF_8))
+            Log.d("BLE Device", returnVal.contentToString())
+            Log.d("BLE Device", returnVal.toString(Charsets.UTF_8))
         } else return false
         return true
     }
@@ -436,8 +435,8 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
         writeValue(byteArrayOf(GPS_RESET_CODE))
         val returnVal = readValue()
         if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
-            Log.d("", returnVal.contentToString())
-            Log.d("", returnVal.toString(Charsets.UTF_8))
+            Log.d("BLE Device", returnVal.contentToString())
+            Log.d("BLE Device", returnVal.toString(Charsets.UTF_8))
         } else return false
         return true
     }

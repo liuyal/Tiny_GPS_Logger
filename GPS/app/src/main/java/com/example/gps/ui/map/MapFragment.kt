@@ -1,6 +1,7 @@
 package com.example.gps.ui.map
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,4 +24,18 @@ class MapFragment : Fragment() {
         })
         return root
     }
+
+
+    override fun onStart() {
+        super.onStart()
+        Log.e("MAP", "Start map Fragment")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.e("MAP", "Stopped map Fragment")
+    }
+
+
+
 }

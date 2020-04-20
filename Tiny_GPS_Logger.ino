@@ -7,6 +7,8 @@
 #include "FS.h"
 #include "TinyGPS++.h"
 
+#define DEBUG true
+
 #define RXD2 16
 #define TXD2 17
 
@@ -34,17 +36,37 @@ int nfiles = 0;
 String log_buffer = "";
 int log_counter = 0;
 
+#if DEBUG
+#include <WiFi.h>
+#include <WiFiUdp.h>
+const char* WIFI_SSID = "";
+const char* WIFI_PWD = "";
+const int WIFI_TIMEOUT = 10 * 1000;
+const int UDP_PORT = 9996;
+IPAddress HOST_IP(192, 168, 1, 80);
+WiFiUDP Udp;
+#endif
+
 TinyGPSPlus gps;
 
 void Serial_Print(String msg) {
+#if DEBUG
   Serial.print(msg);
+  if (WiFi.status() == WL_CONNECTED) {
+    Udp.beginPacket(HOST_IP, UDP_PORT);
+    Udp.printf((msg).c_str());
+    Udp.endPacket();
+  }
+#endif
 }
 
 void setup() {
+#if DEBUG
   Serial.begin(115200);
+#endif
   Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
   EEPROM.begin(64);
-  Serial_Print("\n\r*****GPS_ON*****\n\r");
+  Serial_Print("\n\r*************** GPS_ON ***************\n\r");
   BLE_INIT();
   SD_INIT();
   listDir(SD, "/", 0);
@@ -55,8 +77,15 @@ void setup() {
   if (EEPROM.read(GPS_LOGGING_FLAG_INDEX) == 0x01) statusFlags[GPS_LOGGING_FLAG_INDEX] = true;
   if (EEPROM.read(GPS_SERIAL_PRINT_FLAG_INDEX) == 0x01) statusFlags[GPS_SERIAL_PRINT_FLAG_INDEX] = true;
   if (EEPROM.read(GPS_BLE_PRINT_FLAG_INDEX) == 0x01) statusFlags[GPS_BLE_PRINT_FLAG_INDEX] = true;
-  Serial_Print("\n\r");
+#if DEBUG
+  WIFI_INIT();
+#endif
+  Serial_Print("\n\r\n\r[SETUP COMPLETE]\n\r\n\r");
 }
+
+/**********************************************************************
+   BLE Functions
+ **********************************************************************/
 
 class ServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
@@ -211,8 +240,8 @@ class BLE_Callbacks: public BLECharacteristicCallbacks {
 
 void BLE_INIT() {
   Serial_Print("\n\rInitializing BLE...\n\r");
-  Serial_Print("SERVICE UUID: " + String(SERVICE_UUID) + "\n\r");
-  Serial_Print("CHARACTERISTIC UUID: " + String(CHARACTERISTIC_UUID) + "\n\r");
+  Serial_Print("SERVICE UUID: \t\r" + String(SERVICE_UUID) + "\n\r");
+  Serial_Print("CHARACTERISTIC UUID: \r" + String(CHARACTERISTIC_UUID) + "\n\r");
   Serial_Print("Starting BLE Server...\n\r");
   BLEDevice::init("ESP32_GPS_LOGGER");
   pServer = BLEDevice::createServer();
@@ -236,6 +265,11 @@ void BLE_INIT() {
   Serial_Print("GATT Service Defined!\n\r");
   Serial_Print("GATT Characteristic Defined!\n\r");
 }
+
+
+/**********************************************************************
+   SDCard Functions
+ **********************************************************************/
 
 void SD_INIT() {
   Serial_Print("\n\rInitializing SD Card...\n\r");
@@ -342,10 +376,59 @@ void deleteFile(fs::FS &fs, String path) {
   else Serial_Print("Delete failed\n\r");
 }
 
+
+/**********************************************************************
+   WIFI Functions
+ **********************************************************************/
+
+#if DEBUG
+void WIFI_INIT() {
+  WiFi.begin(WIFI_SSID, WIFI_PWD);
+  Serial_Print("\n\rConnecting to WiFi");
+  unsigned long start_wait = millis();
+  while (WiFi.status() != WL_CONNECTED && millis() - start_wait <= WIFI_TIMEOUT) {
+    Serial_Print(".");
+    delay(500);
+  }
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial_Print("\n\rConnected to: \t" + String(WIFI_SSID));
+    Serial_Print("\n\rGateway IP: \t" + WiFi.gatewayIP().toString());
+    Serial_Print("\n\rHost IP: \t" + HOST_IP.toString());
+    Serial_Print("\n\rLocal IP: \t" + WiFi.localIP().toString());
+    Serial_Print("\n\rUDP port: \t" + String(UDP_PORT));
+    Udp.begin(UDP_PORT);
+  }
+}
+
+String UDP_listen () {
+  char incomingPacket[255];
+  String packet;
+  if (WiFi.status() == WL_CONNECTED) {
+    int packetSize = Udp.parsePacket();
+    if (packetSize) {
+      int len = Udp.read(incomingPacket, 255);
+      if (len > 0) incomingPacket[len] = 0;
+      Serial_Print("Received from: " + String(Udp.remoteIP().toString()) + ":" + String(Udp.remotePort()) + "\n\r");
+      Serial_Print("UDP Packet Contents: [" + String(packetSize) + " bytes] " + String(incomingPacket));
+    } else return "";
+  } else return "";
+  return String(incomingPacket);
+}
+#endif
+
+
+/**********************************************************************
+   CMD Functions
+ **********************************************************************/
+
 void CMD_EVENT() {
   String receivedChars;
   while (Serial.available() > 0 ) receivedChars = Serial.readString();
-  // Serial.println(receivedChars);
+
+#if DEBUG
+  String input = UDP_listen();
+  if (input != "") receivedChars = input;
+#endif
 
   if (receivedChars.indexOf("status") >= 0) {
     byte buf[6];
@@ -477,7 +560,7 @@ void loop() {
     }
   }
   else statusFlags[GPS_FIX_FLAG_INDEX] = false;
-
   log_counter++;
+
   CMD_EVENT();
 }

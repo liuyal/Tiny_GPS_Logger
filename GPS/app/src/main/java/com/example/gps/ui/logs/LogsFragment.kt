@@ -1,6 +1,7 @@
 package com.example.gps.ui.logs
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,4 +24,15 @@ class LogsFragment : Fragment() {
         })
         return root
     }
+
+    override fun onStart() {
+        super.onStart()
+        Log.e("", "Start L Fragment")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.e("", "Stopped L Fragment")
+    }
+
 }

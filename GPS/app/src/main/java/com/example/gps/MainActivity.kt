@@ -27,6 +27,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
 
     var statueCheckThread: Thread? = null
+    var mapThread: Thread? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,17 +46,7 @@ class MainActivity : AppCompatActivity() {
             }
             true
         }
-        val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
-        val navView: NavigationView = findViewById(R.id.nav_view)
-        val navController = findNavController(R.id.nav_host_fragment)
-        appBarConfiguration = AppBarConfiguration(setOf(R.id.nav_home, R.id.nav_map, R.id.nav_logs), drawerLayout)
-        setupActionBarWithNavController(navController, appBarConfiguration)
-        navView.setupWithNavController(navController)
-    }
 
-
-    override fun onStart() {
-        super.onStart()
         if (BluetoothAdapter.getDefaultAdapter() == null) {
             Toast.makeText(applicationContext, "BlueTooth is not supported!", Toast.LENGTH_SHORT).show()
         } else if (!BluetoothAdapter.getDefaultAdapter().isEnabled) {
@@ -68,26 +59,36 @@ class MainActivity : AppCompatActivity() {
                 GlobalApplication.BLE?.context = this
                 GlobalApplication.BLE?.applicationContext = applicationContext as ContextWrapper
             }
-            statueCheckThread = Thread(Runnable { backgroundTask() })
-            statueCheckThread!!.start()
         }
+
+        val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
+        val navView: NavigationView = findViewById(R.id.nav_view)
+        val navController = findNavController(R.id.nav_host_fragment)
+        appBarConfiguration = AppBarConfiguration(setOf(R.id.nav_home, R.id.nav_map, R.id.nav_logs), drawerLayout)
+        setupActionBarWithNavController(navController, appBarConfiguration)
+        navView.setupWithNavController(navController)
     }
+
 
     override fun onStop() {
         super.onStop()
-        statueCheckThread?.interrupt()
-        statueCheckThread = null
         GlobalApplication.BLE?.close()
     }
 
-    fun backgroundTask() {
+
+    fun checkTask() {
         val macAddress = GlobalApplication.BLE?.loadDBMAC()
         if (GlobalApplication.BLE?.connectionState != STATE_CONNECTED || GlobalApplication.BLE?.bleGATT == null) GlobalApplication.BLE?.connect(macAddress)!!
-        Log.d("", "Thread start")
+        Log.d("MAIN", "statusCheckTask start")
         while (true) {
             try {
                 if (GlobalApplication.BLE?.connectionState == STATE_CONNECTED || GlobalApplication.BLE?.bleGATT != null) {
+
+
                     GlobalApplication.BLE?.fetchDeviceStatus()
+
+                    // TODO: add selection for data fetching (ie, status, location)
+
                     Thread.sleep((15 * TIME_OUT).toLong())
                 } else throw IllegalArgumentException("CONNECTION STOPPED")
             } catch (e: Throwable) {
@@ -95,15 +96,19 @@ class MainActivity : AppCompatActivity() {
                 break
             }
         }
-        Log.d("", "Thread Done")
+        Log.d("MAIN", "statusCheckTask Done")
     }
-
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
         return true
     }
 
+    // TODO: Prompt UI to indicate no matching device
+    private fun disconnectionHandler() {
+        Toast.makeText(applicationContext, "Unable to connect to Default BLE Device!", Toast.LENGTH_SHORT).show()
+        Log.e("HOME", "Unable to connect to BLE Device")
+    }
 
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment)
