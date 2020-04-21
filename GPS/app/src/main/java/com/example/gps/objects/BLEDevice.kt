@@ -5,7 +5,6 @@ import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.content.ContextWrapper
 import android.util.Log
-import java.lang.Thread.sleep
 import java.util.*
 
 //https://developer.android.com/reference/android/bluetooth/BluetoothGatt
