@@ -1,4 +1,4 @@
-package com.example.gps
+package com.gps
 
 import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
@@ -10,10 +10,7 @@ import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.os.Bundle
-import android.os.Handler
-import android.os.SystemClock.sleep
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -25,9 +22,8 @@ import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.gps.objects.GlobalApplication
-import com.example.gps.objects.ScanAdapter
-import com.example.gps.objects.TIME_OUT
+import com.gps.objects.GlobalApplication
+import com.gps.objects.ScanAdapter
 import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator
 import kotlinx.android.synthetic.main.activity_ble.*
 import maes.tech.intentanim.CustomIntent
@@ -174,11 +170,11 @@ class BLEActivity : AppCompatActivity() {
 
 
     @UiThread
-    private fun createDialog(c: Context, tite: String, msg: String, button: String) {
+    private fun createDialog(c: Context, title: String, msg: String, button: String) {
         val builder = AlertDialog.Builder(c)
-        builder.setTitle(tite)
+        builder.setTitle(title)
         builder.setMessage(msg)
-        builder.setPositiveButton(button) { dialog, which ->
+        builder.setPositiveButton(button) { _, _ ->
             builder.create().dismiss()
             onSupportNavigateUp()
         }

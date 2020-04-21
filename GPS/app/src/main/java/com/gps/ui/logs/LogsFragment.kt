@@ -1,4 +1,4 @@
-package com.example.gps.ui.logs
+package com.gps.ui.logs
 
 import android.os.Bundle
 import android.util.Log
@@ -9,7 +9,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.example.gps.R
+import com.gps.R
 
 class LogsFragment : Fragment() {
 

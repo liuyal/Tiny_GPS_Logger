@@ -1,4 +1,4 @@
-package com.example.gps.ui.map
+package com.gps.ui.map
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

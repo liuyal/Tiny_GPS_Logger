@@ -1,9 +1,10 @@
-package com.example.gps.objects
+package com.gps.objects
 
 import android.bluetooth.*
 import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.content.ContextWrapper
+import android.database.Cursor
 import android.util.Log
 import java.util.*
 
@@ -198,8 +199,13 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
         }
     }
 
-    fun loadDBMAC(): String {
-        val cursor = dbHandler?.selectFromDB(SqliteDB.macTable)
+    fun loadDBMAC(): String? {
+        var cursor: Cursor?
+        try {
+            cursor = dbHandler?.selectFromDB(SqliteDB.macTable)
+        } catch (e: Throwable) {
+            return null
+        }
         cursor!!.moveToFirst()
         this.bleAddress = cursor.getString(cursor.getColumnIndex(SqliteDB.macColumn))
         return this.bleAddress!!
@@ -233,7 +239,7 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
                     }
                 } else foundService = false
             }
-            if (timeout && System.currentTimeMillis() - start > 3*TIME_OUT) break
+            if (timeout && System.currentTimeMillis() - start > 3 * TIME_OUT) break
         }
         if (serviceList == null || serviceList.size < 1) return false
         for (serviceItem in serviceList) {
@@ -265,7 +271,7 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
         } else return false
 
         while (!this.transactionSuccess) {
-            if (System.currentTimeMillis() - start > 2*TIME_OUT) return false
+            if (System.currentTimeMillis() - start > 2 * TIME_OUT) return false
         }
         this.transactionSuccess = false
         return true
@@ -284,7 +290,7 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
         } else return null
 
         while (!this.transactionSuccess) {
-            if (System.currentTimeMillis() - start > 2*TIME_OUT) return null
+            if (System.currentTimeMillis() - start > 2 * TIME_OUT) return null
         }
         this.transactionSuccess = false
         return this.characteristic?.value

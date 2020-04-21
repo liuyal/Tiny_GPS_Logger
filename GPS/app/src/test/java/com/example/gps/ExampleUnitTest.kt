@@ -1,4 +1,4 @@
-package com.example.gps
+package com.gps
 
 import org.junit.Test
 

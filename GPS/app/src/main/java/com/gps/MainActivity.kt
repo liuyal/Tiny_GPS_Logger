@@ -1,4 +1,4 @@
-package com.example.gps
+package com.gps
 
 import android.bluetooth.BluetoothAdapter
 import android.content.ContextWrapper
@@ -15,10 +15,10 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.example.gps.objects.BLEDevice
-import com.example.gps.objects.GlobalApplication
-import com.example.gps.objects.STATE_CONNECTED
-import com.example.gps.objects.TIME_OUT
+import com.gps.objects.BLEDevice
+import com.gps.objects.GlobalApplication
+import com.gps.objects.STATE_CONNECTED
+import com.gps.objects.TIME_OUT
 import com.google.android.material.navigation.NavigationView
 import maes.tech.intentanim.CustomIntent
 
@@ -77,13 +77,13 @@ class MainActivity : AppCompatActivity() {
 
 
     fun checkTask() {
-        val macAddress = GlobalApplication.BLE?.loadDBMAC()
+        // TODO: IF mac is null update UI to show no device flag
+        val macAddress = GlobalApplication.BLE?.loadDBMAC() ?: return
         if (GlobalApplication.BLE?.connectionState != STATE_CONNECTED || GlobalApplication.BLE?.bleGATT == null) GlobalApplication.BLE?.connect(macAddress)!!
         Log.d("MAIN", "statusCheckTask start")
         while (true) {
             try {
                 if (GlobalApplication.BLE?.connectionState == STATE_CONNECTED || GlobalApplication.BLE?.bleGATT != null) {
-
 
                     GlobalApplication.BLE?.fetchDeviceStatus()
 

@@ -1,4 +1,4 @@
-package com.example.gps.objects
+package com.gps.objects
 
 import android.content.ContentValues
 import android.content.Context
@@ -17,7 +17,7 @@ class SqliteDB(context: Context, factory: SQLiteDatabase.CursorFactory?) : SQLit
 
 
     override fun onCreate(db: SQLiteDatabase) {
-        createTable(macTable)
+        db.execSQL("CREATE TABLE IF NOT EXISTS $macTable($macColumn varchar(18) PRIMARY KEY)")
     }
 
 

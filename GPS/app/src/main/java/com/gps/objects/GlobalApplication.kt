@@ -1,4 +1,4 @@
-package com.example.gps.objects
+package com.gps.objects
 
 class GlobalApplication {
     companion object {

@@ -1,4 +1,4 @@
-package com.example.gps.ui.home
+package com.gps.ui.home
 
 import android.os.Bundle
 import android.util.Log
@@ -10,8 +10,8 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.example.gps.MainActivity
-import com.example.gps.R
+import com.gps.MainActivity
+import com.gps.R
 import kotlinx.android.synthetic.main.fragment_home.view.*
 
 
@@ -27,11 +27,11 @@ class HomeFragment : Fragment() {
         homeViewModel.text.observe(viewLifecycleOwner, Observer { textView.text = it })
 
 
-        view.test_button.setOnClickListener { View ->
+        view.test_button.setOnClickListener { _ ->
             Log.d("HOME", "Clicked S button")
         }
 
-        view.test_button2.setOnClickListener { View ->
+        view.test_button2.setOnClickListener { _ ->
             Log.d("HOME", "Clicked C button")
         }
 
