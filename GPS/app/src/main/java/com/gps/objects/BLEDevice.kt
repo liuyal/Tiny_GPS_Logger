@@ -63,7 +63,7 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
     var transactionSuccess: Boolean = false
     var dbHandler: SqliteDB? = null
 
-    var gpsStatusFlags: BooleanArray? = BooleanArray(NUMBER_OF_FLAGS)
+    private var gpsStatusFlags: BooleanArray? = BooleanArray(NUMBER_OF_FLAGS)
 
     private val mGattCallback = object : BluetoothGattCallback() {
 
