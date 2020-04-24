@@ -14,7 +14,6 @@ import com.gps.MainActivity
 import com.gps.R
 import kotlinx.android.synthetic.main.fragment_home.view.*
 
-
 // TODO Implement UI
 class HomeFragment : Fragment() {
 
@@ -23,20 +22,13 @@ class HomeFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
         val view = inflater.inflate(R.layout.fragment_home, container, false)
-        val textView: TextView = view.findViewById(R.id.text_home)
-        homeViewModel.text.observe(viewLifecycleOwner, Observer { textView.text = it })
 
-        view.test_button.setOnClickListener { _ ->
-            Log.d("HOME", "Clicked A button")
-        }
-
-        view.test_button2.setOnClickListener { _ ->
-            Log.d("HOME", "Clicked B button")
-        }
+        //val textView: TextView = view.findViewById(R.id.text_home)
+        //homeViewModel.text.observe(viewLifecycleOwner, Observer { textView.text = it })
+        //view.button.setOnClickListener { _ -> }
 
         return view
     }
-
 
     override fun onStart() {
         super.onStart()
@@ -46,7 +38,6 @@ class HomeFragment : Fragment() {
         main?.statueCheckThread!!.start()
         Log.d("HOME", "Start h Fragment")
     }
-
 
     override fun onStop() {
         super.onStop()

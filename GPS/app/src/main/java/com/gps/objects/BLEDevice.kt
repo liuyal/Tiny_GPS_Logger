@@ -62,8 +62,7 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
     var characteristic: BluetoothGattCharacteristic? = null
     var transactionSuccess: Boolean = false
     var dbHandler: SqliteDB? = null
-
-    private var gpsStatusFlags: BooleanArray? = BooleanArray(NUMBER_OF_FLAGS)
+    var gpsStatusFlags: BooleanArray? = BooleanArray(NUMBER_OF_FLAGS)
 
     private val mGattCallback = object : BluetoothGattCallback() {
 
@@ -186,7 +185,7 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
         this.bleAddress = address
         this.connectionState = STATE_CONNECTING
         val checkA = serviceChecks()
-        val checkB = GPSCheck()
+        val checkB = GPSTagCheck()
         if (!checkA || !checkB) return false
         updateDBMAC(address)
         return true
@@ -300,7 +299,7 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
         return this == 1
     }
 
-    private fun GPSCheck(): Boolean {
+    private fun GPSTagCheck(): Boolean {
         writeValue(byteArrayOf(GPS_CHECK_CODE))
         val returnVal = readValue()
         if (returnVal != null && returnVal.toString(Charsets.UTF_8).contains(DEVICE_CODE_NAME, ignoreCase = true)) {

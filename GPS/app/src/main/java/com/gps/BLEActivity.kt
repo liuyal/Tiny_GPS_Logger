@@ -109,7 +109,6 @@ class BLEActivity : AppCompatActivity() {
             return false
         } else {
             GlobalApplication.BLE?.initialize()
-            GlobalApplication.BLE?.disconnect()
             GlobalApplication.BLE?.close()
             if (item.itemId == R.id.scan_btn) {
                 if (this.scanFlag) {
@@ -134,14 +133,11 @@ class BLEActivity : AppCompatActivity() {
         var isConnected = false
         val index = deviceList.indexOf(partItem)
         val serviceUUID: UUID? = resultsList[index].scanRecord?.serviceUuids?.get(0)?.uuid
-
         select_device_list.findViewHolderForAdapterPosition(index)?.itemView?.findViewById<Button>(R.id.connect_btn)?.setBackgroundResource(R.drawable.btn_pressed)
-
         progressBar = findViewById(R.id.progress_circularBar)
 
         Thread(Runnable {
             this.runOnUiThread { progressBar?.visibility = View.VISIBLE }
-
             try {
                 Thread.sleep(1000)
                 this.bluetoothLeScanner.stopScan(this.bleScanner)
@@ -149,7 +145,6 @@ class BLEActivity : AppCompatActivity() {
             } catch (e: Throwable) {
                 e.printStackTrace()
             }
-
             if (isConnected && serviceUUID != null) {
                 GlobalApplication.BLE?.device = partItem
                 GlobalApplication.BLE?.scanResult = this.resultsList[index]
@@ -166,12 +161,9 @@ class BLEActivity : AppCompatActivity() {
                     select_device_list.findViewHolderForAdapterPosition(index)?.itemView?.findViewById<Button>(R.id.connect_btn)?.setBackgroundResource(R.drawable.btn_unpressed)
                 }
             }
-
             this.runOnUiThread { progressBar?.visibility = View.GONE }
         }).start()
-
     }
-
 
     @UiThread
     private fun createDialog(c: Context, title: String, msg: String, button: String) {

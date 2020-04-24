@@ -15,11 +15,8 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.gps.objects.BLEDevice
-import com.gps.objects.GlobalApplication
-import com.gps.objects.STATE_CONNECTED
-import com.gps.objects.TIME_OUT
 import com.google.android.material.navigation.NavigationView
+import com.gps.objects.*
 import maes.tech.intentanim.CustomIntent
 
 class MainActivity : AppCompatActivity() {
@@ -35,7 +32,6 @@ class MainActivity : AppCompatActivity() {
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.elevation = 0F
-
         toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.action_settings -> {
@@ -46,7 +42,6 @@ class MainActivity : AppCompatActivity() {
             }
             true
         }
-
         if (BluetoothAdapter.getDefaultAdapter() == null) {
             Toast.makeText(applicationContext, "BlueTooth is not supported!", Toast.LENGTH_SHORT).show()
         } else if (!BluetoothAdapter.getDefaultAdapter().isEnabled) {
@@ -60,7 +55,6 @@ class MainActivity : AppCompatActivity() {
                 GlobalApplication.BLE?.applicationContext = applicationContext as ContextWrapper
             }
         }
-
         val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
         val navView: NavigationView = findViewById(R.id.nav_view)
         val navController = findNavController(R.id.nav_host_fragment)
@@ -69,15 +63,17 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
     }
 
-
     override fun onStop() {
         super.onStop()
-        GlobalApplication.BLE?.close()
+        try {
+            GlobalApplication.BLE?.close()
+        } catch (e: Throwable) {
+            Log.e("MAIN", "GATT Closing ERROR")
+        }
     }
 
     // TODO: IF mac is null update UI to show no device flag
     //GlobalApplication.BLE?.fetchGPSdata()
-
     fun checkTask() {
         val macAddress = GlobalApplication.BLE?.loadDBMAC() ?: return
         if (GlobalApplication.BLE?.connectionState != STATE_CONNECTED || GlobalApplication.BLE?.bleGATT == null) GlobalApplication.BLE?.connect(macAddress)!!
@@ -85,11 +81,13 @@ class MainActivity : AppCompatActivity() {
         while (true) {
             try {
                 if (GlobalApplication.BLE?.connectionState == STATE_CONNECTED || GlobalApplication.BLE?.bleGATT != null) {
-                    GlobalApplication.BLE?.fetchDeviceStatus()
+                    if (!GlobalApplication.BLE?.fetchDeviceStatus()!!) throw IllegalArgumentException("CONNECTION STOPPED")
+                    this.runOnUiThread { updateUIFlags() }
                     Thread.sleep((15 * TIME_OUT).toLong())
                 } else throw IllegalArgumentException("CONNECTION STOPPED")
             } catch (e: Throwable) {
                 if (e.localizedMessage != null) Log.e("", e.localizedMessage!!.toString())
+                this.runOnUiThread { disconnectionHandler() }
                 break
             }
         }
@@ -101,10 +99,19 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
+    private fun updateUIFlags() {
+        GlobalApplication.BLE?.gpsStatusFlags?.get(GPS_CONNECTION_FLAG_INDEX).toString()
+        GlobalApplication.BLE?.gpsStatusFlags?.get(GPS_FIX_FLAG_INDEX).toString()
+        GlobalApplication.BLE?.gpsStatusFlags?.get(GPS_ON_FLAG_INDEX).toString()
+        GlobalApplication.BLE?.gpsStatusFlags?.get(GPS_SERIAL_PRINT_FLAG_INDEX).toString()
+        GlobalApplication.BLE?.gpsStatusFlags?.get(GPS_BLE_PRINT_FLAG_INDEX).toString()
+        GlobalApplication.BLE?.gpsStatusFlags?.get(GPS_LOGGING_FLAG_INDEX).toString()
+    }
+
     // TODO: Prompt UI to indicate no matching device
     private fun disconnectionHandler() {
         Toast.makeText(applicationContext, "Unable to connect to Default BLE Device!", Toast.LENGTH_SHORT).show()
-        Log.e("HOME", "Unable to connect to BLE Device")
+        Log.e("MAIN", "Unable to connect to BLE Device")
     }
 
     override fun onSupportNavigateUp(): Boolean {
