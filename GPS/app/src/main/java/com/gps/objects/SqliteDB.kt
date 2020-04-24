@@ -13,16 +13,20 @@ class SqliteDB(context: Context, factory: SQLiteDatabase.CursorFactory?) : SQLit
         private const val DATABASE_NAME = "bleGPS.db"
         const val macTable: String = "macTable"
         const val macColumn: String = "mac"
+        const val GPSdataTable: String = "GPSdataTable"
+        const val GPSdataColumn: String = "data"
     }
 
 
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL("CREATE TABLE IF NOT EXISTS $macTable($macColumn varchar(18) PRIMARY KEY)")
+        db.execSQL("CREATE TABLE IF NOT EXISTS $GPSdataTable($GPSdataColumn varchar(80) PRIMARY KEY)")
     }
 
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         db.execSQL("DROP TABLE IF EXISTS $macTable")
+        db.execSQL("DROP TABLE IF EXISTS $GPSdataTable")
         onCreate(db)
     }
 
@@ -31,6 +35,8 @@ class SqliteDB(context: Context, factory: SQLiteDatabase.CursorFactory?) : SQLit
         val db = this.writableDatabase
         if (table == macTable) {
             db.execSQL("CREATE TABLE IF NOT EXISTS $macTable($macColumn varchar(18) PRIMARY KEY)")
+        } else if (table == GPSdataTable) {
+            db.execSQL("CREATE TABLE IF NOT EXISTS $GPSdataTable($GPSdataColumn varchar(80) PRIMARY KEY)")
         }
     }
 

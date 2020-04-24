@@ -26,13 +26,12 @@ class HomeFragment : Fragment() {
         val textView: TextView = view.findViewById(R.id.text_home)
         homeViewModel.text.observe(viewLifecycleOwner, Observer { textView.text = it })
 
-
         view.test_button.setOnClickListener { _ ->
-            Log.d("HOME", "Clicked S button")
+            Log.d("HOME", "Clicked A button")
         }
 
         view.test_button2.setOnClickListener { _ ->
-            Log.d("HOME", "Clicked C button")
+            Log.d("HOME", "Clicked B button")
         }
 
         return view

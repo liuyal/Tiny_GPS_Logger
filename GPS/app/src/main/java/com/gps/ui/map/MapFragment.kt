@@ -9,11 +9,16 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.gms.maps.GoogleMap
 import com.gps.R
+
 
 class MapFragment : Fragment() {
 
     private lateinit var mapViewModel: MapViewModel
+
+    private val mMap: GoogleMap? = null
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         mapViewModel =  ViewModelProvider(this).get(MapViewModel::class.java)

@@ -75,20 +75,17 @@ class MainActivity : AppCompatActivity() {
         GlobalApplication.BLE?.close()
     }
 
+    // TODO: IF mac is null update UI to show no device flag
+    //GlobalApplication.BLE?.fetchGPSdata()
 
     fun checkTask() {
-        // TODO: IF mac is null update UI to show no device flag
         val macAddress = GlobalApplication.BLE?.loadDBMAC() ?: return
         if (GlobalApplication.BLE?.connectionState != STATE_CONNECTED || GlobalApplication.BLE?.bleGATT == null) GlobalApplication.BLE?.connect(macAddress)!!
         Log.d("MAIN", "statusCheckTask start")
         while (true) {
             try {
                 if (GlobalApplication.BLE?.connectionState == STATE_CONNECTED || GlobalApplication.BLE?.bleGATT != null) {
-
                     GlobalApplication.BLE?.fetchDeviceStatus()
-
-                    // TODO: add selection for data fetching (ie, status, location)
-
                     Thread.sleep((15 * TIME_OUT).toLong())
                 } else throw IllegalArgumentException("CONNECTION STOPPED")
             } catch (e: Throwable) {

@@ -90,7 +90,7 @@ class BLEActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         this.scanFlag = false
-        if (BluetoothAdapter.getDefaultAdapter() != null) {
+        if (BluetoothAdapter.getDefaultAdapter() != null && BluetoothAdapter.getDefaultAdapter().isEnabled) {
             bluetoothLeScanner.stopScan(bleScanner)
         }
     }
@@ -153,14 +153,18 @@ class BLEActivity : AppCompatActivity() {
             if (isConnected && serviceUUID != null) {
                 GlobalApplication.BLE?.device = partItem
                 GlobalApplication.BLE?.scanResult = this.resultsList[index]
-                this.runOnUiThread { createDialog(this, "Success!", "Connected To BLE Device!", "OK")}
+                this.runOnUiThread { createDialog(this, "Success!", "Connected To BLE Device!", "OK") }
             } else if (this.scanFlag) {
-                this.runOnUiThread { Toast.makeText(applicationContext, "Invalid Device!", Toast.LENGTH_SHORT).show()}
-                select_device_list.findViewHolderForAdapterPosition(index)?.itemView?.findViewById<Button>(R.id.connect_btn)?.setBackgroundResource(R.drawable.btn_unpressed)
+                this.runOnUiThread {
+                    Toast.makeText(applicationContext, "Invalid Device!", Toast.LENGTH_SHORT).show()
+                    select_device_list.findViewHolderForAdapterPosition(index)?.itemView?.findViewById<Button>(R.id.connect_btn)?.setBackgroundResource(R.drawable.btn_unpressed)
+                }
                 this.bluetoothLeScanner.startScan(bleScanner)
             } else {
-                this.runOnUiThread { Toast.makeText(applicationContext, "Invalid Device!", Toast.LENGTH_SHORT).show()}
-                select_device_list.findViewHolderForAdapterPosition(index)?.itemView?.findViewById<Button>(R.id.connect_btn)?.setBackgroundResource(R.drawable.btn_unpressed)
+                this.runOnUiThread {
+                    Toast.makeText(applicationContext, "Invalid Device!", Toast.LENGTH_SHORT).show()
+                    select_device_list.findViewHolderForAdapterPosition(index)?.itemView?.findViewById<Button>(R.id.connect_btn)?.setBackgroundResource(R.drawable.btn_unpressed)
+                }
             }
 
             this.runOnUiThread { progressBar?.visibility = View.GONE }
