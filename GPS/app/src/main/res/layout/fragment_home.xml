@@ -1,26 +1,147 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.home.HomeFragment">
 
-    <TextView
-        android:id="@+id/text_home"
-        android:layout_width="match_parent"
+
+    <LinearLayout
+        android:id="@+id/statusBar"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.025" />
+        tools:ignore="MissingConstraints">
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="@dimen/statusBarHeight"
+            android:layout_weight=".01"
+            android:background="@drawable/status_div" />
+
+        <View
+            android:id="@+id/statusBar1"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/statusBarHeight"
+            android:layout_weight=".155"
+            android:background="@drawable/status_off" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="@dimen/statusBarHeight"
+            android:layout_weight=".01"
+            android:background="@drawable/status_div" />
+
+        <View
+            android:id="@+id/statusBar2"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/statusBarHeight"
+            android:layout_weight=".155"
+            android:background="@drawable/status_off" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="@dimen/statusBarHeight"
+            android:layout_weight=".01"
+            android:background="@drawable/status_div" />
+
+        <View
+            android:id="@+id/statusBar3"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/statusBarHeight"
+            android:layout_weight=".155"
+            android:background="@drawable/status_off" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="@dimen/statusBarHeight"
+            android:layout_weight=".01"
+            android:background="@drawable/status_div" />
+
+        <View
+            android:id="@+id/statusBar4"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/statusBarHeight"
+            android:layout_weight=".155"
+            android:background="@drawable/status_off" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="@dimen/statusBarHeight"
+            android:layout_weight=".01"
+            android:background="@drawable/status_div" />
+
+        <View
+            android:id="@+id/statusBar5"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/statusBarHeight"
+            android:layout_weight=".155"
+            android:background="@drawable/status_off" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="@dimen/statusBarHeight"
+            android:layout_weight=".01"
+            android:background="@drawable/status_div" />
+
+        <View
+            android:id="@+id/statusBar6"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/statusBarHeight"
+            android:layout_weight=".155"
+            android:background="@drawable/status_off" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="@dimen/statusBarHeight"
+            android:layout_weight=".01"
+            android:background="@drawable/status_div" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/infoBar"
+        android:layout_below="@+id/statusBar"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginTop="10dp"
+        android:background="@color/colorPrimaryDark"
+        android:gravity="center"
+        android:orientation="horizontal">
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/statusInfo"
+        android:layout_below="@+id/infoBar"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginTop="10dp"
+        android:background="@color/colorPrimaryDark"
+        android:gravity="center"
+        android:orientation="horizontal">
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/locationInfo"
+        android:layout_below="@+id/statusInfo"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginTop="10dp"
+        android:background="@color/colorPrimaryDark"
+        android:gravity="center"
+        android:orientation="horizontal">
+    </LinearLayout>
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+
+
+
+
+</RelativeLayout>

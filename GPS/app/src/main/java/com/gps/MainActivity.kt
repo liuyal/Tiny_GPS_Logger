@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -81,7 +82,7 @@ class MainActivity : AppCompatActivity() {
         while (true) {
             try {
                 if (GlobalApplication.BLE?.connectionState == STATE_CONNECTED || GlobalApplication.BLE?.bleGATT != null) {
-                    if (!GlobalApplication.BLE?.fetchDeviceStatus()!!) throw IllegalArgumentException("CONNECTION STOPPED")
+                    GlobalApplication.BLE?.fetchDeviceStatus()
                     this.runOnUiThread { updateUIFlags() }
                     Thread.sleep((15 * TIME_OUT).toLong())
                 } else throw IllegalArgumentException("CONNECTION STOPPED")
@@ -100,17 +101,30 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateUIFlags() {
-        GlobalApplication.BLE?.gpsStatusFlags?.get(GPS_CONNECTION_FLAG_INDEX).toString()
-        GlobalApplication.BLE?.gpsStatusFlags?.get(GPS_FIX_FLAG_INDEX).toString()
-        GlobalApplication.BLE?.gpsStatusFlags?.get(GPS_ON_FLAG_INDEX).toString()
-        GlobalApplication.BLE?.gpsStatusFlags?.get(GPS_SERIAL_PRINT_FLAG_INDEX).toString()
-        GlobalApplication.BLE?.gpsStatusFlags?.get(GPS_BLE_PRINT_FLAG_INDEX).toString()
-        GlobalApplication.BLE?.gpsStatusFlags?.get(GPS_LOGGING_FLAG_INDEX).toString()
+        val statusBar1: View = findViewById(R.id.statusBar1)
+        val statusBar2: View = findViewById(R.id.statusBar2)
+        val statusBar3: View = findViewById(R.id.statusBar3)
+        val statusBar4: View = findViewById(R.id.statusBar4)
+        val statusBar5: View = findViewById(R.id.statusBar5)
+        val statusBar6: View = findViewById(R.id.statusBar6)
+        if (GlobalApplication.BLE?.gpsStatusFlags?.get(GPS_CONNECTION_FLAG_INDEX)!!) statusBar1.background = getDrawable(R.drawable.status_on)
+        else statusBar1.background = getDrawable(R.drawable.status_off)
+        if (GlobalApplication.BLE?.gpsStatusFlags?.get(GPS_FIX_FLAG_INDEX)!!) statusBar2.background = getDrawable(R.drawable.status_on)
+        else statusBar2.background = getDrawable(R.drawable.status_off)
+        if (GlobalApplication.BLE?.gpsStatusFlags?.get(GPS_ON_FLAG_INDEX)!!) statusBar3.background = getDrawable(R.drawable.status_on)
+        else statusBar3.background = getDrawable(R.drawable.status_off)
+        if (GlobalApplication.BLE?.gpsStatusFlags?.get(GPS_SERIAL_PRINT_FLAG_INDEX)!!) statusBar4.background = getDrawable(R.drawable.status_on)
+        else statusBar4.background = getDrawable(R.drawable.status_off)
+        if (GlobalApplication.BLE?.gpsStatusFlags?.get(GPS_BLE_PRINT_FLAG_INDEX)!!) statusBar5.background = getDrawable(R.drawable.status_on)
+        else statusBar5.background = getDrawable(R.drawable.status_off)
+        if (GlobalApplication.BLE?.gpsStatusFlags?.get(GPS_LOGGING_FLAG_INDEX)!!) statusBar6.background = getDrawable(R.drawable.status_on)
+        else statusBar6.background = getDrawable(R.drawable.status_off)
     }
 
-    // TODO: Prompt UI to indicate no matching device
     private fun disconnectionHandler() {
-        Toast.makeText(applicationContext, "Unable to connect to Default BLE Device!", Toast.LENGTH_SHORT).show()
+        GlobalApplication.BLE?.gpsStatusFlags?.fill(false, 0, NUMBER_OF_FLAGS)
+        updateUIFlags()
+        Toast.makeText(applicationContext, "Unable to connect to BLE Device!", Toast.LENGTH_SHORT).show()
         Log.e("MAIN", "Unable to connect to BLE Device")
     }
 
