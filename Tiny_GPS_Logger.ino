@@ -21,8 +21,8 @@ BLEService* pService = NULL;
 BLECharacteristic* pCharacteristic = NULL;
 
 const int GPS_CONNECTION_FLAG_INDEX = 0;
-const int GPS_FIX_FLAG_INDEX = 1;
-const int GPS_ON_FLAG_INDEX = 2;
+const int GPS_ON_FLAG_INDEX = 1;
+const int GPS_FIX_FLAG_INDEX = 2;
 const int GPS_SERIAL_PRINT_FLAG_INDEX = 3;
 const int GPS_BLE_PRINT_FLAG_INDEX = 4;
 const int GPS_LOGGING_FLAG_INDEX = 5;
@@ -116,12 +116,12 @@ class BLE_Callbacks: public BLECharacteristicCallbacks {
         }
         else if (value[0] == 0x01) {
           byte buf[6];
-          buf[0] = statusFlags[GPS_CONNECTION_FLAG_INDEX] ? 0x01 : 0x00;
-          buf[1] = statusFlags[GPS_FIX_FLAG_INDEX] ? 0x01 : 0x00;
-          buf[2] = statusFlags[GPS_ON_FLAG_INDEX] ? 0x01 : 0x00;
-          buf[3] = statusFlags[GPS_SERIAL_PRINT_FLAG_INDEX] ? 0x01 : 0x00;
-          buf[4] = statusFlags[GPS_BLE_PRINT_FLAG_INDEX] ? 0x01 : 0x00;
-          buf[5] = statusFlags[GPS_LOGGING_FLAG_INDEX] ? 0x01 : 0x00;
+          buf[GPS_CONNECTION_FLAG_INDEX] = statusFlags[GPS_CONNECTION_FLAG_INDEX] ? 0x01 : 0x00;
+          buf[GPS_FIX_FLAG_INDEX] = statusFlags[GPS_FIX_FLAG_INDEX] ? 0x01 : 0x00;
+          buf[GPS_ON_FLAG_INDEX] = statusFlags[GPS_ON_FLAG_INDEX] ? 0x01 : 0x00;
+          buf[GPS_SERIAL_PRINT_FLAG_INDEX] = statusFlags[GPS_SERIAL_PRINT_FLAG_INDEX] ? 0x01 : 0x00;
+          buf[GPS_BLE_PRINT_FLAG_INDEX] = statusFlags[GPS_BLE_PRINT_FLAG_INDEX] ? 0x01 : 0x00;
+          buf[GPS_LOGGING_FLAG_INDEX] = statusFlags[GPS_LOGGING_FLAG_INDEX] ? 0x01 : 0x00;
           pCharacteristic->setValue(buf, sizeof(buf));
           pCharacteristic->indicate();
           Serial_Print("Status: " + String(buf[0]) + String(buf[1]) + String(buf[2]) + String(buf[3]) + String(buf[4]) + String(buf[5]) + "\n\r");
@@ -397,7 +397,7 @@ void WIFI_INIT() {
     Serial_Print("\n\rLocal IP: \t" + WiFi.localIP().toString());
     Serial_Print("\n\rUDP port: \t" + String(UDP_PORT));
     Udp.begin(UDP_PORT);
-  }
+  } else Serial_Print("Unable to Connect to WiFi.");
 }
 
 String UDP_listen () {
@@ -432,12 +432,12 @@ void CMD_EVENT() {
 
   if (receivedChars.indexOf("status") >= 0) {
     byte buf[6];
-    buf[0] = statusFlags[GPS_CONNECTION_FLAG_INDEX] ? 0x01 : 0x00;
-    buf[1] = statusFlags[GPS_FIX_FLAG_INDEX] ? 0x01 : 0x00;
-    buf[2] = statusFlags[GPS_ON_FLAG_INDEX] ? 0x01 : 0x00;
-    buf[3] = statusFlags[GPS_SERIAL_PRINT_FLAG_INDEX] ? 0x01 : 0x00;
-    buf[4] = statusFlags[GPS_BLE_PRINT_FLAG_INDEX] ? 0x01 : 0x00;
-    buf[5] = statusFlags[GPS_LOGGING_FLAG_INDEX] ? 0x01 : 0x00;
+    buf[GPS_CONNECTION_FLAG_INDEX] = statusFlags[GPS_CONNECTION_FLAG_INDEX] ? 0x01 : 0x00;
+    buf[GPS_FIX_FLAG_INDEX] = statusFlags[GPS_FIX_FLAG_INDEX] ? 0x01 : 0x00;
+    buf[GPS_ON_FLAG_INDEX] = statusFlags[GPS_ON_FLAG_INDEX] ? 0x01 : 0x00;
+    buf[GPS_SERIAL_PRINT_FLAG_INDEX] = statusFlags[GPS_SERIAL_PRINT_FLAG_INDEX] ? 0x01 : 0x00;
+    buf[GPS_BLE_PRINT_FLAG_INDEX] = statusFlags[GPS_BLE_PRINT_FLAG_INDEX] ? 0x01 : 0x00;
+    buf[GPS_LOGGING_FLAG_INDEX] = statusFlags[GPS_LOGGING_FLAG_INDEX] ? 0x01 : 0x00;
     Serial_Print("Status: " + String(buf[0]) + String(buf[1]) + String(buf[2]) + String(buf[3]) + String(buf[4]) + String(buf[5]) + "\n\r");
   }
   else if (receivedChars.indexOf("gps") >= 0) {

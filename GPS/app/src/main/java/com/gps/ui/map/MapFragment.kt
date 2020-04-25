@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.maps.GoogleMap
 import com.gps.R
 
+// https://pusher.com/tutorials/realtime-map-kotlin
 
 class MapFragment : Fragment() {
 
@@ -21,12 +22,10 @@ class MapFragment : Fragment() {
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        mapViewModel =  ViewModelProvider(this).get(MapViewModel::class.java)
+        mapViewModel = ViewModelProvider(this).get(MapViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_map, container, false)
         val textView: TextView = root.findViewById(R.id.text_map)
-        mapViewModel.text.observe(viewLifecycleOwner, Observer {
-            textView.text = it
-        })
+        mapViewModel.text.observe(viewLifecycleOwner, Observer { textView.text = it })
         return root
     }
 
@@ -40,7 +39,6 @@ class MapFragment : Fragment() {
         super.onStop()
         Log.e("MAP", "Stopped map Fragment")
     }
-
 
 
 }

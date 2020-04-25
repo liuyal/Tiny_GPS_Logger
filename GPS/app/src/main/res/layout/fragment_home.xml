@@ -98,50 +98,289 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/infoBar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_below="@+id/statusBar"
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
         android:layout_centerHorizontal="true"
         android:layout_marginHorizontal="10dp"
         android:layout_marginTop="10dp"
-        android:background="@color/colorPrimaryDark"
+        android:layout_marginBottom="80dp"
         android:gravity="center"
-        android:orientation="horizontal">
+        android:orientation="vertical"
+        android:weightSum="100">
+
+        <RelativeLayout
+            android:id="@+id/infoView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="15"
+            android:background="@color/colorPrimaryDark">
+
+            <TextView
+                android:id="@+id/device_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:text="DEIVCE:"
+                android:textColor="#FFF"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/device_text_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="15dp"
+                android:text="@string/ble_name"
+                android:textColor="#FFF"
+                android:textSize="15sp"
+                tools:ignore="RelativeOverlap" />
+
+            <TextView
+                android:id="@+id/mac_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/device_text"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:text="MAC:"
+                android:textColor="#FFF"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/mac_text_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/device_text"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="15dp"
+                android:text="@string/ble_mac"
+                android:textColor="#FFF"
+                android:textSize="15sp" />
+
+        </RelativeLayout>
+
+
+        <RelativeLayout
+            android:id="@+id/statusInfo"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="60"
+            android:background="@drawable/info_boarder">
+
+            <TextView
+                android:id="@+id/connected_text"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:gravity="center"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="35dp"
+                android:text="CONNECTED:"
+                android:textColor="#FFF"
+                android:textSize="15sp" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/connected_text_label"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="35dp"
+                android:layout_marginEnd="15dp"
+                android:src="@drawable/ic_close_black_24dp" />
+
+            <TextView
+                android:id="@+id/gps_on_text"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:gravity="center"
+                android:layout_below="@+id/connected_text"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:text="GPS:"
+                android:textColor="#FFF"
+                android:textSize="15sp" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/gps_on_text_label"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:layout_below="@+id/connected_text_label"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="15dp"
+                android:src="@drawable/ic_close_black_24dp" />
+
+            <TextView
+                android:id="@+id/fix_text"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:gravity="center"
+                android:layout_below="@+id/gps_on_text"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:text="GPS FIX:"
+                android:textColor="#FFF"
+                android:textSize="15sp" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/fix_text_label"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:layout_below="@+id/gps_on_text_label"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="15dp"
+                android:src="@drawable/ic_close_black_24dp" />
+
+            <TextView
+                android:id="@+id/serial_text"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:gravity="center"
+                android:layout_below="@+id/fix_text"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:text="SERIAL PRINT:"
+                android:textColor="#FFF"
+                android:textSize="15sp" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/serial_text_label"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:layout_below="@+id/fix_text_label"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="15dp"
+                android:src="@drawable/ic_close_black_24dp" />
+
+            <TextView
+                android:id="@+id/blep_text"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:gravity="center"
+                android:layout_below="@+id/serial_text"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:text="BLE PRINT:"
+                android:textColor="#FFF"
+                android:textSize="15sp" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/blep_text_label"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:layout_below="@+id/serial_text_label"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="15dp"
+                android:src="@drawable/ic_close_black_24dp" />
+
+            <TextView
+                android:id="@+id/log_text"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:gravity="center"
+                android:layout_below="@+id/blep_text"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:text="LOGGING:"
+                android:textColor="#FFF"
+                android:textSize="15sp" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/log_text_label"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:layout_below="@+id/blep_text_label"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="15dp"
+                android:src="@drawable/ic_close_black_24dp" />
+
+        </RelativeLayout>
+
+
+        <RelativeLayout
+            android:id="@+id/locationInfo"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="25"
+            android:background="@color/colorPrimaryDark">
+
+            <TextView
+                android:id="@+id/time_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/lat_text"
+                android:layout_marginStart="10dp"
+                android:layout_marginBottom="10dp"
+                android:text="GPS TIME:"
+                android:textColor="#FFF"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/time_text_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/lat_text"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="15dp"
+                android:layout_marginBottom="10dp"
+                android:text="00:00:00"
+                android:textColor="#FFF"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/lat_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="10dp"
+                android:text="LATITUDE:"
+                android:textColor="#FFF"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/lat_text_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="15dp"
+                android:text="000.0000"
+                android:textColor="#FFF"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/long_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/lat_text"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:text="LONGITUDE:"
+                android:textColor="#FFF"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/long_text_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/lat_text"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="15dp"
+                android:text="000.0000"
+                android:textColor="#FFF"
+                android:textSize="15sp" />
+
+        </RelativeLayout>
+
     </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/statusInfo"
-        android:layout_below="@+id/infoBar"
-        android:layout_width="match_parent"
-        android:layout_height="250dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginHorizontal="10dp"
-        android:layout_marginTop="10dp"
-        android:background="@color/colorPrimaryDark"
-        android:gravity="center"
-        android:orientation="horizontal">
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/locationInfo"
-        android:layout_below="@+id/statusInfo"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginHorizontal="10dp"
-        android:layout_marginTop="10dp"
-        android:background="@color/colorPrimaryDark"
-        android:gravity="center"
-        android:orientation="horizontal">
-    </LinearLayout>
-
-
-
-
-
-
-
 
 
 </RelativeLayout>

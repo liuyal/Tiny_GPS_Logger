@@ -27,8 +27,8 @@ const val GPS_RESET_CODE: Byte = 0x0d
 
 const val NUMBER_OF_FLAGS: Int = 6
 const val GPS_CONNECTION_FLAG_INDEX: Int = 0
-const val GPS_FIX_FLAG_INDEX: Int = 1
-const val GPS_ON_FLAG_INDEX: Int = 2
+const val GPS_ON_FLAG_INDEX: Int = 1
+const val GPS_FIX_FLAG_INDEX: Int = 2
 const val GPS_SERIAL_PRINT_FLAG_INDEX: Int = 3
 const val GPS_BLE_PRINT_FLAG_INDEX: Int = 4
 const val GPS_LOGGING_FLAG_INDEX: Int = 5
@@ -389,7 +389,7 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
     fun fetchGPSdata(): String {
         writeValue(byteArrayOf(GET_GPS_DATA_CODE))
         val returnVal = readValue()
-        // TODO: add data checks delimiters []
+        // TODO: Save returned value to this.val
         if (returnVal != null) {
             Log.d("BLE Device", returnVal.contentToString())
             Log.d("BLE Device", returnVal.toString(Charsets.UTF_8))
@@ -400,7 +400,6 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
     fun listLogFiles(): String {
         writeValue(byteArrayOf(LIST_LOG_FILES_CODE))
         val returnVal = readValue()
-        // TODO: add data checks delimiters []
         if (returnVal != null) {
             Log.d("BLE Device", returnVal.contentToString())
             Log.d("BLE Device", returnVal.toString(Charsets.UTF_8))
@@ -411,7 +410,6 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
     fun readLogFile(index: Int): String {
         writeValue(byteArrayOf(READ_LOG_FILE_CODE))
         val returnVal = readValue()
-        // TODO: add data checks no delimiters
         return "0"
     }
 

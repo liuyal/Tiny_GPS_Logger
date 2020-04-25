@@ -109,6 +109,7 @@ class BLEActivity : AppCompatActivity() {
             return false
         } else {
             GlobalApplication.BLE?.initialize()
+            GlobalApplication.BLE?.disconnect()
             GlobalApplication.BLE?.close()
             if (item.itemId == R.id.scan_btn) {
                 if (this.scanFlag) {
