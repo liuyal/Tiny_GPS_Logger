@@ -51,7 +51,7 @@ class BLEActivity : AppCompatActivity() {
                     select_device_list.adapter?.notifyItemChanged(deviceList.indexOf(result.device))
                 }
             }
-            Log.d("[DEBUG]", "SCAN: ${result?.device?.address} - ${result?.device?.name}")
+            Log.d("BLEACT", "SCAN: ${result?.device?.address} - ${result?.device?.name}")
         }
     }
 
@@ -114,13 +114,13 @@ class BLEActivity : AppCompatActivity() {
             if (item.itemId == R.id.scan_btn) {
                 if (this.scanFlag) {
                     this.bluetoothLeScanner.stopScan(bleScanner)
-                    item.title = "SCAN"
+                    item.title = getString(R.string.scan)
                 } else {
                     this.deviceList.removeAll(deviceList)
                     this.resultsList.removeAll(resultsList)
                     select_device_list.adapter?.notifyDataSetChanged()
                     this.bluetoothLeScanner.startScan(bleScanner)
-                    item.title = "STOP"
+                    item.title = getString(R.string.stop_scan)
                 }
                 this.scanFlag = !this.scanFlag
             }

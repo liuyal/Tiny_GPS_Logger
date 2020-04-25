@@ -31,10 +31,10 @@ const int NUMBER_OF_FLAGS = 6;
 bool statusFlags[NUMBER_OF_FLAGS];
 
 const int CS = 5;
-String gnss_dir = "GNSS_LOGS";
-int nfiles = 0;
-String log_buffer = "";
 int log_counter = 0;
+int nfiles = 0;
+String gnss_dir = "GNSS_LOGS";
+String log_buffer = "";
 
 #if DEBUG
 #include <WiFi.h>

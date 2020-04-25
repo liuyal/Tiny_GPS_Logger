@@ -19,20 +19,18 @@ class LogsFragment : Fragment() {
         logsViewModel = ViewModelProvider(this).get(LogsViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_logs, container, false)
         val textView: TextView = root.findViewById(R.id.text_logs)
-        logsViewModel.text.observe(viewLifecycleOwner, Observer {
-            textView.text = it
-        })
+        logsViewModel.text.observe(viewLifecycleOwner, Observer { textView.text = it })
         return root
     }
 
     override fun onStart() {
         super.onStart()
-        Log.e("", "Start L Fragment")
+        Log.e("LOGS", "Start L Fragment")
     }
 
     override fun onStop() {
         super.onStop()
-        Log.e("", "Stopped L Fragment")
+        Log.e("LOGS", "Stopped L Fragment")
     }
 
 }

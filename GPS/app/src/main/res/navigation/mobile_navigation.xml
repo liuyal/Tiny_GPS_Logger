@@ -40,4 +40,11 @@
         android:name="com.gps.ui.logs.LogsFragment"
         android:label="@string/menu_log"
         tools:layout="@layout/fragment_logs" />
+
+    <fragment
+        android:id="@+id/nav_setting"
+        android:name="com.gps.ui.setting.SettingFragment"
+        android:label="@string/menu_setting"
+        tools:layout="@layout/fragment_setting" />
+
 </navigation>

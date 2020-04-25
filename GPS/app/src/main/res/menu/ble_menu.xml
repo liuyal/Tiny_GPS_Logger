@@ -2,7 +2,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/scan_btn"
-        android:title="@string/refresh"
+        android:title="@string/scan"
         android:actionMenuTextColor="#FFFFFF"
         app:showAsAction="always" />
 </menu>

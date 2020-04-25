@@ -44,10 +44,9 @@ const val oneByte: Byte = 1
 val SERVICE_UUID: UUID = UUID.fromString("000ffdf4-68d9-4e48-a89a-219e581f0d64")
 val CHARACTERISTIC_UUID: UUID = UUID.fromString("44a80b83-c605-4406-8e50-fc42f03b6d38")
 
-class BLEDevice(c: Context, applicationContext: ContextWrapper) {
+class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
 
     var context: Context = c
-    var applicationContext: ContextWrapper = applicationContext
     var connectionState = STATE_DISCONNECTED
 
     var bleManager: BluetoothManager? = null
@@ -56,13 +55,14 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
 
     var device: BluetoothDevice? = null
     var scanResult: ScanResult? = null
-    var bleAddress: String? = null
-
-    var service: BluetoothGattService? = null
-    var characteristic: BluetoothGattCharacteristic? = null
+    var gpsData: String? = null
     var transactionSuccess: Boolean = false
-    var dbHandler: SqliteDB? = null
     var gpsStatusFlags: BooleanArray? = BooleanArray(NUMBER_OF_FLAGS)
+
+    private var service: BluetoothGattService? = null
+    private var characteristic: BluetoothGattCharacteristic? = null
+    private var dbHandler: SqliteDB? = null
+    private var bleAddress: String? = null
 
     private val mGattCallback = object : BluetoothGattCallback() {
 
@@ -175,17 +175,17 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
         val mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
         if (mBluetoothAdapter == null || address == null || !mBluetoothAdapter.isEnabled) return false
         if (this.bleAddress != null && address == this.bleAddress && this.bleGATT != null) {
-            if (this.bleGATT!!.connect()) {
+            return if (this.bleGATT!!.connect()) {
                 this.connectionState = STATE_CONNECTING
-                return true
-            } else return false
+                true
+            } else false
         }
         if (mBluetoothAdapter.getRemoteDevice(address) == null) return false
         this.bleGATT = mBluetoothAdapter.getRemoteDevice(address).connectGatt(context, false, mGattCallback)
         this.bleAddress = address
         this.connectionState = STATE_CONNECTING
         val checkA = serviceChecks()
-        val checkB = GPSTagCheck()
+        val checkB = gpsTagCheck()
         if (!checkA || !checkB) return false
         updateDBMAC(address)
         return true
@@ -199,15 +199,14 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
     }
 
     fun loadDBMAC(): String? {
-        var cursor: Cursor?
-        try {
-            cursor = dbHandler?.selectFromDB(SqliteDB.macTable)
+        return try {
+            val cursor: Cursor? = dbHandler?.selectFromDB(SqliteDB.macTable)
+            cursor!!.moveToFirst()
+            this.bleAddress = cursor.getString(cursor.getColumnIndex(SqliteDB.macColumn))
+            this.bleAddress!!
         } catch (e: Throwable) {
-            return null
+            ""
         }
-        cursor!!.moveToFirst()
-        this.bleAddress = cursor.getString(cursor.getColumnIndex(SqliteDB.macColumn))
-        return this.bleAddress!!
     }
 
     fun disconnect() {
@@ -299,7 +298,7 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
         return this == 1
     }
 
-    private fun GPSTagCheck(): Boolean {
+    private fun gpsTagCheck(): Boolean {
         writeValue(byteArrayOf(GPS_CHECK_CODE))
         val returnVal = readValue()
         if (returnVal != null && returnVal.toString(Charsets.UTF_8).contains(DEVICE_CODE_NAME, ignoreCase = true)) {
@@ -386,15 +385,18 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
         return true
     }
 
-    fun fetchGPSdata(): String {
+    fun fetchGPSData(): String {
         writeValue(byteArrayOf(GET_GPS_DATA_CODE))
         val returnVal = readValue()
-        // TODO: Save returned value to this.val
-        if (returnVal != null) {
+        return if (returnVal != null) {
             Log.d("BLE Device", returnVal.contentToString())
             Log.d("BLE Device", returnVal.toString(Charsets.UTF_8))
-        } else return ""
-        return returnVal.toString(Charsets.UTF_8)
+            this.gpsData = returnVal.toString(Charsets.UTF_8)
+            returnVal.toString(Charsets.UTF_8)
+        } else {
+            this.gpsData = ""
+            ""
+        }
     }
 
     fun listLogFiles(): String {
@@ -408,9 +410,11 @@ class BLEDevice(c: Context, applicationContext: ContextWrapper) {
     }
 
     fun readLogFile(index: Int): String {
-        writeValue(byteArrayOf(READ_LOG_FILE_CODE))
+        val indexByte: Byte = index.toByte()
+        writeValue(byteArrayOf(READ_LOG_FILE_CODE, indexByte))
         val returnVal = readValue()
-        return "0"
+
+        return returnVal?.toString(Charsets.UTF_8) ?: ""
     }
 
     fun SDCardStatus(): String {
