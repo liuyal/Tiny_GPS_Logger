@@ -70,31 +70,31 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
             super.onConnectionStateChange(gatt, status, newState)
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 connectionState = STATE_CONNECTED
-                Log.d("", "BLE STATE_CONNECTED")
+                Log.d("BLE", "STATE_CONNECTED")
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 connectionState = STATE_DISCONNECTED
-                Log.d("", "BLE STATE_DISCONNECTED")
+                Log.d("BLE", "STATE_DISCONNECTED")
             }
         }
 
         override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
             super.onServicesDiscovered(gatt, status)
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                Log.d("", "onServicesDiscovered received: $status")
+                Log.d("BLE", "onServicesDiscovered received: $status")
             } else {
-                Log.d("", "onServicesDiscovered received: $status")
+                Log.d("BLE", "onServicesDiscovered received: $status")
             }
         }
 
         override fun onCharacteristicChanged(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
             super.onCharacteristicChanged(gatt, characteristic)
-            Log.d("", "onCharacteristicChanged received")
+            Log.d("BLE", "onCharacteristicChanged received")
         }
 
         override fun onCharacteristicRead(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int) {
             super.onCharacteristicRead(gatt, characteristic, status)
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                Log.d("", "onCharacteristicRead received: $status")
+                Log.d("BLE", "onCharacteristicRead received: $status")
                 transactionSuccess = true
             }
         }
@@ -102,7 +102,7 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
         override fun onCharacteristicWrite(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int) {
             super.onCharacteristicWrite(gatt, characteristic, status)
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                Log.d("", "onCharacteristicWrite received: $status")
+                Log.d("BLE", "onCharacteristicWrite received: $status")
                 transactionSuccess = true
             }
         }
@@ -110,7 +110,7 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
         override fun onDescriptorRead(gatt: BluetoothGatt?, descriptor: BluetoothGattDescriptor?, status: Int) {
             super.onDescriptorRead(gatt, descriptor, status)
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                Log.d("", "onDescriptorRead received: $status")
+                Log.d("BLE", "onDescriptorRead received: $status")
                 transactionSuccess = true
             }
         }
@@ -118,7 +118,7 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
         override fun onDescriptorWrite(gatt: BluetoothGatt?, descriptor: BluetoothGattDescriptor?, status: Int) {
             super.onDescriptorWrite(gatt, descriptor, status)
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                Log.d("", "onDescriptorWrite received: $status")
+                Log.d("BLE", "onDescriptorWrite received: $status")
                 transactionSuccess = true
             }
         }
@@ -126,35 +126,35 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
         override fun onPhyRead(gatt: BluetoothGatt?, txPhy: Int, rxPhy: Int, status: Int) {
             super.onPhyRead(gatt, txPhy, rxPhy, status)
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                Log.d("", "onPhyRead received: $status")
+                Log.d("BLE", "onPhyRead received: $status")
             }
         }
 
         override fun onPhyUpdate(gatt: BluetoothGatt?, txPhy: Int, rxPhy: Int, status: Int) {
             super.onPhyUpdate(gatt, txPhy, rxPhy, status)
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                Log.d("", "onPhyUpdate received: $status")
+                Log.d("BLE", "onPhyUpdate received: $status")
             }
         }
 
         override fun onReliableWriteCompleted(gatt: BluetoothGatt?, status: Int) {
             super.onReliableWriteCompleted(gatt, status)
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                Log.d("", "onReliableWriteCompleted received: $status")
+                Log.d("BLE", "onReliableWriteCompleted received: $status")
             }
         }
 
         override fun onReadRemoteRssi(gatt: BluetoothGatt?, rssi: Int, status: Int) {
             super.onReadRemoteRssi(gatt, rssi, status)
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                Log.d("", "onReadRemoteRssi received: $status, RSSI: $rssi")
+                Log.d("BLE", "onReadRemoteRssi received: $status, RSSI: $rssi")
             }
         }
 
         override fun onMtuChanged(gatt: BluetoothGatt?, mtu: Int, status: Int) {
             super.onMtuChanged(gatt, mtu, status)
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                Log.d("", "onMtuChanged received: $status, MTU: $mtu")
+                Log.d("BLE", "onMtuChanged received: $status, MTU: $mtu")
             }
         }
     }
@@ -302,8 +302,8 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
         writeValue(byteArrayOf(GPS_CHECK_CODE))
         val returnVal = readValue()
         if (returnVal != null && returnVal.toString(Charsets.UTF_8).contains(DEVICE_CODE_NAME, ignoreCase = true)) {
-            Log.d("", returnVal.contentToString())
-            Log.d("", returnVal.toString(Charsets.UTF_8))
+            Log.d("BLE", returnVal.contentToString())
+            Log.d("BLE", returnVal.toString(Charsets.UTF_8))
         } else return false
         return true
     }
@@ -319,8 +319,8 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
             this.gpsStatusFlags?.set(GPS_SERIAL_PRINT_FLAG_INDEX, returnVal[GPS_SERIAL_PRINT_FLAG_INDEX].toInt().toBoolean())
             this.gpsStatusFlags?.set(GPS_BLE_PRINT_FLAG_INDEX, returnVal[GPS_BLE_PRINT_FLAG_INDEX].toInt().toBoolean())
             this.gpsStatusFlags?.set(GPS_LOGGING_FLAG_INDEX, returnVal[GPS_LOGGING_FLAG_INDEX].toInt().toBoolean())
-            Log.d("", returnVal.contentToString())
-            Log.d("", returnVal.toString(Charsets.UTF_8))
+            Log.d("BLE", returnVal.contentToString())
+            Log.d("BLE", returnVal.toString(Charsets.UTF_8))
         } else return false
         return true
     }
@@ -329,8 +329,8 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
         writeValue(byteArrayOf(SET_GPS_ON_CODE))
         val returnVal = readValue()
         if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
-            Log.d("BLE Device", returnVal.contentToString())
-            Log.d("BLE Device", returnVal.toString(Charsets.UTF_8))
+            Log.d("BLE", returnVal.contentToString())
+            Log.d("BLE", returnVal.toString(Charsets.UTF_8))
         } else return false
         return true
     }
@@ -339,8 +339,8 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
         writeValue(byteArrayOf(SET_GPS_OFF_CODE))
         val returnVal = readValue()
         if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
-            Log.d("BLE Device", returnVal.contentToString())
-            Log.d("BLE Device", returnVal.toString(Charsets.UTF_8))
+            Log.d("BLE", returnVal.contentToString())
+            Log.d("BLE", returnVal.toString(Charsets.UTF_8))
         } else return false
         return true
     }
@@ -349,8 +349,8 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
         writeValue(byteArrayOf(SET_GPG_LOGGING_ON_CODE))
         val returnVal = readValue()
         if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
-            Log.d("BLE Device", returnVal.contentToString())
-            Log.d("BLE Device", returnVal.toString(Charsets.UTF_8))
+            Log.d("BLE", returnVal.contentToString())
+            Log.d("BLE", returnVal.toString(Charsets.UTF_8))
         } else return false
         return true
     }
@@ -359,8 +359,8 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
         writeValue(byteArrayOf(SET_GPG_LOGGING_OFF_CODE))
         val returnVal = readValue()
         if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
-            Log.d("BLE Device", returnVal.contentToString())
-            Log.d("BLE Device", returnVal.toString(Charsets.UTF_8))
+            Log.d("BLE", returnVal.contentToString())
+            Log.d("BLE", returnVal.toString(Charsets.UTF_8))
         } else return false
         return true
     }
@@ -369,8 +369,8 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
         writeValue(byteArrayOf(SET_GPS_BLE_PRINT_ON_CODE))
         val returnVal = readValue()
         if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
-            Log.d("BLE Device", returnVal.contentToString())
-            Log.d("BLE Device", returnVal.toString(Charsets.UTF_8))
+            Log.d("BLE", returnVal.contentToString())
+            Log.d("BLE", returnVal.toString(Charsets.UTF_8))
         } else return false
         return true
     }
@@ -379,8 +379,8 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
         writeValue(byteArrayOf(SET_GPS_BLE_PRINT_OFF_CODE))
         val returnVal = readValue()
         if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
-            Log.d("BLE Device", returnVal.contentToString())
-            Log.d("BLE Device", returnVal.toString(Charsets.UTF_8))
+            Log.d("BLE", returnVal.contentToString())
+            Log.d("BLE", returnVal.toString(Charsets.UTF_8))
         } else return false
         return true
     }
@@ -389,8 +389,8 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
         writeValue(byteArrayOf(GET_GPS_DATA_CODE))
         val returnVal = readValue()
         return if (returnVal != null) {
-            Log.d("BLE Device", returnVal.contentToString())
-            Log.d("BLE Device", returnVal.toString(Charsets.UTF_8))
+            Log.d("BLE", returnVal.contentToString())
+            Log.d("BLE", returnVal.toString(Charsets.UTF_8))
             this.gpsData = returnVal.toString(Charsets.UTF_8)
             returnVal.toString(Charsets.UTF_8)
         } else {
@@ -403,8 +403,8 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
         writeValue(byteArrayOf(LIST_LOG_FILES_CODE))
         val returnVal = readValue()
         if (returnVal != null) {
-            Log.d("BLE Device", returnVal.contentToString())
-            Log.d("BLE Device", returnVal.toString(Charsets.UTF_8))
+            Log.d("BLE", returnVal.contentToString())
+            Log.d("BLE", returnVal.toString(Charsets.UTF_8))
         } else return ""
         return returnVal.toString(Charsets.UTF_8)
     }
@@ -421,8 +421,8 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
         writeValue(byteArrayOf(GET_SDCARD_STATUS_CODE))
         val returnVal = readValue()
         if (returnVal != null) {
-            Log.d("BLE Device", returnVal.contentToString())
-            Log.d("BLE Device", returnVal.toString(Charsets.UTF_8))
+            Log.d("BLE", returnVal.contentToString())
+            Log.d("BLE", returnVal.toString(Charsets.UTF_8))
         } else return ""
         return returnVal.toString(Charsets.UTF_8)
     }
@@ -431,8 +431,8 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
         writeValue(byteArrayOf(GPS_REBOOT_CODE))
         val returnVal = readValue()
         if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
-            Log.d("BLE Device", returnVal.contentToString())
-            Log.d("BLE Device", returnVal.toString(Charsets.UTF_8))
+            Log.d("BLE", returnVal.contentToString())
+            Log.d("BLE", returnVal.toString(Charsets.UTF_8))
         } else return false
         return true
     }
@@ -441,8 +441,8 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
         writeValue(byteArrayOf(GPS_RESET_CODE))
         val returnVal = readValue()
         if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
-            Log.d("BLE Device", returnVal.contentToString())
-            Log.d("BLE Device", returnVal.toString(Charsets.UTF_8))
+            Log.d("BLE", returnVal.contentToString())
+            Log.d("BLE", returnVal.toString(Charsets.UTF_8))
         } else return false
         return true
     }

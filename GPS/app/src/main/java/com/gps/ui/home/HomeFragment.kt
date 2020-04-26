@@ -51,16 +51,17 @@ class HomeFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        Log.d("HOME", "Pause h Fragment")
-    }
-
-    override fun onStop() {
-        super.onStop()
         val main = activity as MainActivity?
         if (main?.statueCheckThread != null) {
             main.statueCheckThread?.interrupt()
             main.statueCheckThread = null
         }
+        Log.d("HOME", "Pause h Fragment")
+    }
+
+    override fun onStop() {
+        super.onStop()
+
         Log.d("HOME", "Stopped h Fragment")
     }
 
