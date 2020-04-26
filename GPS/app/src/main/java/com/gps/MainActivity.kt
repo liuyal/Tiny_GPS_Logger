@@ -75,6 +75,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
+
     fun checkTask() {
         val macAddress = GlobalApplication.BLE?.loadDBMAC() ?: return
         this.runOnUiThread { updateUIInfo(macAddress) }
@@ -100,10 +102,14 @@ class MainActivity : AppCompatActivity() {
         Log.d("MAIN", "statusCheckTask Done")
     }
 
+
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
         return true
     }
+
+
 
     private fun updateUIInfo(macAddress: String) {
         val macLabel: TextView = findViewById(R.id.mac_text_label)
@@ -148,69 +154,69 @@ class MainActivity : AppCompatActivity() {
         val b4 = GlobalApplication.BLE?.gpsStatusFlags?.get(GPS_SERIAL_PRINT_FLAG_INDEX)
         val b5 = GlobalApplication.BLE?.gpsStatusFlags?.get(GPS_BLE_PRINT_FLAG_INDEX)
         val b6 = GlobalApplication.BLE?.gpsStatusFlags?.get(GPS_LOGGING_FLAG_INDEX)
-        val statusBar1: View = findViewById(R.id.statusBar1)
-        val statusBar2: View = findViewById(R.id.statusBar2)
-        val statusBar3: View = findViewById(R.id.statusBar3)
-        val statusBar4: View = findViewById(R.id.statusBar4)
-        val statusBar5: View = findViewById(R.id.statusBar5)
-        val statusBar6: View = findViewById(R.id.statusBar6)
-        val connectedLabel: AppCompatImageView = findViewById(R.id.connected_text_label)
-        val gpsLabel: AppCompatImageView = findViewById(R.id.gps_on_text_label)
-        val fixLabel: AppCompatImageView = findViewById(R.id.fix_text_label)
-        val serialLabel: AppCompatImageView = findViewById(R.id.serial_text_label)
-        val bledLabel: AppCompatImageView = findViewById(R.id.bleb_text_label)
-        val logLabel: AppCompatImageView = findViewById(R.id.log_text_label)
+        val statusBar1: View? = findViewById(R.id.statusBar1)
+        val statusBar2: View? = findViewById(R.id.statusBar2)
+        val statusBar3: View? = findViewById(R.id.statusBar3)
+        val statusBar4: View? = findViewById(R.id.statusBar4)
+        val statusBar5: View? = findViewById(R.id.statusBar5)
+        val statusBar6: View? = findViewById(R.id.statusBar6)
+        val connectedLabel: AppCompatImageView? = findViewById(R.id.connected_text_label)
+        val gpsLabel: AppCompatImageView? = findViewById(R.id.gps_on_text_label)
+        val fixLabel: AppCompatImageView? = findViewById(R.id.fix_text_label)
+        val serialLabel: AppCompatImageView? = findViewById(R.id.serial_text_label)
+        val bledLabel: AppCompatImageView? = findViewById(R.id.bleb_text_label)
+        val logLabel: AppCompatImageView? = findViewById(R.id.log_text_label)
 
-        if (b1!!) {
+        if (b1!! && statusBar1 != null && connectedLabel != null) {
             statusBar1.background = getDrawable(R.drawable.status_on)
             connectedLabel.setImageResource(R.drawable.ic_check_black_24dp)
             connectedLabel.setColorFilter(Color.parseColor("#00b250"))
-        } else {
+        } else if (!b1 && statusBar1 != null && connectedLabel != null) {
             statusBar1.background = getDrawable(R.drawable.status_off)
             connectedLabel.setImageResource(R.drawable.ic_close_black_24dp)
             connectedLabel.setColorFilter(Color.argb(255, 255, 0, 0))
         }
-        if (b2!!) {
+        if (b2!! && statusBar2 != null && gpsLabel != null) {
             statusBar2.background = getDrawable(R.drawable.status_on)
             gpsLabel.setImageResource(R.drawable.ic_check_black_24dp)
             gpsLabel.setColorFilter(Color.parseColor("#00b250"))
-        } else {
+        } else if (!b2 && statusBar2 != null && gpsLabel != null) {
             statusBar2.background = getDrawable(R.drawable.status_off)
             gpsLabel.setImageResource(R.drawable.ic_close_black_24dp)
             gpsLabel.setColorFilter(Color.argb(255, 255, 0, 0))
         }
-        if (b3!!) {
+        if (b3!! && statusBar3 != null && fixLabel != null) {
             statusBar3.background = getDrawable(R.drawable.status_on)
             fixLabel.setImageResource(R.drawable.ic_check_black_24dp)
             fixLabel.setColorFilter(Color.parseColor("#00b250"))
-        } else {
+        } else if (!b3 && statusBar3 != null && fixLabel != null) {
             statusBar3.background = getDrawable(R.drawable.status_off)
             fixLabel.setImageResource(R.drawable.ic_close_black_24dp)
             fixLabel.setColorFilter(Color.argb(255, 255, 0, 0))
         }
-        if (b4!!) {
+        if (b4!! && statusBar4 != null && serialLabel != null) {
             statusBar4.background = getDrawable(R.drawable.status_on)
             serialLabel.setImageResource(R.drawable.ic_check_black_24dp)
             serialLabel.setColorFilter(Color.parseColor("#00b250"))
-        } else {
+        } else if (!b4 && statusBar4 != null && serialLabel != null) {
             statusBar4.background = getDrawable(R.drawable.status_off)
             serialLabel.setImageResource(R.drawable.ic_close_black_24dp)
             serialLabel.setColorFilter(Color.argb(255, 255, 0, 0))
         }
-        if (b5!!) {
+        if (b5!! && statusBar5 != null && bledLabel != null) {
             statusBar5.background = getDrawable(R.drawable.status_on)
             bledLabel.setImageResource(R.drawable.ic_check_black_24dp)
             bledLabel.setColorFilter(Color.parseColor("#00b250"))
-        } else {
+        } else if (!b5 && statusBar5 != null && bledLabel != null) {
             statusBar5.background = getDrawable(R.drawable.status_off)
             bledLabel.setImageResource(R.drawable.ic_close_black_24dp)
             bledLabel.setColorFilter(Color.argb(255, 255, 0, 0))
         }
-        if (b6!!) {
+        if (b6!! && statusBar6 != null && logLabel != null) {
             statusBar6.background = getDrawable(R.drawable.status_on)
             logLabel.setImageResource(R.drawable.ic_check_black_24dp)
             logLabel.setColorFilter(Color.parseColor("#00b250"))
-        } else {
+        } else if (!b6 && statusBar6 != null && logLabel != null) {
             statusBar6.background = getDrawable(R.drawable.status_off)
             logLabel.setImageResource(R.drawable.ic_close_black_24dp)
             logLabel.setColorFilter(Color.argb(255, 255, 0, 0))
@@ -228,6 +234,9 @@ class MainActivity : AppCompatActivity() {
         }
         Log.e("MAIN", "Unable to connect to BLE Device")
     }
+
+
+
 
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment)

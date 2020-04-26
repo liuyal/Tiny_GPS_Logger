@@ -44,6 +44,16 @@ class HomeFragment : Fragment() {
         Log.d("HOME", "Start h Fragment")
     }
 
+    override fun onResume() {
+        super.onResume()
+        Log.d("HOME", "onResume h Fragment")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d("HOME", "Pause h Fragment")
+    }
+
     override fun onStop() {
         super.onStop()
         val main = activity as MainActivity?
