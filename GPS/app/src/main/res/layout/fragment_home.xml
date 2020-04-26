@@ -411,7 +411,21 @@
                 android:gravity="center_vertical"
                 android:padding="6dp"
                 android:scaleType="fitCenter"
-                android:src="@drawable/ic_refresh_black_24dp"
+                android:src="@drawable/ic_sync_black_24dp"
+                app:elevation="0dp" />
+
+            <ImageButton
+                android:id="@+id/floatingActionButtonC"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_centerHorizontal="true"
+                android:adjustViewBounds="true"
+                android:background="@drawable/btn_unpressed"
+                android:elevation="0dp"
+                android:gravity="center_vertical"
+                android:padding="6dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_file_download_black_24dp"
                 app:elevation="0dp" />
 
             <ImageButton
@@ -428,10 +442,18 @@
                 android:src="@drawable/ic_link_black_24dp"
                 app:elevation="0dp" />
 
-
         </RelativeLayout>
 
     </LinearLayout>
 
+    <ProgressBar
+        android:id="@+id/status_progress_bar"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginVertical="220dp"
+        android:indeterminateTint="#FFF"
+        android:indeterminateTintMode="src_in"
+        android:visibility="gone" />
 
 </RelativeLayout>

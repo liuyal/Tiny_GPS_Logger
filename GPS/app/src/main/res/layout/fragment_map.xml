@@ -9,25 +9,42 @@
     <TextView
         android:id="@+id/text_map"
         android:layout_width="match_parent"
-        android:layout_height="24dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginHorizontal="10dp"
-        android:layout_marginBottom="20dp" />
+        android:layout_marginBottom="40dp"
+        android:textSize="20sp"
+        android:gravity="center" />
 
-    <Button
-        android:id="@+id/toggleButton"
+    <com.andexert.library.RippleView
+        android:id="@+id/more"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginHorizontal="10dp"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/action_button" />
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp">
 
-    <com.google.android.gms.maps.MapView
-        android:id="@+id/mapView"
+        <Button
+            android:id="@+id/toggleButton"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="#2196F3"
+            android:text="@string/update_map_label"
+            android:textColor="#FFFFFF"
+            android:textSize="25sp" />
+
+    </com.andexert.library.RippleView>
+
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginHorizontal="10dp"
-        android:layout_marginVertical="100dp" />
+        android:layout_marginVertical="100dp"
+        android:background="@drawable/btn_pressed">
 
+        <com.google.android.gms.maps.MapView
+            android:id="@+id/mapView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
 
 </RelativeLayout>

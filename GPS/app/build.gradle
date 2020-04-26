@@ -33,6 +33,7 @@ android {
 }
 
 dependencies {
+    implementation 'com.github.traex.rippleeffect:library:1.3'
     implementation 'com.github.hajiyevelnur92:intentanimation:1.0'
     implementation 'com.chauthai.overscroll:overscroll-bouncy:0.1.1'
     implementation 'androidx.appcompat:appcompat:1.1.0'

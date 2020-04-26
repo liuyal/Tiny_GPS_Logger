@@ -49,5 +49,8 @@
     <string name="latitude_label">LATITUDE:</string>
     <string name="longitude_label">LONGITUDE:</string>
 
+    <!--    MAPS FRAGMENT -->
+    <string name="update_map_label">UPDATE</string>
+
 
 </resources>

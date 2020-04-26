@@ -22,15 +22,9 @@ class HomeFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
 
 
-        //TODO: Add refresh functionality
-        view.floatingActionButtonA.setOnClickListener {
-            Log.d("HOME", "Refresh")
-        }
+        //TODO: Add auto refresh, manual pull data, disconnect/reconnect functionality
+        //view.floatingActionButtonA.setOnClickListener {}
 
-        //TODO: Add relink functionality
-        view.floatingActionButtonB.setOnClickListener {
-            Log.d("HOME", "Relink")
-        }
 
         return view
     }

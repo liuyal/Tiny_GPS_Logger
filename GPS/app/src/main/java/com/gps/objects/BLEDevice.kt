@@ -446,5 +446,4 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
         } else return false
         return true
     }
-
 }

@@ -48,7 +48,7 @@
         android:paddingStart="18dp"
         android:textAlignment="viewStart"
         android:textColor="#FFFFFF"
-        android:background="@drawable/btn_unpressed"
+        android:background="@drawable/action_button"
         android:stateListAnimator="@null"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"

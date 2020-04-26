@@ -11,6 +11,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.gps.R
 
+//https://stackoverflow.com/questions/23358822/how-to-custom-switch-button
+
 class LogsFragment : Fragment() {
 
     private lateinit var logsViewModel: LogsViewModel

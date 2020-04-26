@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.View
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -57,8 +58,8 @@ class MainActivity : AppCompatActivity() {
                 GlobalApplication.BLE?.context = this
                 GlobalApplication.BLE?.applicationContext = applicationContext as ContextWrapper
             }
+            // TODO: Connect to ble
         }
-
         val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
         val navView: NavigationView = findViewById(R.id.nav_view)
         val navController = findNavController(R.id.nav_host_fragment)
@@ -76,22 +77,36 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
 
+    // TODO: add Loop and no loop option
     fun checkTask() {
         Log.d("MAIN", "STATUS CHECK START")
+        val progressBar: ProgressBar? = findViewById(R.id.status_progress_bar)
+        this.runOnUiThread { progressBar?.visibility = View.VISIBLE }
         val macAddress = GlobalApplication.BLE?.loadDBMAC() ?: return
+        if (macAddress == "") {
+            this.runOnUiThread { disconnectionHandler() }
+            Log.d("MAIN", "NO DEVICE")
+            return
+        }
         this.runOnUiThread { updateUIInfo(macAddress) }
-        if (GlobalApplication.BLE?.connectionState != STATE_CONNECTED || GlobalApplication.BLE?.bleGATT == null) GlobalApplication.BLE?.connect(macAddress)!!
+        if (GlobalApplication.BLE?.connectionState != STATE_CONNECTED || GlobalApplication.BLE?.bleGATT == null) {
+            GlobalApplication.BLE?.connect(macAddress)!!
+        }
         while (true) {
             try {
                 if (GlobalApplication.BLE?.connectionState == STATE_CONNECTED || GlobalApplication.BLE?.bleGATT != null) {
                     GlobalApplication.BLE?.fetchDeviceStatus()
+                    if (GlobalApplication.BLE?.gpsStatusFlags?.get(GPS_FIX_FLAG_INDEX)!!) GlobalApplication.BLE?.fetchGPSData()
+                    else GlobalApplication.BLE?.gpsData = ""
                     this.runOnUiThread { updateUIFlags() }
-                    if (GlobalApplication.BLE?.gpsStatusFlags?.get(GPS_FIX_FLAG_INDEX)!!) {
-                        GlobalApplication.BLE?.fetchGPSData()
-                        this.runOnUiThread { updateUICoordinate() }
-                        Thread.sleep((5 * TIME_OUT).toLong())
-                    }
+                    this.runOnUiThread { updateUICoordinate() }
+                    this.runOnUiThread { progressBar?.visibility = View.GONE }
+                    Thread.sleep((5 * TIME_OUT).toLong())
                 } else throw IllegalArgumentException("CONNECTION STOPPED")
             } catch (e: Throwable) {
                 if (e.localizedMessage != null) Log.e("", e.localizedMessage!!.toString())
@@ -102,11 +117,6 @@ class MainActivity : AppCompatActivity() {
         Log.d("MAIN", "STATUS CHECK STOPPED")
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.main_menu, menu)
-        return true
-    }
-
     private fun updateUIInfo(macAddress: String) {
         val macLabel: TextView? = findViewById(R.id.mac_text_label)
         val deviceLabel: TextView? = findViewById(R.id.device_text_label)
@@ -115,7 +125,7 @@ class MainActivity : AppCompatActivity() {
             macLabel.text = macAddress
         } else {
             if (macLabel != null && deviceLabel != null) {
-                deviceLabel.text = "-"
+                deviceLabel.text = getString(R.string.initial_ble_name)
                 macLabel.text = getString(R.string.initial_ble_mac)
             }
         }
@@ -135,7 +145,7 @@ class MainActivity : AppCompatActivity() {
             gpsTime.text = getString(R.string.gpsTime, gpdDataList[6], gpdDataList[7], gpdDataList[8])
             latitude.text = gpdDataList[3]
             longitude.text = gpdDataList[4]
-        } else {
+        } else if (gpsData == "") {
             if (gpsTime != null && latitude != null && longitude != null) {
                 gpsTime.text = getString(R.string.init_time)
                 latitude.text = getString(R.string.init_lat)
@@ -146,14 +156,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateUIFlags() {
         val statusBarArray: ArrayList<View>? = ArrayList(0)
+        val iconArray: ArrayList<AppCompatImageView>? = ArrayList(0)
         statusBarArray?.add(findViewById(R.id.statusBar1))
         statusBarArray?.add(findViewById(R.id.statusBar2))
         statusBarArray?.add(findViewById(R.id.statusBar3))
         statusBarArray?.add(findViewById(R.id.statusBar4))
         statusBarArray?.add(findViewById(R.id.statusBar5))
         statusBarArray?.add(findViewById(R.id.statusBar6))
-
-        val iconArray: ArrayList<AppCompatImageView>? = ArrayList(0)
         iconArray?.add(findViewById(R.id.connected_text_label))
         iconArray?.add(findViewById(R.id.gps_on_text_label))
         iconArray?.add(findViewById(R.id.fix_text_label))
@@ -180,14 +189,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // TODO: make update ui function not for disconnect
     private fun disconnectionHandler() {
         try {
+            val progressBar: ProgressBar? = findViewById(R.id.status_progress_bar)
+            progressBar?.visibility = View.GONE
             GlobalApplication.BLE?.gpsStatusFlags?.fill(false, 0, NUMBER_OF_FLAGS)
             GlobalApplication.BLE?.gpsData = ""
+            updateUIInfo("")
             updateUIFlags()
             updateUICoordinate()
         } catch (e: Throwable) {
-            Log.e("MAIN", "Disconnection Error")
+            Log.e("MAIN", "Disconnection UI update Error")
         }
     }
 

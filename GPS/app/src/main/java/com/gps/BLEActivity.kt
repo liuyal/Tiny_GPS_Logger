@@ -128,7 +128,6 @@ class BLEActivity : AppCompatActivity() {
         }
     }
 
-
     @UiThread
     private fun partItemClicked(partItem: BluetoothDevice) {
         var isConnected = false
@@ -153,13 +152,11 @@ class BLEActivity : AppCompatActivity() {
             } else if (this.scanFlag) {
                 this.runOnUiThread {
                     Toast.makeText(applicationContext, "Invalid Device!", Toast.LENGTH_SHORT).show()
-                    select_device_list.findViewHolderForAdapterPosition(index)?.itemView?.findViewById<Button>(R.id.connect_btn)?.setBackgroundResource(R.drawable.btn_unpressed)
                 }
                 this.bluetoothLeScanner.startScan(bleScanner)
             } else {
                 this.runOnUiThread {
                     Toast.makeText(applicationContext, "Invalid Device!", Toast.LENGTH_SHORT).show()
-                    select_device_list.findViewHolderForAdapterPosition(index)?.itemView?.findViewById<Button>(R.id.connect_btn)?.setBackgroundResource(R.drawable.btn_unpressed)
                 }
             }
             this.runOnUiThread { progressBar?.visibility = View.GONE }
