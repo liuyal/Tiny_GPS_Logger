@@ -10,4 +10,5 @@
             <solid android:color="@color/colorPrimaryDark" />
         </shape>
     </item>
+
 </layer-list>

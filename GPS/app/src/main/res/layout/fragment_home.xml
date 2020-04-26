@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -98,16 +99,19 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/dashboard"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@+id/mainButtons"
         android:layout_below="@+id/statusBar"
         android:layout_centerHorizontal="true"
         android:layout_marginHorizontal="10dp"
         android:layout_marginTop="10dp"
-        android:layout_marginBottom="80dp"
+        android:layout_marginBottom="10dp"
         android:gravity="center"
         android:orientation="vertical"
         android:weightSum="100">
+
 
         <RelativeLayout
             android:id="@+id/infoView"
@@ -163,7 +167,6 @@
 
         </RelativeLayout>
 
-
         <RelativeLayout
             android:id="@+id/statusInfo"
             android:layout_width="match_parent"
@@ -175,12 +178,13 @@
                 android:id="@+id/connected_text"
                 android:layout_width="wrap_content"
                 android:layout_height="24dp"
-                android:gravity="center"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="35dp"
+                android:gravity="center"
                 android:text="@string/connected_label"
                 android:textColor="#FFF"
-                android:textSize="15sp" />
+                android:textSize="15sp"
+                tools:ignore="RelativeOverlap" />
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/connected_text_label"
@@ -195,10 +199,10 @@
                 android:id="@+id/gps_on_text"
                 android:layout_width="wrap_content"
                 android:layout_height="24dp"
-                android:gravity="center"
                 android:layout_below="@+id/connected_text"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="10dp"
+                android:gravity="center"
                 android:text="@string/gps_label"
                 android:textColor="#FFF"
                 android:textSize="15sp" />
@@ -217,10 +221,10 @@
                 android:id="@+id/fix_text"
                 android:layout_width="wrap_content"
                 android:layout_height="24dp"
-                android:gravity="center"
                 android:layout_below="@+id/gps_on_text"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="10dp"
+                android:gravity="center"
                 android:text="@string/gps_fix_label"
                 android:textColor="#FFF"
                 android:textSize="15sp" />
@@ -239,10 +243,10 @@
                 android:id="@+id/serial_text"
                 android:layout_width="wrap_content"
                 android:layout_height="24dp"
-                android:gravity="center"
                 android:layout_below="@+id/fix_text"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="10dp"
+                android:gravity="center"
                 android:text="@string/serial_print_label"
                 android:textColor="#FFF"
                 android:textSize="15sp" />
@@ -261,10 +265,10 @@
                 android:id="@+id/bleb_text"
                 android:layout_width="wrap_content"
                 android:layout_height="24dp"
-                android:gravity="center"
                 android:layout_below="@+id/serial_text"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="10dp"
+                android:gravity="center"
                 android:text="@string/ble_print_label"
                 android:textColor="#FFF"
                 android:textSize="15sp" />
@@ -283,10 +287,10 @@
                 android:id="@+id/log_text"
                 android:layout_width="wrap_content"
                 android:layout_height="24dp"
-                android:gravity="center"
                 android:layout_below="@+id/bleb_text"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="10dp"
+                android:gravity="center"
                 android:text="@string/logging_label"
                 android:textColor="#FFF"
                 android:textSize="15sp" />
@@ -302,7 +306,6 @@
                 android:src="@drawable/ic_close_black_24dp" />
 
         </RelativeLayout>
-
 
         <RelativeLayout
             android:id="@+id/locationInfo"
@@ -353,7 +356,8 @@
                 android:layout_marginEnd="15dp"
                 android:text="@string/init_lat"
                 android:textColor="#FFF"
-                android:textSize="15sp" />
+                android:textSize="15sp"
+                tools:ignore="RelativeOverlap" />
 
             <TextView
                 android:id="@+id/long_text"
@@ -377,6 +381,57 @@
                 android:text="@string/init_long"
                 android:textColor="#FFF"
                 android:textSize="15sp" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/mainButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginBottom="10dp"
+        android:gravity="center">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:ignore="UselessParent">
+
+            <ImageButton
+                android:id="@+id/floatingActionButtonA"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_alignParentStart="true"
+                android:adjustViewBounds="true"
+                android:background="@drawable/btn_unpressed"
+                android:clickable="true"
+                android:elevation="0dp"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:padding="6dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_refresh_black_24dp"
+                app:elevation="0dp" />
+
+            <ImageButton
+                android:id="@+id/floatingActionButtonB"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_alignParentEnd="true"
+                android:adjustViewBounds="true"
+                android:background="@drawable/btn_unpressed"
+                android:clickable="true"
+                android:elevation="0dp"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:padding="6dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_link_black_24dp"
+                app:elevation="0dp" />
+
 
         </RelativeLayout>
 

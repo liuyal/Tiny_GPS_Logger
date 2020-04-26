@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.gps.MainActivity
 import com.gps.R
+import kotlinx.android.synthetic.main.fragment_home.view.*
 
 
 // TODO Implement UI
@@ -20,9 +21,16 @@ class HomeFragment : Fragment() {
         homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
         val view = inflater.inflate(R.layout.fragment_home, container, false)
 
-        //val textView: TextView = view.findViewById(R.id.text_home)
-        //homeViewModel.text.observe(viewLifecycleOwner, Observer { textView.text = it })
-        //view.button.setOnClickListener { _ -> }
+
+        //TODO: Add refresh functionality
+        view.floatingActionButtonA.setOnClickListener { _ ->
+            Log.d("HOME", "Refresh")
+        }
+
+        //TODO: Add relink functionality
+        view.floatingActionButtonB.setOnClickListener { _ ->
+            Log.d("HOME", "Relink")
+        }
 
         return view
     }
