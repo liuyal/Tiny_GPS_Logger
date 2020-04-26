@@ -58,6 +58,7 @@ class MainActivity : AppCompatActivity() {
                 GlobalApplication.BLE?.applicationContext = applicationContext as ContextWrapper
             }
         }
+
         val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
         val navView: NavigationView = findViewById(R.id.nav_view)
         val navController = findNavController(R.id.nav_host_fragment)
@@ -105,7 +106,6 @@ class MainActivity : AppCompatActivity() {
         menuInflater.inflate(R.menu.main_menu, menu)
         return true
     }
-
 
     private fun updateUIInfo(macAddress: String) {
         val macLabel: TextView? = findViewById(R.id.mac_text_label)

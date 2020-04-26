@@ -23,12 +23,12 @@ class HomeFragment : Fragment() {
 
 
         //TODO: Add refresh functionality
-        view.floatingActionButtonA.setOnClickListener { _ ->
+        view.floatingActionButtonA.setOnClickListener {
             Log.d("HOME", "Refresh")
         }
 
         //TODO: Add relink functionality
-        view.floatingActionButtonB.setOnClickListener { _ ->
+        view.floatingActionButtonB.setOnClickListener {
             Log.d("HOME", "Relink")
         }
 

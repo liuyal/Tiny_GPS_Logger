@@ -5,17 +5,14 @@ apply plugin: 'kotlin-android-extensions'
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
-
     defaultConfig {
         applicationId "com.gps"
         minSdkVersion 21
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-
     buildTypes {
         release {
             minifyEnabled false
@@ -26,7 +23,6 @@ android {
 // To inline the bytecode built with JVM target 1.8 into
 // bytecode that is being built with JVM target 1.6. (e.g. navArgs)
 
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -34,7 +30,6 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-
 }
 
 dependencies {
@@ -53,12 +48,11 @@ dependencies {
     implementation 'androidx.navigation:navigation-ui-ktx:2.2.2'
     implementation 'info.androidhive:fontawesome:0.0.5'
     implementation 'jp.wasabeef:recyclerview-animators:3.0.0'
-    implementation 'com.google.android.material:material:1.1.0'
+    implementation 'com.google.android.material:material:1.2.0-alpha06'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-
 }
