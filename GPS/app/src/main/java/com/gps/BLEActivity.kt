@@ -15,14 +15,13 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.gps.objects.GlobalApplication
+import com.gps.objects.GlobalApp
 import com.gps.objects.ScanAdapter
 import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator
 import kotlinx.android.synthetic.main.activity_ble.*
@@ -57,9 +56,9 @@ class BLEActivity : AppCompatActivity() {
 
     private val bluetoothLeScanner: BluetoothLeScanner
         get() {
-            GlobalApplication.BLE?.bleManager = applicationContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-            GlobalApplication.BLE?.bleAdapter = GlobalApplication.BLE?.bleManager!!.adapter
-            return GlobalApplication.BLE?.bleAdapter!!.bluetoothLeScanner
+            GlobalApp.BLE?.bleManager = applicationContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+            GlobalApp.BLE?.bleAdapter = GlobalApp.BLE?.bleManager!!.adapter
+            return GlobalApp.BLE?.bleAdapter!!.bluetoothLeScanner
         }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -78,8 +77,8 @@ class BLEActivity : AppCompatActivity() {
         setContentView(R.layout.activity_ble)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.elevation = 0F
-        GlobalApplication.BLE?.context = this
-        GlobalApplication.BLE?.applicationContext = applicationContext as ContextWrapper
+        GlobalApp.BLE?.context = this
+        GlobalApp.BLE?.applicationContext = applicationContext as ContextWrapper
         select_device_list.layoutManager = LinearLayoutManager(select_device_list.context)
         select_device_list.adapter = ScanAdapter(deviceList, resultsList) { partItem: BluetoothDevice -> partItemClicked(partItem) }
         select_device_list.itemAnimator = SlideInLeftAnimator()
@@ -108,9 +107,9 @@ class BLEActivity : AppCompatActivity() {
             Toast.makeText(applicationContext, "BlueTooth is not enabled!", Toast.LENGTH_SHORT).show()
             return false
         } else {
-            GlobalApplication.BLE?.initialize()
-            GlobalApplication.BLE?.disconnect()
-            GlobalApplication.BLE?.close()
+            GlobalApp.BLE?.initialize()
+            GlobalApp.BLE?.disconnect()
+            GlobalApp.BLE?.close()
             if (item.itemId == R.id.scan_btn) {
                 if (this.scanFlag) {
                     this.bluetoothLeScanner.stopScan(bleScanner)
@@ -133,31 +132,28 @@ class BLEActivity : AppCompatActivity() {
         var isConnected = false
         val index = deviceList.indexOf(partItem)
         val serviceUUID: UUID? = resultsList[index].scanRecord?.serviceUuids?.get(0)?.uuid
-        select_device_list.findViewHolderForAdapterPosition(index)?.itemView?.findViewById<Button>(R.id.connect_btn)?.setBackgroundResource(R.drawable.btn_pressed)
         progressBar = findViewById(R.id.progress_circularBar)
 
         Thread(Runnable {
             this.runOnUiThread { progressBar?.visibility = View.VISIBLE }
+
             try {
                 Thread.sleep(1000)
                 this.bluetoothLeScanner.stopScan(this.bleScanner)
-                isConnected = GlobalApplication.BLE?.connect(partItem.address.toString())!!
+                isConnected = GlobalApp.BLE?.connect(partItem.address.toString())!!
             } catch (e: Throwable) {
                 e.printStackTrace()
             }
+
             if (isConnected && serviceUUID != null) {
-                GlobalApplication.BLE?.device = partItem
-                GlobalApplication.BLE?.scanResult = this.resultsList[index]
+                GlobalApp.BLE?.device = partItem
+                GlobalApp.BLE?.scanResult = this.resultsList[index]
                 this.runOnUiThread { createDialog(this, "Success!", "Connected To BLE Device!", "OK") }
             } else if (this.scanFlag) {
-                this.runOnUiThread {
-                    Toast.makeText(applicationContext, "Invalid Device!", Toast.LENGTH_SHORT).show()
-                }
+                this.runOnUiThread { Toast.makeText(applicationContext, "Invalid Device!", Toast.LENGTH_SHORT).show() }
                 this.bluetoothLeScanner.startScan(bleScanner)
             } else {
-                this.runOnUiThread {
-                    Toast.makeText(applicationContext, "Invalid Device!", Toast.LENGTH_SHORT).show()
-                }
+                this.runOnUiThread { Toast.makeText(applicationContext, "Invalid Device!", Toast.LENGTH_SHORT).show() }
             }
             this.runOnUiThread { progressBar?.visibility = View.GONE }
         }).start()

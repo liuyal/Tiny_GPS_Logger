@@ -1,6 +1,6 @@
 package com.gps.objects
 
-class GlobalApplication {
+class GlobalApp {
     companion object {
         var BLE: BLEDevice? = null
     }

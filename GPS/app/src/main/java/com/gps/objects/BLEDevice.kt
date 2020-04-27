@@ -55,6 +55,7 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
 
     var device: BluetoothDevice? = null
     var scanResult: ScanResult? = null
+    var bleAddress: String? = null
     var gpsData: String? = null
     var transactionSuccess: Boolean = false
     var gpsStatusFlags: BooleanArray? = BooleanArray(NUMBER_OF_FLAGS)
@@ -62,7 +63,7 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
     private var service: BluetoothGattService? = null
     private var characteristic: BluetoothGattCharacteristic? = null
     private var dbHandler: SqliteDB? = null
-    private var bleAddress: String? = null
+
 
     private val mGattCallback = object : BluetoothGattCallback() {
 
@@ -168,6 +169,7 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
         if (this.bleAdapter == null) return false
         dbHandler = SqliteDB(context, null)
         this.gpsStatusFlags?.fill(false, 0, NUMBER_OF_FLAGS)
+        this.loadDBMAC()
         return true
     }
 
@@ -205,6 +207,7 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
             this.bleAddress = cursor.getString(cursor.getColumnIndex(SqliteDB.macColumn))
             this.bleAddress!!
         } catch (e: Throwable) {
+            this.bleAddress = ""
             ""
         }
     }
@@ -222,13 +225,13 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
 
     private fun serviceChecks(timeout: Boolean = true): Boolean {
         val start = System.currentTimeMillis()
-        var serviceList = GlobalApplication.BLE!!.bleGATT?.services
+        var serviceList = GlobalApp.BLE!!.bleGATT?.services
         var foundService = false
         var foundCharacteristics = false
 
         while (serviceList != null && serviceList.size < 1 && !foundService && !foundCharacteristics) {
-            GlobalApplication.BLE!!.bleGATT?.discoverServices()
-            serviceList = GlobalApplication.BLE!!.bleGATT?.services
+            GlobalApp.BLE!!.bleGATT?.discoverServices()
+            serviceList = GlobalApp.BLE!!.bleGATT?.services
             if (serviceList != null) for (item in serviceList) {
                 if (item.uuid == SERVICE_UUID) {
                     foundService = true
@@ -260,12 +263,12 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
         val start = System.currentTimeMillis()
 
         val serviceCheck: Boolean = if (this.service == null || this.characteristic == null) {
-            GlobalApplication.BLE?.serviceChecks()!!
+            GlobalApp.BLE?.serviceChecks()!!
         } else true
 
         if (serviceCheck) {
             this.characteristic!!.value = value
-            GlobalApplication.BLE?.bleGATT?.writeCharacteristic(this.characteristic)
+            GlobalApp.BLE?.bleGATT?.writeCharacteristic(this.characteristic)
         } else return false
 
         while (!this.transactionSuccess) {
@@ -280,11 +283,11 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
         val start = System.currentTimeMillis()
 
         val serviceCheck: Boolean = if (this.service == null || this.characteristic == null) {
-            GlobalApplication.BLE?.serviceChecks()!!
+            GlobalApp.BLE?.serviceChecks()!!
         } else true
 
         if (serviceCheck) {
-            GlobalApplication.BLE?.bleGATT?.readCharacteristic(this.characteristic)
+            GlobalApp.BLE?.bleGATT?.readCharacteristic(this.characteristic)
         } else return null
 
         while (!this.transactionSuccess) {

@@ -401,7 +401,7 @@
             tools:ignore="UselessParent">
 
             <ImageButton
-                android:id="@+id/floatingActionButtonA"
+                android:id="@+id/action_button_A"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_alignParentStart="true"
@@ -415,21 +415,7 @@
                 app:elevation="0dp" />
 
             <ImageButton
-                android:id="@+id/floatingActionButtonC"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_centerHorizontal="true"
-                android:adjustViewBounds="true"
-                android:background="@drawable/btn_unpressed"
-                android:elevation="0dp"
-                android:gravity="center_vertical"
-                android:padding="6dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_file_download_black_24dp"
-                app:elevation="0dp" />
-
-            <ImageButton
-                android:id="@+id/floatingActionButtonB"
+                android:id="@+id/action_button_B"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_alignParentEnd="true"
