@@ -102,7 +102,8 @@ class MainActivity : AppCompatActivity() {
                     this.runOnUiThread { updateUIFlags() }
                     this.runOnUiThread { updateUICoordinate() }
                     this.runOnUiThread { progressBar?.visibility = View.GONE }
-                    Thread.sleep((5 * TIME_OUT).toLong())
+                    // TODO: configurable delay (in settings frag)
+                    Thread.sleep((5 * TIME_OUT).toLong()) 
                 } else throw IllegalArgumentException()
             } catch (e: Throwable) {
                 break
