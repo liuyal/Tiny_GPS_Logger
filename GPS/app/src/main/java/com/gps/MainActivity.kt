@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.View
+import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -23,6 +24,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
 import com.gps.objects.*
+import kotlinx.android.synthetic.main.fragment_home.view.*
 import maes.tech.intentanim.CustomIntent
 
 class MainActivity : AppCompatActivity() {
@@ -189,9 +191,13 @@ class MainActivity : AppCompatActivity() {
         var connected = false
         val progressBar: ProgressBar? = findViewById(R.id.status_progress_bar)
         this.runOnUiThread { progressBar?.visibility = View.VISIBLE }
-        if (GlobalApp.BLE?.connectionState != STATE_CONNECTED || GlobalApp.BLE?.bleGATT == null) {
+
+        val start = System.currentTimeMillis()
+        while (!connected && (GlobalApp.BLE?.connectionState != STATE_CONNECTED || GlobalApp.BLE?.bleGATT == null)) {
             connected = GlobalApp.BLE?.connect(GlobalApp.BLE?.bleAddress!!)!!
+            if (System.currentTimeMillis() - start > 5 * TIME_OUT) break
         }
+
         if (connected) {
             GlobalApp.BLE?.fetchDeviceStatus()
             this.runOnUiThread { updateUIInfo(GlobalApp.BLE?.bleAddress!!) }
