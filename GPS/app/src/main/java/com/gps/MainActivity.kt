@@ -1,6 +1,7 @@
 package com.gps
 
 import android.bluetooth.BluetoothAdapter
+import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.graphics.Color
@@ -184,15 +185,21 @@ class MainActivity : AppCompatActivity() {
 
     fun connectionUIHandler() {
         Log.d("MAIN", "Connection UI Handler Starting")
+        var connected = false
         val progressBar: ProgressBar? = findViewById(R.id.status_progress_bar)
         this.runOnUiThread { progressBar?.visibility = View.VISIBLE }
         if (GlobalApp.BLE?.connectionState != STATE_CONNECTED || GlobalApp.BLE?.bleGATT == null) {
-            GlobalApp.BLE?.connect(GlobalApp.BLE?.bleAddress!!)!!
+            connected = GlobalApp.BLE?.connect(GlobalApp.BLE?.bleAddress!!)!!
         }
-        GlobalApp.BLE?.fetchDeviceStatus()
-        this.runOnUiThread { updateUIInfo(GlobalApp.BLE?.bleAddress!!)}
-        this.runOnUiThread { updateUIFlags() }
-        this.runOnUiThread { progressBar?.visibility = View.GONE }
+        if (connected) {
+            GlobalApp.BLE?.fetchDeviceStatus()
+            this.runOnUiThread { updateUIInfo(GlobalApp.BLE?.bleAddress!!) }
+            this.runOnUiThread { updateUIFlags() }
+            this.runOnUiThread { progressBar?.visibility = View.GONE }
+        } else {
+            this.runOnUiThread { progressBar?.visibility = View.GONE }
+            Log.d("MAIN", "Unable to connect to Device")
+        }
         Log.d("MAIN", "Connection UI Handler Complete")
     }
 

@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".ui.home.HomeFragment">
 
-
     <LinearLayout
         android:id="@+id/statusBar"
         android:layout_width="fill_parent"
@@ -99,11 +98,56 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/mainButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/statusBar"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:ignore="UselessParent">
+
+            <ImageButton
+                android:id="@+id/action_button_A"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_alignParentStart="true"
+                android:adjustViewBounds="true"
+                android:background="@drawable/btn_unpressed"
+                android:elevation="0dp"
+                android:gravity="center_vertical"
+                android:padding="6dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_sync_black_24dp"
+                app:elevation="0dp" />
+
+            <ImageButton
+                android:id="@+id/action_button_B"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_alignParentEnd="true"
+                android:adjustViewBounds="true"
+                android:background="@drawable/btn_unpressed"
+                android:elevation="0dp"
+                android:gravity="center_vertical"
+                android:padding="6dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_link_black_24dp"
+                app:elevation="0dp" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/dashboard"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/mainButtons"
-        android:layout_below="@+id/statusBar"
+        android:layout_below="@+id/mainButtons"
         android:layout_centerHorizontal="true"
         android:layout_marginHorizontal="10dp"
         android:layout_marginTop="10dp"
@@ -386,58 +430,12 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/mainButtons"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginHorizontal="10dp"
-        android:layout_marginBottom="10dp"
-        android:gravity="center">
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:ignore="UselessParent">
-
-            <ImageButton
-                android:id="@+id/action_button_A"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_alignParentStart="true"
-                android:adjustViewBounds="true"
-                android:background="@drawable/btn_unpressed"
-                android:elevation="0dp"
-                android:gravity="center_vertical"
-                android:padding="6dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_sync_black_24dp"
-                app:elevation="0dp" />
-
-            <ImageButton
-                android:id="@+id/action_button_B"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_alignParentEnd="true"
-                android:adjustViewBounds="true"
-                android:background="@drawable/btn_unpressed"
-                android:elevation="0dp"
-                android:gravity="center_vertical"
-                android:padding="6dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_link_black_24dp"
-                app:elevation="0dp" />
-
-        </RelativeLayout>
-
-    </LinearLayout>
-
     <ProgressBar
         android:id="@+id/status_progress_bar"
         android:layout_width="75dp"
         android:layout_height="75dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginVertical="220dp"
+        android:layout_marginVertical="250dp"
         android:indeterminateTint="#FFF"
         android:indeterminateTintMode="src_in"
         android:visibility="gone" />
