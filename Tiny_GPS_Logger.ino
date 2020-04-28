@@ -39,8 +39,8 @@ String log_buffer = "";
 #if DEBUG
 #include <WiFi.h>
 #include <WiFiUdp.h>
-const char* WIFI_SSID = "";
-const char* WIFI_PWD = "";
+const char* WIFI_SSID = "TELUS3854";
+const char* WIFI_PWD = "tsp5df7yfy";
 const int WIFI_TIMEOUT = 10 * 1000;
 const int UDP_PORT = 9996;
 IPAddress HOST_IP(192, 168, 1, 80);
@@ -542,7 +542,7 @@ void loop() {
     if (gps.location.age() > 10000) statusFlags[GPS_FIX_FLAG_INDEX] = false;
     else statusFlags[GPS_FIX_FLAG_INDEX] = true;
 
-    if (statusFlags[GPS_SERIAL_PRINT_FLAG_INDEX]) Serial_Print(gnss_data);
+    if (statusFlags[GPS_SERIAL_PRINT_FLAG_INDEX] && gnss_data != "") Serial_Print(gnss_data);
 
     if (statusFlags[GPS_BLE_PRINT_FLAG_INDEX] && gnss_data.length() > 20) {
       byte buf[gnss_data.length() + 1];

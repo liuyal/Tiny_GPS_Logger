@@ -33,6 +33,21 @@ const val GPS_SERIAL_PRINT_FLAG_INDEX: Int = 3
 const val GPS_BLE_PRINT_FLAG_INDEX: Int = 4
 const val GPS_LOGGING_FLAG_INDEX: Int = 5
 
+const val LOCATION_IS_VALID_INDEX: Int = 0
+const val LOCATION_IS_UPDATED_INDEX: Int = 1
+const val LOCATION_AGE_INDEX: Int = 2
+const val LOCATION_LAT_INDEX: Int = 3
+const val LOCATION_LNG_INDEX: Int = 4
+const val DATE_VALUE_INDEX: Int = 5
+const val TIME_HOUR_INDEX: Int = 6
+const val TIME_MINUTE_INDEX: Int = 7
+const val TIME_SECOND_INDEX: Int = 8
+const val SATELLITES_VALUE_INDEX: Int = 9
+const val SPEED_KMPH_INDEX: Int = 10
+const val COURSE_DEG_INDEX: Int = 11
+const val ALTITUDE_METERS_INDEX: Int = 12
+const val HDOP_VALUE_INDEX: Int = 13
+
 const val STATE_DISCONNECTED: Int = 0
 const val STATE_CONNECTING: Int = 1
 const val STATE_CONNECTED: Int = 2
@@ -213,6 +228,8 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
     }
 
     fun disconnect() {
+        this.gpsStatusFlags?.fill(false, 0, NUMBER_OF_FLAGS)
+        this.gpsData = ""
         if (this.bleAdapter == null || this.bleGATT == null) return
         this.bleGATT!!.disconnect()
     }

@@ -9,13 +9,11 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.View
-import android.widget.ImageButton
-import android.widget.ProgressBar
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.res.ResourcesCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -70,6 +68,11 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
     }
 
+    override fun onStart() {
+        super.onStart()
+        this.updateUIInfo()
+    }
+
     override fun onStop() {
         super.onStop()
         try {
@@ -86,15 +89,21 @@ class MainActivity : AppCompatActivity() {
 
     fun checkTaskLoop() {
         Log.d("MAIN", "STATUS CHECK START")
-        val progressBar: ProgressBar? = findViewById(R.id.status_progress_bar)
-        this.runOnUiThread { progressBar?.visibility = View.VISIBLE }
+        val delay = 5 // TODO: configurable delay (in settings frag)
+
+        this.runOnUiThread { findViewById<ProgressBar>(R.id.status_progress_bar)?.visibility = View.VISIBLE }
+
         if (GlobalApp.BLE?.bleAddress == null || GlobalApp.BLE?.bleAddress == "") {
             this.runOnUiThread { disconnectionUIHandler() }
-            Log.d("MAIN", "NO DEVICE")
+            this.runOnUiThread { Toast.makeText(applicationContext, "No Device Paired", Toast.LENGTH_SHORT).show() }
             return
         }
-        this.runOnUiThread { updateUIInfo(GlobalApp.BLE?.bleAddress!!) }
+
         if (GlobalApp.BLE?.connectionState != STATE_CONNECTED || GlobalApp.BLE?.bleGATT == null) GlobalApp.BLE?.connect(GlobalApp.BLE?.bleAddress!!)!!
+        this.runOnUiThread { updateUIInfo() }
+        this.runOnUiThread { findViewById<ImageButton>(R.id.action_button_A).setColorFilter(Color.GREEN) }
+        this.runOnUiThread { findViewById<ImageButton>(R.id.action_button_B).setColorFilter(ResourcesCompat.getColor(resources, R.color.DodgerBlue, null)) }
+
         while (true) {
             try {
                 if (GlobalApp.BLE?.connectionState == STATE_CONNECTED || GlobalApp.BLE?.bleGATT != null) {
@@ -103,9 +112,8 @@ class MainActivity : AppCompatActivity() {
                     else GlobalApp.BLE?.gpsData = ""
                     this.runOnUiThread { updateUIFlags() }
                     this.runOnUiThread { updateUICoordinate() }
-                    this.runOnUiThread { progressBar?.visibility = View.GONE }
-                    // TODO: configurable delay (in settings frag)
-                    Thread.sleep((5 * TIME_OUT).toLong()) 
+                    this.runOnUiThread { findViewById<ProgressBar>(R.id.status_progress_bar)?.visibility = View.GONE }
+                    Thread.sleep((delay * TIME_OUT).toLong())
                 } else throw IllegalArgumentException()
             } catch (e: Throwable) {
                 break
@@ -114,9 +122,10 @@ class MainActivity : AppCompatActivity() {
         Log.d("MAIN", "STATUS CHECK STOPPED")
     }
 
-    private fun updateUIInfo(macAddress: String) {
+    private fun updateUIInfo() {
         val macLabel: TextView? = findViewById(R.id.mac_text_label)
         val deviceLabel: TextView? = findViewById(R.id.device_text_label)
+        val macAddress = GlobalApp.BLE?.loadDBMAC()!!
         if (macAddress != "" && macLabel != null && deviceLabel != null) {
             deviceLabel.text = DEVICE_CODE_NAME
             macLabel.text = macAddress
@@ -136,12 +145,12 @@ class MainActivity : AppCompatActivity() {
         if (gpsData != null && gpsData != "" && gpsTime != null && latitude != null && longitude != null) {
             gpsData = gpsData.substring(gpsData.indexOf('[') + 1, gpsData.indexOf(']'))
             val gpdDataList = gpsData.split(',') as ArrayList<String>
-            if (gpdDataList[6].toInt() < 10) gpdDataList[6] = "0" + gpdDataList[6]
-            if (gpdDataList[7].toInt() < 10) gpdDataList[7] = "0" + gpdDataList[7]
-            if (gpdDataList[8].toInt() < 10) gpdDataList[8] = "0" + gpdDataList[8]
-            gpsTime.text = getString(R.string.gpsTime, gpdDataList[6], gpdDataList[7], gpdDataList[8])
-            latitude.text = gpdDataList[3]
-            longitude.text = gpdDataList[4]
+            if (gpdDataList[TIME_HOUR_INDEX].toInt() < 10) gpdDataList[TIME_HOUR_INDEX] = "0" + gpdDataList[TIME_HOUR_INDEX]
+            if (gpdDataList[TIME_MINUTE_INDEX].toInt() < 10) gpdDataList[TIME_MINUTE_INDEX] = "0" + gpdDataList[TIME_MINUTE_INDEX]
+            if (gpdDataList[TIME_SECOND_INDEX].toInt() < 10) gpdDataList[TIME_SECOND_INDEX] = "0" + gpdDataList[TIME_SECOND_INDEX]
+            gpsTime.text = getString(R.string.gpsTime, gpdDataList[TIME_HOUR_INDEX], gpdDataList[TIME_MINUTE_INDEX], gpdDataList[TIME_SECOND_INDEX])
+            latitude.text = gpdDataList[LOCATION_LAT_INDEX]
+            longitude.text = gpdDataList[LOCATION_LNG_INDEX]
         } else if (gpsData == "") {
             if (gpsTime != null && latitude != null && longitude != null) {
                 gpsTime.text = getString(R.string.init_time)
@@ -189,38 +198,45 @@ class MainActivity : AppCompatActivity() {
     fun connectionUIHandler() {
         Log.d("MAIN", "Connection UI Handler Starting")
         var connected = false
-        val progressBar: ProgressBar? = findViewById(R.id.status_progress_bar)
-        this.runOnUiThread { progressBar?.visibility = View.VISIBLE }
+        this.runOnUiThread { findViewById<ProgressBar>(R.id.status_progress_bar)?.visibility = View.VISIBLE }
+
+        if (GlobalApp.BLE?.bleAddress == null || GlobalApp.BLE?.bleAddress == "") {
+            this.runOnUiThread { disconnectionUIHandler() }
+            this.runOnUiThread { Toast.makeText(applicationContext, "No Device Paired", Toast.LENGTH_SHORT).show() }
+            return
+        }
 
         val start = System.currentTimeMillis()
         while (!connected && (GlobalApp.BLE?.connectionState != STATE_CONNECTED || GlobalApp.BLE?.bleGATT == null)) {
             connected = GlobalApp.BLE?.connect(GlobalApp.BLE?.bleAddress!!)!!
-            if (System.currentTimeMillis() - start > 5 * TIME_OUT) break
+            if (System.currentTimeMillis() - start > 10 * TIME_OUT) break
         }
 
-        if (connected) {
+        if (connected || GlobalApp.BLE?.connectionState == STATE_CONNECTED) {
             GlobalApp.BLE?.fetchDeviceStatus()
-            this.runOnUiThread { updateUIInfo(GlobalApp.BLE?.bleAddress!!) }
+            this.runOnUiThread { updateUIInfo() }
             this.runOnUiThread { updateUIFlags() }
-            this.runOnUiThread { progressBar?.visibility = View.GONE }
+            this.runOnUiThread { findViewById<ImageButton>(R.id.action_button_B).setColorFilter(ResourcesCompat.getColor(resources, R.color.DodgerBlue, null)) }
+
         } else {
-            this.runOnUiThread { progressBar?.visibility = View.GONE }
+            this.runOnUiThread { findViewById<ImageButton>(R.id.action_button_A).setColorFilter(Color.WHITE) }
+            this.runOnUiThread { findViewById<ImageButton>(R.id.action_button_B).setColorFilter(Color.WHITE) }
             Log.d("MAIN", "Unable to connect to Device")
         }
+        this.runOnUiThread { findViewById<ProgressBar>(R.id.status_progress_bar)?.visibility = View.GONE }
         Log.d("MAIN", "Connection UI Handler Complete")
     }
 
     fun disconnectionUIHandler() {
         try {
-            val progressBar: ProgressBar? = findViewById(R.id.status_progress_bar)
-            progressBar?.visibility = View.GONE
-            GlobalApp.BLE?.gpsStatusFlags?.fill(false, 0, NUMBER_OF_FLAGS)
-            GlobalApp.BLE?.gpsData = ""
-            updateUIInfo("")
+            findViewById<ImageButton>(R.id.action_button_A).setColorFilter(Color.WHITE)
+            findViewById<ImageButton>(R.id.action_button_B).setColorFilter(Color.WHITE)
+            findViewById<ProgressBar>(R.id.status_progress_bar)?.visibility = View.GONE
+            GlobalApp.BLE?.disconnect()
             updateUIFlags()
             updateUICoordinate()
         } catch (e: Throwable) {
-            Log.e("MAIN", "Disconnection UI update Error")
+            Log.e("MAIN", "Disconnection UI Update Error")
         }
     }
 

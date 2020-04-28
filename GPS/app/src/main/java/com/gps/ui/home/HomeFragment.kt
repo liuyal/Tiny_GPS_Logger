@@ -23,64 +23,46 @@ import kotlinx.android.synthetic.main.fragment_home.view.*
 class HomeFragment : Fragment() {
 
     private lateinit var homeViewModel: HomeViewModel
-    private var mainRunning: Boolean = false
-    private var isConnected: Boolean = false
+
+    // TODO: Make persistent
+    private var autoCheck: Boolean = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
         val view = inflater.inflate(R.layout.fragment_home, container, false)
 
         view.action_button_A.setOnClickListener {
-            if (BluetoothAdapter.getDefaultAdapter() == null) {
-                Toast.makeText(activity, "BlueTooth is not supported!", Toast.LENGTH_SHORT).show()
-            } else if (!BluetoothAdapter.getDefaultAdapter().isEnabled) {
-                Toast.makeText(activity, "BlueTooth is not enabled!", Toast.LENGTH_SHORT).show()
-            } else if (BluetoothAdapter.getDefaultAdapter().isEnabled) {
-                val main = activity as MainActivity?
-                if (!mainRunning) {
-                    main?.statueCheckThread = null
-                    main?.statueCheckThread = Thread(Runnable { main?.checkTaskLoop() })
-                    main?.statueCheckThread!!.start()
-                    mainRunning = true
-                    view.action_button_A.setColorFilter(Color.GREEN)
-                    view.action_button_B.setColorFilter(ResourcesCompat.getColor(resources, R.color.DodgerBlue, null))
-                } else {
-                    main?.statueCheckThread?.interrupt()
-                    main?.statueCheckThread = null
-                    mainRunning = false
-                    view.action_button_A.setColorFilter(Color.WHITE)
-                }
+            val main = activity as MainActivity?
+            val checkBLEon = checkBLEon()
+            if (checkBLEon && !autoCheck) {
+                autoCheck = true
+                main?.statueCheckThread = null
+                main?.statueCheckThread = Thread(Runnable { main?.checkTaskLoop() })
+                main?.statueCheckThread!!.start()
+            } else if (checkBLEon) {
+                autoCheck = false
+                main?.statueCheckThread?.interrupt()
+                main?.statueCheckThread = null
+                view.action_button_A.setColorFilter(Color.WHITE)
             }
         }
 
         view.action_button_B.setOnClickListener {
-            if (BluetoothAdapter.getDefaultAdapter() == null) {
-                Toast.makeText(activity, "BlueTooth is not supported!", Toast.LENGTH_SHORT).show()
-            } else if (!BluetoothAdapter.getDefaultAdapter().isEnabled) {
-                Toast.makeText(activity, "BlueTooth is not enabled!", Toast.LENGTH_SHORT).show()
-            } else if (BluetoothAdapter.getDefaultAdapter().isEnabled) {
-                val bleConnection = GlobalApp.BLE?.connectionState == STATE_CONNECTED
-                this.isConnected = bleConnection
-                val main = activity as MainActivity?
-                if (this.isConnected && main != null) {
-                    if (main.statueCheckThread != null) {
-                        main.statueCheckThread?.interrupt()
-                        main.statueCheckThread = null
-                    }
-                    GlobalApp.BLE?.disconnect()
-                    main.disconnectionUIHandler()
-                    view.action_button_B.setColorFilter(Color.WHITE)
-                    view.action_button_A.setColorFilter(Color.WHITE)
-                } else {
-                    if (GlobalApp.BLE == null) {
-                        GlobalApp.BLE = BLEDevice(main as Context, activity as ContextWrapper)
-                        GlobalApp.BLE!!.initialize()
-                    }
-                    main?.statueCheckThread = null
-                    main?.statueCheckThread = Thread(Runnable { main?.connectionUIHandler() })
-                    main?.statueCheckThread!!.start()
-                    view.action_button_B.setColorFilter(ResourcesCompat.getColor(resources, R.color.DodgerBlue, null))
+            val isConnected = GlobalApp.BLE?.connectionState == STATE_CONNECTED
+            val main = activity as MainActivity?
+            val checkBLEon = checkBLEon()
+            if (checkBLEon && isConnected && main != null) {
+                main.statueCheckThread?.interrupt()
+                main.statueCheckThread = null
+                main.disconnectionUIHandler()
+            } else if (checkBLEon) {
+                if (GlobalApp.BLE == null) {
+                    GlobalApp.BLE = BLEDevice(main as Context, activity as ContextWrapper)
+                    GlobalApp.BLE!!.initialize()
                 }
+                main?.statueCheckThread = null
+                main?.statueCheckThread = Thread(Runnable { main?.connectionUIHandler() })
+                main?.statueCheckThread!!.start()
             }
         }
         return view
@@ -88,32 +70,17 @@ class HomeFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        if (BluetoothAdapter.getDefaultAdapter() == null) {
-            Toast.makeText(activity, "BlueTooth is not supported!", Toast.LENGTH_SHORT).show()
-        } else if (!BluetoothAdapter.getDefaultAdapter().isEnabled) {
-            Toast.makeText(activity, "BlueTooth is not enabled!", Toast.LENGTH_SHORT).show()
-        } else if (BluetoothAdapter.getDefaultAdapter().isEnabled) {
-            val bleConnection = GlobalApp.BLE?.connectionState == STATE_CONNECTED
-            this.isConnected = bleConnection
-            val main = activity as MainActivity?
-            if (isConnected && main != null) {
-                main.statueCheckThread = null
-                main.statueCheckThread = Thread(Runnable { main.connectionUIHandler() })
-                main.statueCheckThread!!.start()
-                view?.action_button_B?.setColorFilter(ResourcesCompat.getColor(resources, R.color.DodgerBlue, null))
-            }
-            Log.d("HOME", "Start h Fragment")
-        }
+        Log.d("HOME", "Start h Fragment")
     }
 
     override fun onResume() {
         super.onResume()
+        linkCheck()
         Log.d("HOME", "onResume h Fragment")
     }
 
     override fun onPause() {
         super.onPause()
-
         Log.d("HOME", "Pause h Fragment")
     }
 
@@ -122,4 +89,29 @@ class HomeFragment : Fragment() {
         Log.d("HOME", "Stopped h Fragment")
     }
 
+    private fun linkCheck() {
+        val isConnected = GlobalApp.BLE?.connectionState == STATE_CONNECTED
+        val main = activity as MainActivity?
+        val checkBLEon = checkBLEon()
+        if (checkBLEon && isConnected && main != null) {
+            if (GlobalApp.BLE == null) {
+                GlobalApp.BLE = BLEDevice(main as Context, activity as ContextWrapper)
+                GlobalApp.BLE!!.initialize()
+            }
+            main.statueCheckThread = null
+            main.statueCheckThread = Thread(Runnable { main.connectionUIHandler() })
+            main.statueCheckThread!!.start()
+        }
+    }
+
+    private fun checkBLEon(): Boolean {
+        if (BluetoothAdapter.getDefaultAdapter() == null) {
+            Toast.makeText(activity, "BlueTooth is not supported!", Toast.LENGTH_SHORT).show()
+        } else if (!BluetoothAdapter.getDefaultAdapter().isEnabled) {
+            Toast.makeText(activity, "BlueTooth is not enabled!", Toast.LENGTH_SHORT).show()
+        } else if (BluetoothAdapter.getDefaultAdapter().isEnabled) {
+            return true
+        }
+        return false
+    }
 }
