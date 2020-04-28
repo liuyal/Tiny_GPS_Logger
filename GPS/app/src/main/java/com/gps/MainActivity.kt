@@ -138,25 +138,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateUICoordinate() {
+        val gpsdate: TextView? = findViewById(R.id.date_text_label)
         val gpsTime: TextView? = findViewById(R.id.time_text_label)
         val latitude: TextView? = findViewById(R.id.lat_text_label)
         val longitude: TextView? = findViewById(R.id.long_text_label)
         var gpsData = GlobalApp.BLE?.gpsData
-        if (gpsData != null && gpsData != "" && gpsTime != null && latitude != null && longitude != null) {
+        if (gpsData != null ) {
             gpsData = gpsData.substring(gpsData.indexOf('[') + 1, gpsData.indexOf(']'))
             val gpdDataList = gpsData.split(',') as ArrayList<String>
             if (gpdDataList[TIME_HOUR_INDEX].toInt() < 10) gpdDataList[TIME_HOUR_INDEX] = "0" + gpdDataList[TIME_HOUR_INDEX]
             if (gpdDataList[TIME_MINUTE_INDEX].toInt() < 10) gpdDataList[TIME_MINUTE_INDEX] = "0" + gpdDataList[TIME_MINUTE_INDEX]
             if (gpdDataList[TIME_SECOND_INDEX].toInt() < 10) gpdDataList[TIME_SECOND_INDEX] = "0" + gpdDataList[TIME_SECOND_INDEX]
-            gpsTime.text = getString(R.string.gpsTime, gpdDataList[TIME_HOUR_INDEX], gpdDataList[TIME_MINUTE_INDEX], gpdDataList[TIME_SECOND_INDEX])
-            latitude.text = gpdDataList[LOCATION_LAT_INDEX]
-            longitude.text = gpdDataList[LOCATION_LNG_INDEX]
+            gpsdate?.text = gpdDataList[DATE_VALUE_INDEX]
+            gpsTime?.text = getString(R.string.gpsTime, gpdDataList[TIME_HOUR_INDEX], gpdDataList[TIME_MINUTE_INDEX], gpdDataList[TIME_SECOND_INDEX])
+            latitude?.text = gpdDataList[LOCATION_LAT_INDEX]
+            longitude?.text = gpdDataList[LOCATION_LNG_INDEX]
         } else if (gpsData == "") {
-            if (gpsTime != null && latitude != null && longitude != null) {
-                gpsTime.text = getString(R.string.init_time)
-                latitude.text = getString(R.string.init_lat)
-                longitude.text = getString(R.string.init_long)
-            }
+            gpsdate?.text = getString(R.string.init_date)
+            gpsTime?.text = getString(R.string.init_time)
+            latitude?.text = getString(R.string.init_lat)
+            longitude?.text = getString(R.string.init_long)
         }
     }
 

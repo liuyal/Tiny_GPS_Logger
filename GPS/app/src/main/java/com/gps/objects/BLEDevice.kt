@@ -223,7 +223,7 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
             this.bleAddress!!
         } catch (e: Throwable) {
             this.bleAddress = ""
-            ""
+            this.bleAddress
         }
     }
 

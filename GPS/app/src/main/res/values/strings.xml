@@ -31,9 +31,10 @@
     <string name="disconnect">DISCONNECT</string>
 
     <!--    MainActivity                   -->
-    <string name="init_time">00:00:00</string>
     <string name="init_lat">000.0000</string>
     <string name="init_long">000.0000</string>
+    <string name="init_date">000000</string>
+    <string name="init_time">00:00:00</string>
     <string name="gpsTime">%1$s:%2$s:%3$s</string>
 
     <!--    HOME FRAGMENT                   -->
@@ -45,6 +46,7 @@
     <string name="serial_print_label">SERIAL PRINT:</string>
     <string name="ble_print_label">BLE PRINT:</string>
     <string name="logging_label">LOGGING:</string>
+    <string name="gps_date_label">GPS DATE:</string>
     <string name="gps_time_label">GPS TIME:</string>
     <string name="latitude_label">LATITUDE:</string>
     <string name="longitude_label">LONGITUDE:</string>
