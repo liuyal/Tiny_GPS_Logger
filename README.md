@@ -29,11 +29,9 @@ A portable GPS logging device built with ESP32, NEO-6M, and SDCard Module.
 	
 ## GPS Status Flags
 
-6 bit status flag system
+### 6 bit status flag system
 
-ex. Status: 0 0 0 0 0 0
-
-| Bit Number | Flag | Description |
+| Bit Number | Function | Description |
 | :---: | --- | --- |
 | 1 | Device Connection 		|  |
 | 2 | GPS Has Fix 				|  |
