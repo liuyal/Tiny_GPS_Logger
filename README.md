@@ -29,16 +29,16 @@ A portable GPS logging device built with ESP32, NEO-6M, and SD Card Module.
 
 ## GPS Status Flags
 
-### 6 bit status flag system
+### 6 Bit GPS Status Flag System
 
 | Bit Number | Function | Description |
 | :---: | --- | --- |
-| 1 | Device Connection 				|  |
-| 2 | GPS Has Fix 							|  |
-| 3 | GPS On/Off Status					|  |
-| 4 | GPS Serial Print Status  	|  |
-| 5 | GPS BLE Print Status  		|  |
-| 6 | Logging Status 						|  |
+| 1 | BLE Device Connection 		| True if BLE service on GPS device is connected to BLE client |
+| 2 | GPS Has Fix 							| True if GPS has location fix |
+| 3 | GPS On/Off Status					| True if GPS service is enabled on device |
+| 4 | GPS Serial Print Status  	| True if GPS sentences serial print is enabled |
+| 5 | GPS BLE Print Status  		| True if GPS sentences BLE print is enabled |
+| 6 | Logging Status 						| True if GPS sentences logging is enabled |
 
 ## Resource Links
 
