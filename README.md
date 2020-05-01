@@ -1,8 +1,26 @@
 # Tiny GPS Logger
 
-Portable GPS logging device built with ESP32, NEO-6M, and SD Card Module.
+Portable GPS logging device built with ESP32, NEO-6M, and Catalex Micro SD Card Module.
 
 ## Hardware Schematic & Pin Connection
+
+![]("./Assets/images/schematics/schematics.png")
+
+| ESP32 | NEO-6M |
+| --- | --- |
+| 3V3    | VCC  |
+| Pin 17 | Rx	  |
+| Pin 16 | Tx   |
+| GND    | GND	|
+
+| ESP32 | SD Card Module |
+| --- | --- |
+| Pin 5  | CS   |
+| Pin 18 | SCK	|
+| Pin 23 | MOSI |
+| Pin 19 | MISO	|
+| 5V 		 | VCC  |
+| GND    | GND  |
 
 ## Android App User Guide
 
@@ -31,12 +49,12 @@ Portable GPS logging device built with ESP32, NEO-6M, and SD Card Module.
 
 | Bit Index | Function | Description |
 | :---: | --- | --- |
-| 1 | BLE Connection 		| True if BLE service on GPS device is connected to BLE client |
-| 2 | GPS Has Fix 							| True if GPS has location fix |
-| 3 | GPS On/Off Status					| True if GPS service is enabled on device |
-| 4 | Serial Print Status  	| True if GPS sentences serial print is enabled |
-| 5 | BLE Print Status  		| True if GPS sentences BLE print is enabled |
-| 6 | Logging Status 						| True if GPS sentences logging is enabled |
+| 0 | BLE Connection 		| True if BLE service on GPS device is connected to BLE client |
+| 1 | GPS Has Fix 							| True if GPS has location fix |
+| 2 | GPS On/Off Status					| True if GPS service is enabled on device |
+| 3 | Serial Print Status  	| True if GPS sentences serial print is enabled |
+| 4 | BLE Print Status  		| True if GPS sentences BLE print is enabled |
+| 5 | Logging Status 						| True if GPS sentences logging is enabled |
 
 ## Resource Links
 
