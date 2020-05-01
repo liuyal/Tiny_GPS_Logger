@@ -68,7 +68,11 @@ Andriod App
 - [BLE Basics](https://developer.android.com/guide/topics/connectivity/bluetooth-le)
 - [GATT (Services and Characteristics)](https://www.oreilly.com/library/view/getting-started-with/9781491900550/ch04.html)
 - [Remote adb](https://stackoverflow.com/questions/4893953/run-install-debug-android-applications-over-wi-fi)
-
+- [Kotlin Map](https://pusher.com/tutorials/realtime-map-kotlin)
+- [Kotlin Real Time Map repo] (https://github.com/neoighodaro/realtime-map-example-kotlin/blob/master/app/src/main/java/com/example/android/realtimemapkotlin/MainActivity.kt)
+- [Map object Doc](https://developers.google.com/maps/documentation/android-sdk/map)
+- [MapView Doc](https://developers.google.com/android/reference/com/google/android/gms/maps/MapView)
+- [offline maps](https://docs.mapbox.com/android/maps/overview/)
 
 ## Remote adb debug
 

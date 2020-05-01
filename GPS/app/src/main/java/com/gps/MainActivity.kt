@@ -1,7 +1,6 @@
 package com.gps
 
 import android.bluetooth.BluetoothAdapter
-import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.graphics.Color
@@ -9,7 +8,10 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.View
-import android.widget.*
+import android.widget.ImageButton
+import android.widget.ProgressBar
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.Toolbar
@@ -20,16 +22,28 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.gms.maps.*
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.navigation.NavigationView
 import com.gps.objects.*
-import kotlinx.android.synthetic.main.fragment_home.view.*
 import maes.tech.intentanim.CustomIntent
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
 
     var statueCheckThread: Thread? = null
+
+    private lateinit var googleMap: GoogleMap
+    private lateinit var markerOptions: MarkerOptions
+    private lateinit var marker: Marker
+    private lateinit var cameraPosition: CameraPosition
+    private var defaultLatitude = 40.730610
+    private var defaultLongitude = -73.935242
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,6 +80,28 @@ class MainActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(setOf(R.id.nav_home, R.id.nav_map, R.id.nav_logs, R.id.nav_setting), drawerLayout)
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+    }
+
+    override fun onMapReady(googleMap: GoogleMap?) {
+        this.googleMap = googleMap!!
+        marker = googleMap.addMarker(markerOptions)
+        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+    }
+
+    fun updateMaps() {
+        runOnUiThread {
+            // TODO: check status flag & upload coordinates
+            marker.position = LatLng(defaultLatitude, defaultLongitude)
+            cameraPosition = CameraPosition.Builder().target(LatLng(defaultLatitude, defaultLongitude)).zoom(17f).build()
+            googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+        }
+        Log.d("MAIN", "MAPS UPDATE")
+    }
+
+    fun createMaps() {
+        markerOptions = MarkerOptions()
+        markerOptions.position(LatLng(defaultLatitude, defaultLongitude))
+        cameraPosition = CameraPosition.Builder().target(LatLng(defaultLatitude, defaultLongitude)).zoom(17f).build()
     }
 
     override fun onStart() {
@@ -138,23 +174,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateUICoordinate() {
-        val gpsdate: TextView? = findViewById(R.id.date_text_label)
+        val gpsDate: TextView? = findViewById(R.id.date_text_label)
         val gpsTime: TextView? = findViewById(R.id.time_text_label)
         val latitude: TextView? = findViewById(R.id.lat_text_label)
         val longitude: TextView? = findViewById(R.id.long_text_label)
         var gpsData = GlobalApp.BLE?.gpsData
-        if (gpsData != null ) {
+        if (gpsData != null && gpsData != "") {
             gpsData = gpsData.substring(gpsData.indexOf('[') + 1, gpsData.indexOf(']'))
             val gpdDataList = gpsData.split(',') as ArrayList<String>
             if (gpdDataList[TIME_HOUR_INDEX].toInt() < 10) gpdDataList[TIME_HOUR_INDEX] = "0" + gpdDataList[TIME_HOUR_INDEX]
             if (gpdDataList[TIME_MINUTE_INDEX].toInt() < 10) gpdDataList[TIME_MINUTE_INDEX] = "0" + gpdDataList[TIME_MINUTE_INDEX]
             if (gpdDataList[TIME_SECOND_INDEX].toInt() < 10) gpdDataList[TIME_SECOND_INDEX] = "0" + gpdDataList[TIME_SECOND_INDEX]
-            gpsdate?.text = gpdDataList[DATE_VALUE_INDEX]
+            gpsDate?.text = gpdDataList[DATE_VALUE_INDEX]
             gpsTime?.text = getString(R.string.gpsTime, gpdDataList[TIME_HOUR_INDEX], gpdDataList[TIME_MINUTE_INDEX], gpdDataList[TIME_SECOND_INDEX])
             latitude?.text = gpdDataList[LOCATION_LAT_INDEX]
             longitude?.text = gpdDataList[LOCATION_LNG_INDEX]
-        } else if (gpsData == "") {
-            gpsdate?.text = getString(R.string.init_date)
+        } else if (gpsData == null || gpsData == "") {
+            gpsDate?.text = getString(R.string.init_date)
             gpsTime?.text = getString(R.string.init_time)
             latitude?.text = getString(R.string.init_lat)
             longitude?.text = getString(R.string.init_long)

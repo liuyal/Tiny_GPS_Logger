@@ -9,36 +9,67 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.gms.maps.GoogleMap
+import com.gps.MainActivity
 import com.gps.R
-
-// https://pusher.com/tutorials/realtime-map-kotlin
+import kotlinx.android.synthetic.main.fragment_map.view.*
 
 class MapFragment : Fragment() {
 
     private lateinit var mapViewModel: MapViewModel
 
-    private val mMap: GoogleMap? = null
-
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         mapViewModel = ViewModelProvider(this).get(MapViewModel::class.java)
-        val root = inflater.inflate(R.layout.fragment_map, container, false)
-        val textView: TextView = root.findViewById(R.id.text_map)
+        val view = inflater.inflate(R.layout.fragment_map, container, false)
+        val textView: TextView = view.findViewById(R.id.text_map)
         mapViewModel.text.observe(viewLifecycleOwner, Observer { textView.text = it })
-        return root
+
+        view?.mapView?.onCreate(savedInstanceState)
+        view?.mapView?.getMapAsync(activity as MainActivity?)
+        (activity as MainActivity?)?.createMaps()
+
+        view.toggleButton.setOnClickListener {
+            val main = activity as MainActivity?
+            main?.statueCheckThread?.interrupt()
+            main?.statueCheckThread = null
+            main?.statueCheckThread = Thread(Runnable { main?.updateMaps() })
+            main?.statueCheckThread!!.start()
+        }
+
+        return view
     }
 
 
     override fun onStart() {
         super.onStart()
-        Log.e("MAP", "Start map Fragment")
+        view?.mapView?.onStart()
+        Log.d("MAP", "Start m Fragment")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        view?.mapView?.onResume()
+        Log.d("MAP", "onResume m Fragment")
+    }
+
+    override fun onPause() {
+        view?.mapView?.onResume()
+        Log.d("MAP", "Pause m Fragment")
+        super.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        Log.e("MAP", "Stopped map Fragment")
+        view?.mapView?.onStop()
+        Log.d("MAP", "Stopped m Fragment")
     }
 
+    override fun onDestroy() {
+        view?.mapView?.onDestroy()
+        super.onDestroy()
+    }
 
+    override fun onLowMemory() {
+        super.onLowMemory()
+        view?.mapView?.onLowMemory()
+    }
 }

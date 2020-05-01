@@ -169,6 +169,7 @@ class BLE_Callbacks: public BLECharacteristicCallbacks {
           pCharacteristic->indicate();
         }
         else if (value[0] == 0x08) {
+          //TODO: FIX date format
           String gps_valid = String(gps.location.isValid()) + "," + String(gps.location.isUpdated()) + "," + String(gps.location.age());
           String gps_data_a = String(gps.location.lat(), 7) + "," + String(gps.location.lng(), 7) + "," + String(gps.date.value());
           String gps_data_b = String(gps.time.hour()) + "," + String(gps.time.minute()) + "," + String(gps.time.second());

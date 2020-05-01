@@ -4,3 +4,4 @@ target/
 .idea/
 *.sql
 git_commit.py
+google_maps_api.xml
