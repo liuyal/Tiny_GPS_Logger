@@ -4,7 +4,7 @@ Portable GPS logging device built with ESP32, NEO-6M, and Catalex Micro SD Card 
 
 ## Hardware Schematic & Pin Connection
 
-![]("./Assets/images/schematics/schematics.png")
+![]("./Assets/images/schematics/schematic.png")
 
 | ESP32 | NEO-6M |
 | --- | --- |
