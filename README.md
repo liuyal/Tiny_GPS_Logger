@@ -1,6 +1,6 @@
 # Tiny GPS Logger
 
-A portable GPS logging device built with ESP32, NEO-6M, and SDCard Module. 
+A portable GPS logging device built with ESP32, NEO-6M, and SD Card Module.
 
 ## Hardware Schematic
 
@@ -12,33 +12,33 @@ A portable GPS logging device built with ESP32, NEO-6M, and SDCard Module.
 
 | Hex Code | Function | Description |
 | :---: | --- | --- |
-| 0x00 | None             		|  |
-| 0x01 | Get device status 		|  |
-| 0x02 | Toggle GPS on 			|  |
-| 0x03 | Toggle GPS off 		|  |
-| 0x04 | Toggle logging on 		|  |
-| 0x05 | Toggle logging off 	|  |
-| 0x06 | Toggle BLE print on 	|  |
-| 0x07 | Toggle BLE print off 	|  |
-| 0x08 | Get GPS data 			|  |
-| 0x09 | List Files 			|  |
-| 0x0a | Read File 				|  |
-| 0x0b | Get SDCard Status 		|  |
-| 0x0c | Reboot 				|  |
-| 0x0d | Reset 					|  |
-	
+| 0x00 | None             			| Code Not Assigned |
+| 0x01 | Get device status 			| Get current GPS device statue code (see GPS Status Flags) |
+| 0x02 | Toggle GPS on 					| Turn GPS location service on 	|
+| 0x03 | Toggle GPS off 				| Turn GPS location service off |
+| 0x04 | Toggle logging on 			| Turn GPS sentences logging on |
+| 0x05 | Toggle logging off 		| Turn GPS sentences logging off |
+| 0x06 | Toggle BLE print on 		| Start sending GPS sentences via BLE and serial |
+| 0x07 | Toggle BLE print off 	| Stop sending GPS sentences via BLE and serial  |
+| 0x08 | Get GPS data 					| Get current GPS location data if GPS has fix   |
+| 0x09 | List Files 						| List all current log files on GPS SD card |
+| 0x0a | Read File 							| Read log file from GPS SD card |
+| 0x0b | Get SD Card Status 		| Get SD card usage information |
+| 0x0c | Reboot 								| Reboot GPS device |
+| 0x0d | Reset 									| Reset GPS device configurations and all status flags |
+
 ## GPS Status Flags
 
 ### 6 bit status flag system
 
 | Bit Number | Function | Description |
 | :---: | --- | --- |
-| 1 | Device Connection 		|  |
-| 2 | GPS Has Fix 				|  |
-| 3 | GPS On/Off Status			|  |
+| 1 | Device Connection 				|  |
+| 2 | GPS Has Fix 							|  |
+| 3 | GPS On/Off Status					|  |
 | 4 | GPS Serial Print Status  	|  |
-| 5 | GPS BLE Print Status  	|  |
-| 6 | Logging Status 			|  |
+| 5 | GPS BLE Print Status  		|  |
+| 6 | Logging Status 						|  |
 
 ## Resource Links
 
@@ -51,9 +51,9 @@ GPS
 - [NEO-6 Product Summary](https://www.u-blox.com/sites/default/files/products/documents/NEO-6_ProductSummary_%28GPS.G6-HW-09003%29.pdf)
 - [NEOGPS](https://github.com/SlashDevin/NeoGPS/tree/master/examples)
 
-SDCARD
-- [ESP32 SDCard Example](https://randomnerdtutorials.com/esp32-data-logging-temperature-to-microsd-card/)
-- [SDCard Example](https://lastminuteengineers.com/arduino-micro-sd-card-module-tutorial/)
+SD CARD
+- [ESP32 SD Card Example](https://randomnerdtutorials.com/esp32-data-logging-temperature-to-microsd-card/)
+- [SD Card Example](https://lastminuteengineers.com/arduino-micro-sd-card-module-tutorial/)
 - [SD Library](https://www.arduino.cc/en/reference/SD)
 
 BLE
@@ -62,20 +62,19 @@ BLE
 - [Change Characteristic](https://github.com/espressif/arduino-esp32/issues/1038)
 - Indication & Notification [Link1](https://community.nxp.com/docs/DOC-328525) [Link2](https://www.onethesis.com/2015/11/21/ble-introduction-notify-or-indicate/)
 
-Andriod App
+Android App
 - [Bluetooth Device](https://developer.android.com/reference/kotlin/android/bluetooth/package-summary)
 - [Bluetooth GATT](https://developer.android.com/reference/android/bluetooth/BluetoothGatt)
 - [BLE Basics](https://developer.android.com/guide/topics/connectivity/bluetooth-le)
 - [GATT (Services and Characteristics)](https://www.oreilly.com/library/view/getting-started-with/9781491900550/ch04.html)
 - [Remote adb](https://stackoverflow.com/questions/4893953/run-install-debug-android-applications-over-wi-fi)
 - [Kotlin Map](https://pusher.com/tutorials/realtime-map-kotlin)
-- [Kotlin Real Time Map repo] (https://github.com/neoighodaro/realtime-map-example-kotlin/blob/master/app/src/main/java/com/example/android/realtimemapkotlin/MainActivity.kt)
+- [Kotlin Real Time Map repo](https://github.com/neoighodaro/realtime-map-example-kotlin/blob/master/app/src/main/java/com/example/android/realtimemapkotlin/MainActivity.kt)
 - [Map object Doc](https://developers.google.com/maps/documentation/android-sdk/map)
-- [MapView Doc](https://developers.google.com/android/reference/com/google/android/gms/maps/MapView)
+- [Map View Doc](https://developers.google.com/android/reference/com/google/android/gms/maps/MapView)
 - [offline maps](https://docs.mapbox.com/android/maps/overview/)
 
 ## Remote adb debug
-
 
 1. Connect the device via USB and make sure debugging is working;
 2. `adb tcpip 5555` This makes the device to start listening for connections on port 5555;
@@ -84,8 +83,7 @@ Andriod App
 5. `adb connect <DEVICE_IP_ADDRESS>:5555`. This connects to the server we set up on the device on step 2;
 6. Now you have a device over the network with which you can debug as usual.
 
-
-- To switch the server back to the USB mode, run `adb usb`, which will put the server on your phone back to the USB mode. 
+- To switch the server back to the USB mode, run `adb usb`, which will put the server on your phone back to the USB mode.
 - If you have more than one device, you can specify the device with the -s option: `adb -s <DEVICE_IP_ADDRESS>:5555 usb`
-- To find the IP address of the device: run `adb shell` and then `netcfg`. 
+- To find the IP address of the device: run `adb shell` and then `netcfg`.
 - To find the IP address while using OSX run the command adb shell ip route.

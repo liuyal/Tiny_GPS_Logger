@@ -155,15 +155,21 @@ class BLE_Callbacks: public BLECharacteristicCallbacks {
           pCharacteristic->indicate();
         }
         else if (value[0] == 0x06) {
-          Serial_Print("[start_ble_print]\n\r"); statusFlags[GPS_BLE_PRINT_FLAG_INDEX] = true;
+          Serial_Print("[start_ble_print]\n\r"); 
+          statusFlags[GPS_BLE_PRINT_FLAG_INDEX] = true;
+          statusFlags[GPS_SERIAL_PRINT_FLAG_INDEX] = true;
           EEPROM.write(GPS_BLE_PRINT_FLAG_INDEX, 0x01); EEPROM.commit();
+          EEPROM.write(GPS_SERIAL_PRINT_FLAG_INDEX, 0x01); EEPROM.commit();
           byte buf[2] = {0x01, 0x01};
           pCharacteristic->setValue(buf, sizeof(buf));
           pCharacteristic->indicate();
         }
         else if (value[0] == 0x07) {
-          Serial_Print("[end_ble_print]\n\r"); statusFlags[GPS_BLE_PRINT_FLAG_INDEX] = false;
+          Serial_Print("[end_ble_print]\n\r"); 
+          statusFlags[GPS_BLE_PRINT_FLAG_INDEX] = false;
+          statusFlags[GPS_SERIAL_PRINT_FLAG_INDEX] = false;
           EEPROM.write(GPS_BLE_PRINT_FLAG_INDEX, 0x00); EEPROM.commit();
+          EEPROM.write(GPS_SERIAL_PRINT_FLAG_INDEX, 0x00); EEPROM.commit();
           byte buf[2] = {0x01, 0x01};
           pCharacteristic->setValue(buf, sizeof(buf));
           pCharacteristic->indicate();
