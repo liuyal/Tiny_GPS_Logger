@@ -1,14 +1,12 @@
 # Tiny GPS Logger
 
-A portable GPS logging device built with ESP32, NEO-6M, and SD Card Module.
+Portable GPS logging device built with ESP32, NEO-6M, and SD Card Module.
 
-## Hardware Schematic
-
-## Hardware Pin Connection
+## Hardware Schematic & Pin Connection
 
 ## Android App User Guide
 
-## BLE Code
+## BLE Instruction Code
 
 | Hex Code | Function | Description |
 | :---: | --- | --- |
@@ -31,32 +29,32 @@ A portable GPS logging device built with ESP32, NEO-6M, and SD Card Module.
 
 ### 6 Bit GPS Status Flag System
 
-| Bit Number | Function | Description |
+| Bit Index | Function | Description |
 | :---: | --- | --- |
-| 1 | BLE Device Connection 		| True if BLE service on GPS device is connected to BLE client |
+| 1 | BLE Connection 		| True if BLE service on GPS device is connected to BLE client |
 | 2 | GPS Has Fix 							| True if GPS has location fix |
 | 3 | GPS On/Off Status					| True if GPS service is enabled on device |
-| 4 | GPS Serial Print Status  	| True if GPS sentences serial print is enabled |
-| 5 | GPS BLE Print Status  		| True if GPS sentences BLE print is enabled |
+| 4 | Serial Print Status  	| True if GPS sentences serial print is enabled |
+| 5 | BLE Print Status  		| True if GPS sentences BLE print is enabled |
 | 6 | Logging Status 						| True if GPS sentences logging is enabled |
 
 ## Resource Links
 
-GPS
+GPS Module
 - [NMEA Messages Info](https://www.gpsinformation.org/dale/nmea.htm)
 - [Tiny GPS++ Library](http://arduiniana.org/libraries/tinygpsplus/)
 - [NEO-6M Guide A](https://randomnerdtutorials.com/guide-to-neo-6m-gps-module-with-arduino/)
 - [NEO-6M Guide B](https://lastminuteengineers.com/neo6m-gps-arduino-tutorial/)
-- [NEO-6 DataSheet](https://www.u-blox.com/sites/default/files/products/documents/NEO-6_DataSheet_%28GPS.G6-HW-09005%29.pdf)
-- [NEO-6 Product Summary](https://www.u-blox.com/sites/default/files/products/documents/NEO-6_ProductSummary_%28GPS.G6-HW-09003%29.pdf)
+- [NEO-6M DataSheet](https://www.u-blox.com/sites/default/files/products/documents/NEO-6_DataSheet_%28GPS.G6-HW-09005%29.pdf)
+- [NEO-6M Product Summary](https://www.u-blox.com/sites/default/files/products/documents/NEO-6_ProductSummary_%28GPS.G6-HW-09003%29.pdf)
 - [NEOGPS](https://github.com/SlashDevin/NeoGPS/tree/master/examples)
 
-SD CARD
+SD CARD Module
 - [ESP32 SD Card Example](https://randomnerdtutorials.com/esp32-data-logging-temperature-to-microsd-card/)
 - [SD Card Example](https://lastminuteengineers.com/arduino-micro-sd-card-module-tutorial/)
 - [SD Library](https://www.arduino.cc/en/reference/SD)
 
-BLE
+Bluetooth Low Energy
 - [UUID Generator](https://www.uuidgenerator.net/)
 - [ESP32 BLE Guide](https://randomnerdtutorials.com/esp32-bluetooth-low-energy-ble-arduino-ide/)
 - [Change Characteristic](https://github.com/espressif/arduino-esp32/issues/1038)
@@ -66,7 +64,7 @@ Android App
 - [Bluetooth Device](https://developer.android.com/reference/kotlin/android/bluetooth/package-summary)
 - [Bluetooth GATT](https://developer.android.com/reference/android/bluetooth/BluetoothGatt)
 - [BLE Basics](https://developer.android.com/guide/topics/connectivity/bluetooth-le)
-- [GATT (Services and Characteristics)](https://www.oreilly.com/library/view/getting-started-with/9781491900550/ch04.html)
+- [GATT Services & Characteristics](https://www.oreilly.com/library/view/getting-started-with/9781491900550/ch04.html)
 - [Remote adb](https://stackoverflow.com/questions/4893953/run-install-debug-android-applications-over-wi-fi)
 - [Kotlin Map](https://pusher.com/tutorials/realtime-map-kotlin)
 - [Kotlin Real Time Map repo](https://github.com/neoighodaro/realtime-map-example-kotlin/blob/master/app/src/main/java/com/example/android/realtimemapkotlin/MainActivity.kt)
