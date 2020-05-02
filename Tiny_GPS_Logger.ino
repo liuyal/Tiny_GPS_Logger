@@ -155,7 +155,7 @@ class BLE_Callbacks: public BLECharacteristicCallbacks {
           pCharacteristic->indicate();
         }
         else if (value[0] == 0x06) {
-          Serial_Print("[start_ble_print]\n\r"); 
+          Serial_Print("[start_ble_print]\n\r");
           statusFlags[GPS_BLE_PRINT_FLAG_INDEX] = true;
           statusFlags[GPS_SERIAL_PRINT_FLAG_INDEX] = true;
           EEPROM.write(GPS_BLE_PRINT_FLAG_INDEX, 0x01); EEPROM.commit();
@@ -165,7 +165,7 @@ class BLE_Callbacks: public BLECharacteristicCallbacks {
           pCharacteristic->indicate();
         }
         else if (value[0] == 0x07) {
-          Serial_Print("[end_ble_print]\n\r"); 
+          Serial_Print("[end_ble_print]\n\r");
           statusFlags[GPS_BLE_PRINT_FLAG_INDEX] = false;
           statusFlags[GPS_SERIAL_PRINT_FLAG_INDEX] = false;
           EEPROM.write(GPS_BLE_PRINT_FLAG_INDEX, 0x00); EEPROM.commit();
@@ -175,13 +175,13 @@ class BLE_Callbacks: public BLECharacteristicCallbacks {
           pCharacteristic->indicate();
         }
         else if (value[0] == 0x08) {
-          //TODO: FIX date format
           String gps_valid = String(gps.location.isValid()) + "," + String(gps.location.isUpdated()) + "," + String(gps.location.age());
-          String gps_data_a = String(gps.location.lat(), 7) + "," + String(gps.location.lng(), 7) + "," + String(gps.date.value());
-          String gps_data_b = String(gps.time.hour()) + "," + String(gps.time.minute()) + "," + String(gps.time.second());
-          String gps_data_c = String(gps.satellites.value()) + "," + String(gps.speed.kmph()) + "," + String(gps.course.deg());
-          String gps_data_d = String(gps.altitude.meters()) + "," +  String(gps.hdop.value());
-          String packet = "[" + gps_valid + "," + gps_data_a  + "," + gps_data_b + "," + gps_data_c + "," + gps_data_d + "]";
+          String gps_data_a = String(gps.location.lat(), 7) + "," + String(gps.location.lng(), 7);
+          String gps_data_b = String(gps.date.year()) + "," + String(gps.date.month()) + "," + String(gps.date.day());
+          String gps_data_c = String(gps.time.hour()) + "," + String(gps.time.minute()) + "," + String(gps.time.second());
+          String gps_data_d = String(gps.satellites.value()) + "," + String(gps.speed.kmph()) + "," + String(gps.course.deg());
+          String gps_data_e = String(gps.altitude.meters()) + "," +  String(gps.hdop.value());
+          String packet = "[" + gps_valid + "," + gps_data_a  + "," + gps_data_b + "," + gps_data_c + "," + gps_data_d + "," + gps_data_e + "]";
           byte buf[packet.length() + 1];
           packet.getBytes(buf, sizeof(buf));
           pCharacteristic->setValue(buf, sizeof(buf));
@@ -488,11 +488,12 @@ void CMD_EVENT() {
   }
   else if (receivedChars.indexOf("data") >= 0) {
     String gps_valid = String(gps.location.isValid()) + "," + String(gps.location.isUpdated()) + "," + String(gps.location.age());
-    String gps_data_a = String(gps.location.lat(), 7) + "," + String(gps.location.lng(), 7) + "," + String(gps.date.value());
-    String gps_data_b = String(gps.time.hour()) + "," + String(gps.time.minute()) + "," + String(gps.time.second());
-    String gps_data_c = String(gps.satellites.value()) + "," + String(gps.speed.kmph()) + "," + String(gps.course.deg());
-    String gps_data_d = String(gps.altitude.meters()) + "," +  String(gps.hdop.value());
-    String packet = "[" + gps_valid + "," + gps_data_a  + "," + gps_data_b + "," + gps_data_c + "," + gps_data_d + "]";
+    String gps_data_a = String(gps.location.lat(), 7) + "," + String(gps.location.lng(), 7);
+    String gps_data_b = String(gps.date.year()) + "," + String(gps.date.month()) + "," + String(gps.date.day());
+    String gps_data_c = String(gps.time.hour()) + "," + String(gps.time.minute()) + "," + String(gps.time.second());
+    String gps_data_d = String(gps.satellites.value()) + "," + String(gps.speed.kmph()) + "," + String(gps.course.deg());
+    String gps_data_e = String(gps.altitude.meters()) + "," +  String(gps.hdop.value());
+    String packet = "[" + gps_valid + "," + gps_data_a  + "," + gps_data_b + "," + gps_data_c + "," + gps_data_d + "," + gps_data_e + "]";
     Serial_Print(packet + "\n\r");
   }
   else if (receivedChars.indexOf("list") >= 0) {

@@ -138,7 +138,6 @@ class BLEActivity : AppCompatActivity() {
             this.runOnUiThread { progressBar?.visibility = View.VISIBLE }
 
             try {
-                Thread.sleep(1000)
                 this.bluetoothLeScanner.stopScan(this.bleScanner)
                 isConnected = GlobalApp.BLE?.connect(partItem.address.toString())!!
             } catch (e: Throwable) {

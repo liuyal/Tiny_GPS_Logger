@@ -32,7 +32,7 @@ class MapFragment : Fragment() {
 
         view.toggleButton.setOnClickListener {
             val main = activity as MainActivity?
-            main?.statueCheckThread?.interrupt()
+            if (main?.statueCheckThread != null && main.statueCheckThread?.isAlive!!) main.statueCheckThread?.interrupt()
             main?.statueCheckThread = null
             main?.statueCheckThread = Thread(Runnable { main?.updateMaps() })
             main?.statueCheckThread!!.start()
@@ -78,25 +78,15 @@ class MapFragment : Fragment() {
 
     private fun bleLinkCheck() {
         val main = activity as MainActivity?
-        if (this.checkBLEon() && GlobalApp.BLE?.connectionState == STATE_CONNECTED && main != null) {
+        if (main != null && main.checkBTon() && GlobalApp.BLE?.connectionState == STATE_CONNECTED) {
             if (GlobalApp.BLE == null) {
                 GlobalApp.BLE = BLEDevice(main as Context, activity as ContextWrapper)
                 GlobalApp.BLE!!.initialize()
             }
+            if (main.statueCheckThread != null && main.statueCheckThread?.isAlive!!) main.statueCheckThread?.interrupt()
             main.statueCheckThread = null
             main.statueCheckThread = Thread(Runnable { main.connectionHandler() })
             main.statueCheckThread!!.start()
         }
-    }
-
-    private fun checkBLEon(): Boolean {
-        if (BluetoothAdapter.getDefaultAdapter() == null) {
-            Toast.makeText(activity, "BlueTooth is not supported!", Toast.LENGTH_SHORT).show()
-        } else if (!BluetoothAdapter.getDefaultAdapter().isEnabled) {
-            Toast.makeText(activity, "BlueTooth is not enabled!", Toast.LENGTH_SHORT).show()
-        } else if (BluetoothAdapter.getDefaultAdapter().isEnabled) {
-            return true
-        }
-        return false
     }
 }

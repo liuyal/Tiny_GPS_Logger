@@ -24,7 +24,7 @@ class HomeFragment : Fragment() {
     private lateinit var homeViewModel: HomeViewModel
 
     // TODO: Make persistent
-    private var autoCheck: Boolean = false
+    private var autoCheckRunning: Boolean = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
@@ -32,36 +32,35 @@ class HomeFragment : Fragment() {
 
         view.action_button_A.setOnClickListener {
             val main = activity as MainActivity?
-            val checkBLEon = checkBLEon()
-            if (checkBLEon && !autoCheck) {
-                autoCheck = true
-                main?.statueCheckThread = null
-                main?.statueCheckThread = Thread(Runnable { main?.checkTaskLoop() })
-                main?.statueCheckThread!!.start()
-            } else if (checkBLEon) {
-                autoCheck = false
-                main?.statueCheckThread?.interrupt()
-                main?.statueCheckThread = null
+            if (main != null && main.checkBTon() && !autoCheckRunning) {
+                autoCheckRunning = true
+                if (main.statueCheckThread != null && main.statueCheckThread?.isAlive!!) main.statueCheckThread?.interrupt()
+                main.statueCheckThread = null
+                main.statueCheckThread = Thread(Runnable { main.checkTaskLoop() })
+                main.statueCheckThread!!.start()
+            } else if (main != null && main.checkBTon() && main.statueCheckThread?.isAlive!!) {
+                autoCheckRunning = false
+                main.statueCheckThread?.interrupt()
+                main.statueCheckThread = null
                 view.action_button_A.setColorFilter(Color.WHITE)
             }
         }
 
         view.action_button_B.setOnClickListener {
-            val isConnected = GlobalApp.BLE?.connectionState == STATE_CONNECTED
             val main = activity as MainActivity?
-            val checkBLEon = checkBLEon()
-            if (checkBLEon && isConnected && main != null) {
-                main.statueCheckThread?.interrupt()
+            if (main != null && main.checkBTon() && GlobalApp.BLE?.connectionState == STATE_CONNECTED) {
+                if (main.statueCheckThread != null && main.statueCheckThread?.isAlive!!) main.statueCheckThread?.interrupt()
                 main.statueCheckThread = null
                 main.disconnectionUIHandler()
-            } else if (checkBLEon) {
+            } else if (main != null && main.checkBTon()) {
                 if (GlobalApp.BLE == null) {
                     GlobalApp.BLE = BLEDevice(main as Context, activity as ContextWrapper)
                     GlobalApp.BLE!!.initialize()
                 }
-                main?.statueCheckThread = null
-                main?.statueCheckThread = Thread(Runnable { main?.connectionUIHandler() })
-                main?.statueCheckThread!!.start()
+                if (main.statueCheckThread != null && main.statueCheckThread?.isAlive!!) main.statueCheckThread?.interrupt()
+                main.statueCheckThread = null
+                main.statueCheckThread = Thread(Runnable { main.connectionUIHandler() })
+                main.statueCheckThread!!.start()
             }
         }
         return view
@@ -90,25 +89,15 @@ class HomeFragment : Fragment() {
 
     private fun bleLinkCheck() {
         val main = activity as MainActivity?
-        if (checkBLEon() &&  GlobalApp.BLE?.connectionState == STATE_CONNECTED && main != null) {
+        if (main != null && main.checkBTon() && GlobalApp.BLE?.connectionState == STATE_CONNECTED) {
             if (GlobalApp.BLE == null) {
                 GlobalApp.BLE = BLEDevice(main as Context, activity as ContextWrapper)
                 GlobalApp.BLE!!.initialize()
             }
+            if (main.statueCheckThread != null && main.statueCheckThread?.isAlive!!) main.statueCheckThread?.interrupt()
             main.statueCheckThread = null
             main.statueCheckThread = Thread(Runnable { main.connectionUIHandler() })
             main.statueCheckThread!!.start()
         }
-    }
-
-    private fun checkBLEon(): Boolean {
-        if (BluetoothAdapter.getDefaultAdapter() == null) {
-            Toast.makeText(activity, "BlueTooth is not supported!", Toast.LENGTH_SHORT).show()
-        } else if (!BluetoothAdapter.getDefaultAdapter().isEnabled) {
-            Toast.makeText(activity, "BlueTooth is not enabled!", Toast.LENGTH_SHORT).show()
-        } else if (BluetoothAdapter.getDefaultAdapter().isEnabled) {
-            return true
-        }
-        return false
     }
 }

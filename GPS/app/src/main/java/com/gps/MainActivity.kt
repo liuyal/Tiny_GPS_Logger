@@ -1,9 +1,13 @@
 package com.gps
 
 import android.bluetooth.BluetoothAdapter
+import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -15,6 +19,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.findNavController
@@ -25,12 +30,10 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import com.google.android.material.navigation.NavigationView
 import com.gps.objects.*
+import com.mapbox.android.gestures.Utils
 import maes.tech.intentanim.CustomIntent
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -62,18 +65,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             }
             true
         }
-        if (BluetoothAdapter.getDefaultAdapter() == null) {
-            Toast.makeText(applicationContext, "BlueTooth is not supported!", Toast.LENGTH_SHORT).show()
-        } else if (!BluetoothAdapter.getDefaultAdapter().isEnabled) {
-            Toast.makeText(applicationContext, "BlueTooth is not enabled!", Toast.LENGTH_SHORT).show()
-        } else if (BluetoothAdapter.getDefaultAdapter().isEnabled) {
-            if (GlobalApp.BLE == null) {
-                GlobalApp.BLE = BLEDevice(this, applicationContext as ContextWrapper)
-                GlobalApp.BLE!!.initialize()
-            } else {
-                GlobalApp.BLE?.context = this
-                GlobalApp.BLE?.applicationContext = applicationContext as ContextWrapper
-            }
+        if (this.checkBTon() && GlobalApp.BLE == null) {
+            GlobalApp.BLE = BLEDevice(this, applicationContext as ContextWrapper)
+            GlobalApp.BLE!!.initialize()
+        } else if (this.checkBTon()) {
+            GlobalApp.BLE?.context = this
+            GlobalApp.BLE?.applicationContext = applicationContext as ContextWrapper
         }
         val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
         val navView: NavigationView = findViewById(R.id.nav_view)
@@ -102,6 +99,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         return true
     }
 
+    override fun onSupportNavigateUp(): Boolean {
+        val navController = findNavController(R.id.nav_host_fragment)
+        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    }
+
     override fun onMapReady(googleMap: GoogleMap?) {
         this.googleMap = googleMap!!
         this.googleMap.uiSettings.isZoomControlsEnabled = true
@@ -110,14 +112,26 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         this.googleMap.uiSettings.isScrollGesturesEnabled = true
         this.googleMap.uiSettings.isTiltGesturesEnabled = true
         this.googleMap.uiSettings.isRotateGesturesEnabled = true
-        marker = googleMap.addMarker(markerOptions)
-        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+        this.marker = googleMap.addMarker( this.markerOptions)
+        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition( this.cameraPosition))
+        googleMap.mapType = GoogleMap.MAP_TYPE_NORMAL
     }
 
     fun createMaps() {
-        markerOptions = MarkerOptions()
-        markerOptions.position(LatLng(defaultLatitude, defaultLongitude))
-        cameraPosition = CameraPosition.Builder().target(LatLng(defaultLatitude, defaultLongitude)).zoom(10f).build()
+        this.markerOptions = MarkerOptions()
+        val bitmapDescriptor = bitmapDescriptorFromVector(this, R.drawable.ic_fiber_manual_record_black_24dp)
+        this.markerOptions.icon(bitmapDescriptor)
+        this.markerOptions.position(LatLng(defaultLatitude, defaultLongitude))
+        this.cameraPosition = CameraPosition.Builder().target(LatLng(defaultLatitude, defaultLongitude)).zoom(10f).build()
+    }
+
+    private fun bitmapDescriptorFromVector(context: Context, vectorResId: Int): BitmapDescriptor? {
+        return ContextCompat.getDrawable(context, vectorResId)?.run {
+            setBounds(0, 0, intrinsicWidth, intrinsicHeight)
+            val bitmap = Bitmap.createBitmap(intrinsicWidth, intrinsicHeight, Bitmap.Config.ARGB_8888)
+            draw(Canvas(bitmap))
+            BitmapDescriptorFactory.fromBitmap(bitmap)
+        }
     }
 
     fun updateMaps() {
@@ -184,19 +198,18 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             this.runOnUiThread { Toast.makeText(applicationContext, "No Device Paired", Toast.LENGTH_SHORT).show() }
             return
         }
-
         var connected = false
         val start = System.currentTimeMillis()
         while (!connected && (GlobalApp.BLE?.connectionState != STATE_CONNECTED || GlobalApp.BLE?.bleGATT == null)) {
             connected = GlobalApp.BLE?.connect(GlobalApp.BLE?.bleAddress!!)!!
             if (System.currentTimeMillis() - start > 10 * TIME_OUT) break
         }
-
-        if (connected || GlobalApp.BLE?.connectionState == STATE_CONNECTED) {
+        if (GlobalApp.BLE?.connectionState == STATE_CONNECTED || connected) {
+            Thread.sleep(1000)
             GlobalApp.BLE?.fetchDeviceStatus()
+            Thread.sleep(1000)
             this.runOnUiThread { updateUIStatusBar() }
         } else Log.d("MAIN", "Unable to Connect to Device")
-
         Log.d("MAIN", "Connection Handler Complete")
     }
 
@@ -205,6 +218,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         this.runOnUiThread { findViewById<ProgressBar>(R.id.status_progress_bar)?.visibility = View.VISIBLE }
         if (GlobalApp.BLE?.bleAddress == null || GlobalApp.BLE?.bleAddress == "") {
             this.runOnUiThread {
+                updateUIDeviceInfo()
                 disconnectionUIHandler()
                 Toast.makeText(applicationContext, "No Device Paired", Toast.LENGTH_SHORT).show()
             }
@@ -216,7 +230,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             connected = GlobalApp.BLE?.connect(GlobalApp.BLE?.bleAddress!!)!!
             if (System.currentTimeMillis() - start > 10 * TIME_OUT) break
         }
-        if (connected || GlobalApp.BLE?.connectionState == STATE_CONNECTED) {
+        if (GlobalApp.BLE?.connectionState == STATE_CONNECTED || connected) {
+            Thread.sleep(1000)
             GlobalApp.BLE?.fetchDeviceStatus()
             Thread.sleep(1000)
             this.runOnUiThread {
@@ -320,10 +335,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         if (gpsData != null && gpsData != "") {
             gpsData = gpsData.substring(gpsData.indexOf('[') + 1, gpsData.indexOf(']'))
             val gpdDataList = gpsData.split(',') as ArrayList<String>
+            if (gpdDataList[DATE_MONTH_INDEX].toInt() < 10) gpdDataList[DATE_MONTH_INDEX] = "0" + gpdDataList[DATE_MONTH_INDEX]
+            if (gpdDataList[DATE_DAY_INDEX].toInt() < 10) gpdDataList[DATE_DAY_INDEX] = "0" + gpdDataList[DATE_DAY_INDEX]
             if (gpdDataList[TIME_HOUR_INDEX].toInt() < 10) gpdDataList[TIME_HOUR_INDEX] = "0" + gpdDataList[TIME_HOUR_INDEX]
             if (gpdDataList[TIME_MINUTE_INDEX].toInt() < 10) gpdDataList[TIME_MINUTE_INDEX] = "0" + gpdDataList[TIME_MINUTE_INDEX]
             if (gpdDataList[TIME_SECOND_INDEX].toInt() < 10) gpdDataList[TIME_SECOND_INDEX] = "0" + gpdDataList[TIME_SECOND_INDEX]
-            gpsDate?.text = gpdDataList[DATE_VALUE_INDEX]
+            gpsDate?.text = getString(R.string.gpsDate, gpdDataList[DATE_YEAR_INDEX], gpdDataList[DATE_MONTH_INDEX], gpdDataList[DATE_DAY_INDEX])
             gpsTime?.text = getString(R.string.gpsTime, gpdDataList[TIME_HOUR_INDEX], gpdDataList[TIME_MINUTE_INDEX], gpdDataList[TIME_SECOND_INDEX])
             latitude?.text = gpdDataList[LOCATION_LAT_INDEX]
             longitude?.text = gpdDataList[LOCATION_LNG_INDEX]
@@ -335,8 +352,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment)
-        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    fun checkBTon(): Boolean {
+        if (BluetoothAdapter.getDefaultAdapter() == null) {
+            Toast.makeText(applicationContext, "BlueTooth is not supported!", Toast.LENGTH_SHORT).show()
+        } else if (!BluetoothAdapter.getDefaultAdapter().isEnabled) {
+            Toast.makeText(applicationContext, "BlueTooth is not enabled!", Toast.LENGTH_SHORT).show()
+        } else if (BluetoothAdapter.getDefaultAdapter().isEnabled) {
+            return true
+        }
+        return false
     }
+
 }

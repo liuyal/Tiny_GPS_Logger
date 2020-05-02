@@ -35,6 +35,7 @@
     <string name="init_long">000.0000</string>
     <string name="init_date">000000</string>
     <string name="init_time">00:00:00</string>
+    <string name="gpsDate">%1$s%2$s%3$s</string>
     <string name="gpsTime">%1$s:%2$s:%3$s</string>
 
     <!--    HOME FRAGMENT                   -->

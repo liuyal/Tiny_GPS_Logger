@@ -38,15 +38,17 @@ const val LOCATION_IS_UPDATED_INDEX: Int = 1
 const val LOCATION_AGE_INDEX: Int = 2
 const val LOCATION_LAT_INDEX: Int = 3
 const val LOCATION_LNG_INDEX: Int = 4
-const val DATE_VALUE_INDEX: Int = 5
-const val TIME_HOUR_INDEX: Int = 6
-const val TIME_MINUTE_INDEX: Int = 7
-const val TIME_SECOND_INDEX: Int = 8
-const val SATELLITES_VALUE_INDEX: Int = 9
-const val SPEED_KMPH_INDEX: Int = 10
-const val COURSE_DEG_INDEX: Int = 11
-const val ALTITUDE_METERS_INDEX: Int = 12
-const val HDOP_VALUE_INDEX: Int = 13
+const val DATE_YEAR_INDEX: Int = 5
+const val DATE_MONTH_INDEX: Int = 6
+const val DATE_DAY_INDEX: Int = 7
+const val TIME_HOUR_INDEX: Int = 8
+const val TIME_MINUTE_INDEX: Int = 9
+const val TIME_SECOND_INDEX: Int = 10
+const val SATELLITES_VALUE_INDEX: Int = 11
+const val SPEED_KMPH_INDEX: Int = 12
+const val COURSE_DEG_INDEX: Int = 13
+const val ALTITUDE_METERS_INDEX: Int = 14
+const val HDOP_VALUE_INDEX: Int = 15
 
 const val STATE_DISCONNECTED: Int = 0
 const val STATE_CONNECTING: Int = 1
@@ -245,7 +247,6 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
         var serviceList = GlobalApp.BLE!!.bleGATT?.services
         var foundService = false
         var foundCharacteristics = false
-
         while (serviceList != null && serviceList.size < 1 && !foundService && !foundCharacteristics) {
             GlobalApp.BLE!!.bleGATT?.discoverServices()
             serviceList = GlobalApp.BLE!!.bleGATT?.services
@@ -278,7 +279,6 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
     private fun writeValue(value: ByteArray): Boolean {
         this.transactionSuccess = false
         val start = System.currentTimeMillis()
-
         val serviceCheck: Boolean = if (this.service == null || this.characteristic == null) {
             GlobalApp.BLE?.serviceChecks()!!
         } else true
@@ -298,7 +298,6 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
     private fun readValue(): ByteArray? {
         this.transactionSuccess = false
         val start = System.currentTimeMillis()
-
         val serviceCheck: Boolean = if (this.service == null || this.characteristic == null) {
             GlobalApp.BLE?.serviceChecks()!!
         } else true
