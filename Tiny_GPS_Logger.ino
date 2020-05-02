@@ -39,8 +39,8 @@ String log_buffer = "";
 #if DEBUG
 #include <WiFi.h>
 #include <WiFiUdp.h>
-const char* WIFI_SSID = "TELUS3854";
-const char* WIFI_PWD = "tsp5df7yfy";
+const char* WIFI_SSID = "";
+const char* WIFI_PWD = "";
 const int WIFI_TIMEOUT = 10 * 1000;
 const int UDP_PORT = 9996;
 IPAddress HOST_IP(192, 168, 1, 80);

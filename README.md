@@ -105,8 +105,12 @@ Portable GPS logging device built with ESP32, NEO-6M, and Catalex Micro SD Card 
 - [Android Developers: Bluetooth GATT](https://developer.android.com/reference/android/bluetooth/BluetoothGatt)
 - [Android Developers: BLE Basics](https://developer.android.com/guide/topics/connectivity/bluetooth-le)
 - [GATT Services & Characteristics](https://www.oreilly.com/library/view/getting-started-with/9781491900550/ch04.html)
+
+#### Google Map API
 - [Android Developers: Map Object](https://developers.google.com/maps/documentation/android-sdk/map)
 - [Android Developers: MapView](https://developers.google.com/android/reference/com/google/android/gms/maps/MapView)
+- [Android Developers: Map Controls and Gestures](https://developers.google.com/maps/documentation/android-sdk/controls)
 - [Mapbox API Offline maps](https://docs.mapbox.com/android/maps/overview/)
 - [Real-Time Map using Kotlin](https://pusher.com/tutorials/realtime-map-kotlin)
 - [Real-Time Map using Kotlin Repo](https://github.com/neoighodaro/realtime-map-example-kotlin)
+
