@@ -26,7 +26,7 @@ Portable GPS logging device built with ESP32, NEO-6M, and Catalex Micro SD Card 
 
 - TBA
 
-## Android [Remote adb debug](https://stackoverflow.com/questions/4893953/run-install-debug-android-applications-over-wi-fi)
+### Android [Remote adb debug](https://stackoverflow.com/questions/4893953/run-install-debug-android-applications-over-wi-fi)
 
 1. Connect the device via USB and make sure debugging is working;
 2. `adb tcpip 5555` This makes the device to start listening for connections on port 5555;
@@ -40,7 +40,7 @@ Portable GPS logging device built with ESP32, NEO-6M, and Catalex Micro SD Card 
 - To find the IP address of the device: run `adb shell` and then `netcfg`.
 - To find the IP address while using OSX run the command adb shell ip route.
 
-## BLE Instruction Code
+## BLE Instruction Codes
 
 | Hex Code | Function | Description |
 | :---: | --- | --- |
@@ -82,7 +82,8 @@ Portable GPS logging device built with ESP32, NEO-6M, and Catalex Micro SD Card 
 - [NEO-6M DataSheet](https://www.u-blox.com/sites/default/files/products/documents/NEO-6_DataSheet_%28GPS.G6-HW-09005%29.pdf)
 - [NEO-6M Product Summary](https://www.u-blox.com/sites/default/files/products/documents/NEO-6_ProductSummary_%28GPS.G6-HW-09003%29.pdf)
 - [NEOGPS Repo](https://github.com/SlashDevin/NeoGPS/tree/master/examples)
-
+- [LoRaTracker GPS Tutorial](https://github.com/LoRaTracker/GPSTutorial)
+- 
 #### ESP32
 - [ESP32 DataSheet](https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf)
 - [ESP32 Wiki](http://arduinoinfo.mywikis.net/wiki/Esp32)
@@ -110,7 +111,7 @@ Portable GPS logging device built with ESP32, NEO-6M, and Catalex Micro SD Card 
 - [Android Developers: Map Object](https://developers.google.com/maps/documentation/android-sdk/map)
 - [Android Developers: MapView](https://developers.google.com/android/reference/com/google/android/gms/maps/MapView)
 - [Android Developers: Map Controls and Gestures](https://developers.google.com/maps/documentation/android-sdk/controls)
+- [Android Developers: Map Makers](https://developers.google.com/maps/documentation/javascript/markers)
 - [Mapbox API Offline maps](https://docs.mapbox.com/android/maps/overview/)
 - [Real-Time Map using Kotlin](https://pusher.com/tutorials/realtime-map-kotlin)
 - [Real-Time Map using Kotlin Repo](https://github.com/neoighodaro/realtime-map-example-kotlin)
-

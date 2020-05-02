@@ -144,7 +144,7 @@ class BLEActivity : AppCompatActivity() {
             } catch (e: Throwable) {
                 e.printStackTrace()
             }
-
+            Thread.sleep(1000)
             if (isConnected && serviceUUID != null) {
                 GlobalApp.BLE?.device = partItem
                 GlobalApp.BLE?.scanResult = this.resultsList[index]
