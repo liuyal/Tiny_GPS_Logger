@@ -102,34 +102,105 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/statusBar"
-        android:layout_marginHorizontal="10dp"
         android:layout_marginTop="10dp"
         android:gravity="center">
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:ignore="UselessParent">
+            android:weightSum="6">
 
             <ImageButton
                 android:id="@+id/action_button_A"
-                android:layout_width="50dp"
+                android:layout_width="0dp"
                 android:layout_height="50dp"
-                android:layout_alignParentStart="true"
+                android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="5dp"
                 android:adjustViewBounds="true"
                 android:background="@drawable/btn_unpressed"
                 android:elevation="0dp"
                 android:gravity="center_vertical"
                 android:padding="6dp"
                 android:scaleType="fitCenter"
-                android:src="@drawable/ic_sync_black_24dp"
+                android:src="@drawable/ic_sync_disabled_black_24dp"
                 app:elevation="0dp" />
 
             <ImageButton
                 android:id="@+id/action_button_B"
-                android:layout_width="50dp"
+                android:layout_width="0dp"
                 android:layout_height="50dp"
-                android:layout_alignParentEnd="true"
+                android:layout_weight="1"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
+                android:adjustViewBounds="true"
+                android:background="@drawable/btn_unpressed"
+                android:elevation="0dp"
+                android:gravity="center_vertical"
+                android:padding="6dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_location_off_black_24dp"
+                android:tint="#FFF"
+                app:elevation="0dp" />
+
+            <ImageButton
+                android:id="@+id/action_button_B2"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
+                android:adjustViewBounds="true"
+                android:background="@drawable/btn_unpressed"
+                android:elevation="0dp"
+                android:gravity="center_vertical"
+                android:padding="6dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_gps_off_black_24dp"
+                android:tint="#FFF"
+                app:elevation="0dp" />
+
+            <ImageButton
+                android:id="@+id/action_button_C"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
+                android:adjustViewBounds="true"
+                android:background="@drawable/btn_unpressed"
+                android:elevation="0dp"
+                android:gravity="center_vertical"
+                android:padding="6dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_bluetooth_searching_black_24dp"
+                android:tint="#FFF"
+                app:elevation="0dp" />
+
+            <ImageButton
+                android:id="@+id/action_button_D"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
+                android:adjustViewBounds="true"
+                android:background="@drawable/btn_unpressed"
+                android:elevation="0dp"
+                android:gravity="center_vertical"
+                android:padding="6dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_fiber_manual_record_black_24dp"
+                android:tint="#FFF"
+                app:elevation="0dp" />
+
+            <ImageButton
+                android:id="@+id/action_button_E"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="10dp"
                 android:adjustViewBounds="true"
                 android:background="@drawable/btn_unpressed"
                 android:elevation="0dp"
@@ -139,7 +210,7 @@
                 android:src="@drawable/ic_link_black_24dp"
                 app:elevation="0dp" />
 
-        </RelativeLayout>
+        </LinearLayout>
 
     </LinearLayout>
 
@@ -155,7 +226,6 @@
         android:gravity="center"
         android:orientation="vertical"
         android:weightSum="100">
-
 
         <RelativeLayout
             android:id="@+id/infoView"

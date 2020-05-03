@@ -20,7 +20,6 @@ import com.google.android.gms.maps.model.*
 import com.gps.MainActivity
 import com.gps.R
 import com.gps.objects.*
-import kotlinx.android.synthetic.main.fragment_home.view.*
 import kotlinx.android.synthetic.main.fragment_map.view.*
 import kotlinx.android.synthetic.main.fragment_map.view.statusBar1
 import kotlinx.android.synthetic.main.fragment_map.view.statusBar2
@@ -112,7 +111,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     private fun createMaps() {
         this.markerOptions = MarkerOptions()
-        val bitmapDescriptor = bitmapDescriptorFromVector(activity as Context, R.drawable.ic_fiber_manual_record_black_24dp)
+        val bitmapDescriptor = bitmapDescriptorFromVector(activity as Context, R.drawable.ic_map_marker_24dp)
         this.markerOptions.icon(bitmapDescriptor)
         this.markerOptions.position(LatLng(defaultLatitude, defaultLongitude))
         this.cameraPosition = CameraPosition.Builder().target(LatLng(defaultLatitude, defaultLongitude)).zoom(10f).build()

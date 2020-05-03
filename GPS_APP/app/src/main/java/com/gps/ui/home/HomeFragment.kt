@@ -20,6 +20,7 @@ import com.gps.R
 import com.gps.objects.*
 import kotlinx.android.synthetic.main.fragment_home.view.*
 
+// TODO: Update all buttons
 class HomeFragment : Fragment() {
 
     private lateinit var homeViewModel: HomeViewModel
@@ -42,11 +43,12 @@ class HomeFragment : Fragment() {
                 autoCheckRunning = false
                 this.statueCheckThread?.interrupt()
                 this.statueCheckThread = null
+                view?.action_button_A?.setImageResource(R.drawable.ic_sync_disabled_black_24dp)
                 view?.action_button_A?.setColorFilter(Color.WHITE)
             }
         }
 
-        view.action_button_B.setOnClickListener {
+        view.action_button_E.setOnClickListener {
             val main = activity as MainActivity?
             if (main != null && main.checkBTon() && GlobalApp.BLE?.connectionState == STATE_CONNECTED) {
                 if (this.statueCheckThread != null && this.statueCheckThread?.isAlive!!) this.statueCheckThread?.interrupt()
@@ -91,11 +93,10 @@ class HomeFragment : Fragment() {
         Log.d("HOME", "Stopped h Fragment")
     }
 
-    // TODO: configurable delay (in settings fragment)
     private fun checkTaskLoop() {
         try {
             Log.d("HOME", "STATUS CHECK START")
-            val delay = 5
+            val delay = 5 // TODO: configurable delay (in settings fragment)
             activity?.runOnUiThread { view?.status_progress_bar?.visibility = View.VISIBLE }
             if (GlobalApp.BLE?.bleAddress == null || GlobalApp.BLE?.bleAddress == "") {
                 activity?.runOnUiThread {
@@ -107,11 +108,7 @@ class HomeFragment : Fragment() {
             if (GlobalApp.BLE?.connectionState != STATE_CONNECTED || GlobalApp.BLE?.bleGATT == null) {
                 GlobalApp.BLE?.connect(GlobalApp.BLE?.bleAddress!!)!!
             }
-            activity?.runOnUiThread {
-                this.updateUIDeviceInfo()
-                view?.action_button_A?.setColorFilter(Color.GREEN)
-                view?.action_button_B?.setColorFilter(ResourcesCompat.getColor(resources, R.color.DodgerBlue, null))
-            }
+            activity?.runOnUiThread { this.updateUIDeviceInfo() }
             Thread.sleep(1000)
             while (true) {
                 try {
@@ -123,6 +120,9 @@ class HomeFragment : Fragment() {
                             this.updateUIStatusInfo()
                             this.updateUIStatusBar()
                             this.updateUICoordinateInfo()
+                            view?.action_button_A?.setImageResource(R.drawable.ic_sync_black_24dp)
+                            view?.action_button_A?.setColorFilter(Color.GREEN)
+                            view?.action_button_E?.setColorFilter(ResourcesCompat.getColor(resources, R.color.DodgerBlue, null))
                             view?.status_progress_bar?.visibility = View.GONE
                         }
                         Thread.sleep((delay * TIME_OUT).toLong())
@@ -163,12 +163,13 @@ class HomeFragment : Fragment() {
                     this.updateUIDeviceInfo()
                     this.updateUIStatusInfo()
                     this.updateUIStatusBar()
-                    view?.action_button_B?.setColorFilter(ResourcesCompat.getColor(resources, R.color.DodgerBlue, null))
+                    view?.action_button_E?.setColorFilter(ResourcesCompat.getColor(resources, R.color.DodgerBlue, null))
                 }
             } else {
                 activity?.runOnUiThread {
+                    view?.action_button_A?.setImageResource(R.drawable.ic_sync_disabled_black_24dp)
                     view?.action_button_A?.setColorFilter(Color.WHITE)
-                    view?.action_button_B?.setColorFilter(Color.WHITE)
+                    view?.action_button_E?.setColorFilter(Color.WHITE)
                 }
                 Log.d("HOME", "Unable to Connect to Device")
             }
@@ -181,8 +182,10 @@ class HomeFragment : Fragment() {
 
     private fun disconnectionUIHandler() {
         try {
+            view?.action_button_A?.setImageResource(R.drawable.ic_sync_disabled_black_24dp)
             view?.action_button_A?.setColorFilter(Color.WHITE)
-            view?.action_button_B?.setColorFilter(Color.WHITE)
+            view?.action_button_B?.setImageResource(R.drawable.ic_location_off_black_24dp)
+            view?.action_button_E?.setColorFilter(Color.WHITE)
             view?.status_progress_bar?.visibility = View.GONE
             GlobalApp.BLE?.disconnect()
             this.updateUIStatusInfo()
@@ -216,6 +219,15 @@ class HomeFragment : Fragment() {
             }
         } catch (e: Throwable) {
             Log.e("HOME", "Update UI Status Bar Error")
+        }
+    }
+
+    private fun updateUIStatusButtons() {
+        try {
+
+
+        } catch (e: Throwable) {
+            Log.e("HOME", "Update UI Status Button Error")
         }
     }
 
