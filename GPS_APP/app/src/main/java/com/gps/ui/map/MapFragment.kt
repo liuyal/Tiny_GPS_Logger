@@ -25,8 +25,7 @@ import kotlinx.android.synthetic.main.fragment_map.view.statusBar1
 import kotlinx.android.synthetic.main.fragment_map.view.statusBar2
 import kotlinx.android.synthetic.main.fragment_map.view.statusBar3
 import kotlinx.android.synthetic.main.fragment_map.view.statusBar4
-import kotlinx.android.synthetic.main.fragment_map.view.statusBar5
-import kotlinx.android.synthetic.main.fragment_map.view.statusBar6
+
 
 class MapFragment : Fragment(), OnMapReadyCallback {
 
@@ -182,8 +181,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         statusBarArray?.add(view?.statusBar2!!)
         statusBarArray?.add(view?.statusBar3!!)
         statusBarArray?.add(view?.statusBar4!!)
-        statusBarArray?.add(view?.statusBar5!!)
-        statusBarArray?.add(view?.statusBar6!!)
         for (i in 0 until NUMBER_OF_FLAGS) {
             val view: View? = statusBarArray?.get(i)
             if (statusBarArray != null && GlobalApp.BLE?.gpsStatusFlags?.get(i)!!) {

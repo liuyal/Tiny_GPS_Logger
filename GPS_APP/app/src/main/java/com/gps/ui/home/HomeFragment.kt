@@ -12,7 +12,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.content.ContextCompat
-import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.gps.MainActivity
@@ -54,9 +53,7 @@ class HomeFragment : Fragment() {
 
         view.action_button_D.setOnClickListener {}
 
-        view.action_button_E.setOnClickListener {}
-
-        view.action_button_F.setOnClickListener {
+        view.action_button_E.setOnClickListener {
             val main = activity as MainActivity?
             if (main != null && main.checkBTon() && !autoCheckRunning) {
                 autoCheckRunning = true
@@ -68,7 +65,8 @@ class HomeFragment : Fragment() {
                 autoCheckRunning = false
                 this.statueCheckThread?.interrupt()
                 this.statueCheckThread = null
-                view?.action_button_F?.setColorFilter(Color.WHITE)
+                view?.action_button_E?.setImageResource(R.drawable.ic_sync_disabled_black_24dp)
+                view?.action_button_E?.setColorFilter(Color.WHITE)
             }
         }
 
@@ -160,9 +158,9 @@ class HomeFragment : Fragment() {
                 if (System.currentTimeMillis() - start > 10 * TIME_OUT) break
             }
             if (GlobalApp.BLE?.connectionState == STATE_CONNECTED || connected) {
-                Thread.sleep(500)
+                Thread.sleep(1000)
                 GlobalApp.BLE?.fetchDeviceStatus()
-                Thread.sleep(500)
+                Thread.sleep(1000)
                 activity?.runOnUiThread {
                     this.updateUIStatusBar()
                     this.updateUIStatusButtons()
@@ -176,6 +174,7 @@ class HomeFragment : Fragment() {
             activity?.runOnUiThread { view?.status_progress_bar?.visibility = View.GONE }
             Log.d("HOME", "Connection UI Handler Complete")
         } catch (e: Throwable) {
+            e.printStackTrace()
             Log.e("MAP", "Connection Handler Error")
         }
     }
@@ -203,8 +202,6 @@ class HomeFragment : Fragment() {
             statusBarArray?.add(view?.statusBar2!!)
             statusBarArray?.add(view?.statusBar3!!)
             statusBarArray?.add(view?.statusBar4!!)
-            statusBarArray?.add(view?.statusBar5!!)
-            statusBarArray?.add(view?.statusBar6!!)
             for (i in 0 until NUMBER_OF_FLAGS) {
                 val view: View? = statusBarArray?.get(i)
                 if (statusBarArray != null && GlobalApp.BLE?.gpsStatusFlags?.get(i)!!) {
@@ -251,19 +248,19 @@ class HomeFragment : Fragment() {
             }
 
             if (GlobalApp.BLE?.gpsStatusFlags?.get(GPS_LOGGING_FLAG_INDEX)!!) {
-                view?.action_button_E?.setImageResource(R.drawable.ic_fiber_manual_record_black_24dp)
-                view?.action_button_E?.setColorFilter(Color.RED)
+                view?.action_button_D?.setImageResource(R.drawable.ic_fiber_manual_record_black_24dp)
+                view?.action_button_D?.setColorFilter(Color.RED)
             } else if (!GlobalApp.BLE?.gpsStatusFlags?.get(GPS_LOGGING_FLAG_INDEX)!!) {
-                view?.action_button_E?.setImageResource(R.drawable.ic_fiber_manual_record_black_24dp)
-                view?.action_button_E?.setColorFilter(Color.WHITE)
+                view?.action_button_D?.setImageResource(R.drawable.ic_fiber_manual_record_black_24dp)
+                view?.action_button_D?.setColorFilter(Color.WHITE)
             }
 
             if (this.autoCheckRunning) {
-                view?.action_button_F?.setImageResource(R.drawable.ic_sync_black_24dp)
-                view?.action_button_F?.setColorFilter(Color.GREEN)
+                view?.action_button_E?.setImageResource(R.drawable.ic_sync_black_24dp)
+                view?.action_button_E?.setColorFilter(Color.GREEN)
             } else if (!this.autoCheckRunning) {
-                view?.action_button_F?.setImageResource(R.drawable.ic_sync_disabled_black_24dp)
-                view?.action_button_F?.setColorFilter(Color.WHITE)
+                view?.action_button_E?.setImageResource(R.drawable.ic_sync_disabled_black_24dp)
+                view?.action_button_E?.setColorFilter(Color.WHITE)
             }
 
         } catch (e: Throwable) {
@@ -297,8 +294,6 @@ class HomeFragment : Fragment() {
             iconArray?.add(view?.connected_text_label!!)
             iconArray?.add(view?.gps_on_text_label!!)
             iconArray?.add(view?.fix_text_label!!)
-            iconArray?.add(view?.serial_text_label!!)
-            iconArray?.add(view?.bleb_text_label!!)
             iconArray?.add(view?.log_text_label!!)
             for (i in 0 until NUMBER_OF_FLAGS) {
                 val icon: AppCompatImageView? = iconArray?.get(i)
@@ -323,6 +318,7 @@ class HomeFragment : Fragment() {
         try {
             val gpsDate: TextView? = view?.date_text_label
             val gpsTime: TextView? = view?.time_text_label
+            val satellite: TextView? = view?.sat_text_label
             val latitude: TextView? = view?.lat_text_label
             val longitude: TextView? = view?.long_text_label
             var gpsData = GlobalApp.BLE?.gpsData
@@ -336,11 +332,13 @@ class HomeFragment : Fragment() {
                 if (gpdDataList[TIME_SECOND_INDEX].toInt() < 10) gpdDataList[TIME_SECOND_INDEX] = "0" + gpdDataList[TIME_SECOND_INDEX]
                 gpsDate?.text = getString(R.string.gpsDate, gpdDataList[DATE_YEAR_INDEX], gpdDataList[DATE_MONTH_INDEX], gpdDataList[DATE_DAY_INDEX])
                 gpsTime?.text = getString(R.string.gpsTime, gpdDataList[TIME_HOUR_INDEX], gpdDataList[TIME_MINUTE_INDEX], gpdDataList[TIME_SECOND_INDEX])
+                satellite?.text = gpdDataList[SATELLITES_VALUE_INDEX]
                 latitude?.text = gpdDataList[LOCATION_LAT_INDEX]
                 longitude?.text = gpdDataList[LOCATION_LNG_INDEX]
             } else if (gpsData == null || gpsData == "") {
                 gpsDate?.text = getString(R.string.init_date)
                 gpsTime?.text = getString(R.string.init_time)
+                satellite?.text = getString(R.string.init_sat)
                 latitude?.text = getString(R.string.init_lat)
                 longitude?.text = getString(R.string.init_long)
             }

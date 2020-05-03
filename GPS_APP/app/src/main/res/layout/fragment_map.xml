@@ -10,101 +10,47 @@
         android:id="@+id/statusBar"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        tools:ignore="MissingConstraints">
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="@dimen/statusBarHeight"
-            android:layout_weight=".01"
-            android:background="@drawable/status_div" />
+        android:weightSum="100">
 
         <View
             android:id="@+id/statusBar1"
             android:layout_width="0dp"
             android:layout_height="@dimen/statusBarHeight"
-            android:layout_weight=".155"
+            android:layout_weight="25"
             android:background="@drawable/status_off" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="@dimen/statusBarHeight"
-            android:layout_weight=".01"
-            android:background="@drawable/status_div" />
 
         <View
             android:id="@+id/statusBar2"
             android:layout_width="0dp"
             android:layout_height="@dimen/statusBarHeight"
-            android:layout_weight=".155"
+            android:layout_weight="25"
             android:background="@drawable/status_off" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="@dimen/statusBarHeight"
-            android:layout_weight=".01"
-            android:background="@drawable/status_div" />
 
         <View
             android:id="@+id/statusBar3"
             android:layout_width="0dp"
             android:layout_height="@dimen/statusBarHeight"
-            android:layout_weight=".155"
+            android:layout_weight="25"
             android:background="@drawable/status_off" />
 
-        <View
-            android:layout_width="0dp"
-            android:layout_height="@dimen/statusBarHeight"
-            android:layout_weight=".01"
-            android:background="@drawable/status_div" />
 
         <View
             android:id="@+id/statusBar4"
             android:layout_width="0dp"
             android:layout_height="@dimen/statusBarHeight"
-            android:layout_weight=".155"
+            android:layout_weight="25"
             android:background="@drawable/status_off" />
 
-        <View
-            android:layout_width="0dp"
-            android:layout_height="@dimen/statusBarHeight"
-            android:layout_weight=".01"
-            android:background="@drawable/status_div" />
 
-        <View
-            android:id="@+id/statusBar5"
-            android:layout_width="0dp"
-            android:layout_height="@dimen/statusBarHeight"
-            android:layout_weight=".155"
-            android:background="@drawable/status_off" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="@dimen/statusBarHeight"
-            android:layout_weight=".01"
-            android:background="@drawable/status_div" />
-
-        <View
-            android:id="@+id/statusBar6"
-            android:layout_width="0dp"
-            android:layout_height="@dimen/statusBarHeight"
-            android:layout_weight=".155"
-            android:background="@drawable/status_off" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="@dimen/statusBarHeight"
-            android:layout_weight=".01"
-            android:background="@drawable/status_div" />
     </LinearLayout>
-
 
     <com.andexert.library.RippleView
         android:id="@+id/ripple"
-        android:layout_below="@+id/statusBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginHorizontal="10dp">
+        android:layout_below="@+id/statusBar"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginTop="10dp">
 
         <Button
             android:id="@+id/toggleButton"
@@ -121,8 +67,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginHorizontal="10dp"
         android:layout_below="@+id/ripple"
+        android:layout_marginHorizontal="10dp"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
         android:background="#2196F3"

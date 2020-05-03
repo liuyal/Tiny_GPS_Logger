@@ -17,22 +17,18 @@ const val SET_GPS_ON_CODE: Byte = 0x02
 const val SET_GPS_OFF_CODE: Byte = 0x03
 const val SET_GPG_LOGGING_ON_CODE: Byte = 0x04
 const val SET_GPG_LOGGING_OFF_CODE: Byte = 0x05
-const val SET_GPS_BLE_PRINT_ON_CODE: Byte = 0x06
-const val SET_GPS_BLE_PRINT_OFF_CODE: Byte = 0x07
-const val GET_GPS_DATA_CODE: Byte = 0x08
-const val LIST_LOG_FILES_CODE: Byte = 0x09
-const val READ_LOG_FILE_CODE: Byte = 0x0a
-const val GET_SDCARD_STATUS_CODE: Byte = 0x0b
-const val GPS_REBOOT_CODE: Byte = 0x0c
-const val GPS_RESET_CODE: Byte = 0x0d
+const val GET_GPS_DATA_CODE: Byte = 0x06
+const val LIST_LOG_FILES_CODE: Byte = 0x07
+const val READ_LOG_FILE_CODE: Byte = 0x08
+const val GET_SDCARD_STATUS_CODE: Byte = 0x09
+const val GPS_REBOOT_CODE: Byte = 0x0a
+const val GPS_RESET_CODE: Byte = 0x0b
 
-const val NUMBER_OF_FLAGS: Int = 6
+const val NUMBER_OF_FLAGS: Int = 4
 const val GPS_CONNECTION_FLAG_INDEX: Int = 0
 const val GPS_ON_FLAG_INDEX: Int = 1
 const val GPS_FIX_FLAG_INDEX: Int = 2
-const val GPS_SERIAL_PRINT_FLAG_INDEX: Int = 3
-const val GPS_BLE_PRINT_FLAG_INDEX: Int = 4
-const val GPS_LOGGING_FLAG_INDEX: Int = 5
+const val GPS_LOGGING_FLAG_INDEX: Int = 3
 
 const val LOCATION_IS_VALID_INDEX: Int = 0
 const val LOCATION_IS_UPDATED_INDEX: Int = 1
@@ -335,8 +331,6 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
             this.gpsStatusFlags?.set(GPS_CONNECTION_FLAG_INDEX, returnVal[GPS_CONNECTION_FLAG_INDEX].toInt().toBoolean())
             this.gpsStatusFlags?.set(GPS_FIX_FLAG_INDEX, returnVal[GPS_FIX_FLAG_INDEX].toInt().toBoolean())
             this.gpsStatusFlags?.set(GPS_ON_FLAG_INDEX, returnVal[GPS_ON_FLAG_INDEX].toInt().toBoolean())
-            this.gpsStatusFlags?.set(GPS_SERIAL_PRINT_FLAG_INDEX, returnVal[GPS_SERIAL_PRINT_FLAG_INDEX].toInt().toBoolean())
-            this.gpsStatusFlags?.set(GPS_BLE_PRINT_FLAG_INDEX, returnVal[GPS_BLE_PRINT_FLAG_INDEX].toInt().toBoolean())
             this.gpsStatusFlags?.set(GPS_LOGGING_FLAG_INDEX, returnVal[GPS_LOGGING_FLAG_INDEX].toInt().toBoolean())
             Log.d("BLE", returnVal.contentToString())
             Log.d("BLE", returnVal.toString(Charsets.UTF_8))
@@ -376,26 +370,6 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
 
     fun GPSloggingOff(): Boolean {
         writeValue(byteArrayOf(SET_GPG_LOGGING_OFF_CODE))
-        val returnVal = readValue()
-        if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
-            Log.d("BLE", returnVal.contentToString())
-            Log.d("BLE", returnVal.toString(Charsets.UTF_8))
-        } else return false
-        return true
-    }
-
-    fun BLEPrintOn(): Boolean {
-        writeValue(byteArrayOf(SET_GPS_BLE_PRINT_ON_CODE))
-        val returnVal = readValue()
-        if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
-            Log.d("BLE", returnVal.contentToString())
-            Log.d("BLE", returnVal.toString(Charsets.UTF_8))
-        } else return false
-        return true
-    }
-
-    fun BLEPrintOff(): Boolean {
-        writeValue(byteArrayOf(SET_GPS_BLE_PRINT_OFF_CODE))
         val returnVal = readValue()
         if (returnVal != null && returnVal[0] == oneByte && returnVal[1] == oneByte) {
             Log.d("BLE", returnVal.contentToString())

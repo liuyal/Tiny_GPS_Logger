@@ -9,18 +9,18 @@ Portable GPS logging device built with ESP32, NEO-6M, and Catalex Micro SD Card 
 | ESP32 | SD Card Module |
 | --- | --- |
 | Pin 5  | CS   |
-| Pin 18 | SCK	|
+| Pin 18 | SCK  |
 | Pin 23 | MOSI |
-| Pin 19 | MISO	|
-| 5V 		 | VCC  |
+| Pin 19 | MISO |
+| 5V     | VCC  |
 | GND    | GND  |
 
 | ESP32 | NEO-6M |
 | --- | --- |
-| 3V3    | VCC  |
-| Pin 17 | RX	  |
-| Pin 16 | TX   |
-| GND    | GND	|
+| 3V3    | VCC   |
+| Pin 17 | RX    |
+| Pin 16 | TX    |
+| GND    | GND   |
 
 ## Android App Guide
 
@@ -44,33 +44,29 @@ Portable GPS logging device built with ESP32, NEO-6M, and Catalex Micro SD Card 
 
 | Hex Code | Function | Description |
 | :---: | --- | --- |
-| 0x00 | None             			| Code Not Assigned |
-| 0x01 | Get device status 			| Get current GPS device statue code (see GPS Status Flags) |
-| 0x02 | Toggle GPS on 					| Turn GPS location service on 	|
-| 0x03 | Toggle GPS off 				| Turn GPS location service off |
-| 0x04 | Toggle logging on 			| Turn GPS sentences logging on |
-| 0x05 | Toggle logging off 		| Turn GPS sentences logging off |
-| 0x06 | Toggle BLE print on 		| Start sending GPS sentences via BLE and serial |
-| 0x07 | Toggle BLE print off 	| Stop sending GPS sentences via BLE and serial  |
-| 0x08 | Get GPS data 					| Get current GPS location data if GPS has fix   |
-| 0x09 | List Files 						| List all current log files on GPS SD card |
-| 0x0a | Read File 							| Read log file from GPS SD card |
-| 0x0b | Get SD Card Status 		| Get SD card usage information |
-| 0x0c | Reboot 								| Reboot GPS device |
-| 0x0d | Reset 									| Reset GPS device configurations and all status flags |
+| 0x00 | None               | Code Not Assigned |
+| 0x01 | Get device status  | Get current GPS device statue code (see GPS Status Flags) |
+| 0x02 | Toggle GPS on      | Turn GPS location service on     |
+| 0x03 | Toggle GPS off     | Turn GPS location service off |
+| 0x04 | Toggle logging on  | Turn GPS sentences logging on |
+| 0x05 | Toggle logging off | Turn GPS sentences logging off |
+| 0x06 | Get GPS data       | Get current GPS location data if GPS has fix   |
+| 0x07 | List Files         | List all current log files on GPS SD card |
+| 0x08 | Read File          | Read log file from GPS SD card |
+| 0x09 | Get SD Card Status | Get SD card usage information |
+| 0x0a | Reboot             | Reboot GPS device |
+| 0x0b | Reset              | Reset GPS device configurations and all status flags |
 
 ## GPS Status Flags
 
-#### 6 Bit GPS Status Flag System
+#### 4 Bit GPS Status Flag System
 
 | Bit Index | Function | Description |
 | :---: | --- | --- |
-| 0 | BLE Connection 		| True if BLE service on GPS device is connected to BLE client |
-| 1 | GPS Has Fix 							| True if GPS has location fix |
-| 2 | GPS On/Off Status					| True if GPS service is enabled on device |
-| 3 | Serial Print Status  	| True if GPS sentences serial print is enabled |
-| 4 | BLE Print Status  		| True if GPS sentences BLE print is enabled |
-| 5 | Logging Status 						| True if GPS sentences logging is enabled |
+| 0 | BLE Connection    | True if BLE service on GPS device is connected to BLE client |
+| 1 | GPS Has Fix       | True if GPS has location fix |
+| 2 | GPS On/Off Status | True if GPS service is enabled on device |
+| 3 | Logging Status    | True if GPS sentences logging is enabled |
 
 ## Resource Links
 

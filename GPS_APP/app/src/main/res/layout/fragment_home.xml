@@ -10,92 +10,40 @@
         android:id="@+id/statusBar"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        tools:ignore="MissingConstraints">
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="@dimen/statusBarHeight"
-            android:layout_weight=".01"
-            android:background="@drawable/status_div" />
+        android:weightSum="100">
 
         <View
             android:id="@+id/statusBar1"
             android:layout_width="0dp"
             android:layout_height="@dimen/statusBarHeight"
-            android:layout_weight=".155"
+            android:layout_weight="25"
             android:background="@drawable/status_off" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="@dimen/statusBarHeight"
-            android:layout_weight=".01"
-            android:background="@drawable/status_div" />
 
         <View
             android:id="@+id/statusBar2"
             android:layout_width="0dp"
             android:layout_height="@dimen/statusBarHeight"
-            android:layout_weight=".155"
+            android:layout_weight="25"
             android:background="@drawable/status_off" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="@dimen/statusBarHeight"
-            android:layout_weight=".01"
-            android:background="@drawable/status_div" />
 
         <View
             android:id="@+id/statusBar3"
             android:layout_width="0dp"
             android:layout_height="@dimen/statusBarHeight"
-            android:layout_weight=".155"
+            android:layout_weight="25"
             android:background="@drawable/status_off" />
 
-        <View
-            android:layout_width="0dp"
-            android:layout_height="@dimen/statusBarHeight"
-            android:layout_weight=".01"
-            android:background="@drawable/status_div" />
 
         <View
             android:id="@+id/statusBar4"
             android:layout_width="0dp"
             android:layout_height="@dimen/statusBarHeight"
-            android:layout_weight=".155"
+            android:layout_weight="25"
             android:background="@drawable/status_off" />
 
-        <View
-            android:layout_width="0dp"
-            android:layout_height="@dimen/statusBarHeight"
-            android:layout_weight=".01"
-            android:background="@drawable/status_div" />
 
-        <View
-            android:id="@+id/statusBar5"
-            android:layout_width="0dp"
-            android:layout_height="@dimen/statusBarHeight"
-            android:layout_weight=".155"
-            android:background="@drawable/status_off" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="@dimen/statusBarHeight"
-            android:layout_weight=".01"
-            android:background="@drawable/status_div" />
-
-        <View
-            android:id="@+id/statusBar6"
-            android:layout_width="0dp"
-            android:layout_height="@dimen/statusBarHeight"
-            android:layout_weight=".155"
-            android:background="@drawable/status_off" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="@dimen/statusBarHeight"
-            android:layout_weight=".01"
-            android:background="@drawable/status_div" />
     </LinearLayout>
+
 
     <LinearLayout
         android:id="@+id/mainButtons"
@@ -108,7 +56,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:weightSum="6">
+            android:weightSum="5">
 
             <ImageButton
                 android:id="@+id/action_button_A"
@@ -173,29 +121,12 @@
                 android:gravity="center_vertical"
                 android:padding="6dp"
                 android:scaleType="fitCenter"
-                android:src="@drawable/ic_bluetooth_searching_black_24dp"
-                android:tint="#FFF"
-                app:elevation="0dp" />
-
-            <ImageButton
-                android:id="@+id/action_button_E"
-                android:layout_width="0dp"
-                android:layout_height="50dp"
-                android:layout_marginStart="5dp"
-                android:layout_marginEnd="5dp"
-                android:layout_weight="1"
-                android:adjustViewBounds="true"
-                android:background="@drawable/btn_unpressed"
-                android:elevation="0dp"
-                android:gravity="center_vertical"
-                android:padding="6dp"
-                android:scaleType="fitCenter"
                 android:src="@drawable/ic_fiber_manual_record_black_24dp"
                 android:tint="#FFF"
                 app:elevation="0dp" />
 
             <ImageButton
-                android:id="@+id/action_button_F"
+                android:id="@+id/action_button_E"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_marginStart="5dp"
@@ -210,7 +141,6 @@
                 android:src="@drawable/ic_sync_disabled_black_24dp"
                 app:elevation="0dp" />
 
-
         </LinearLayout>
 
     </LinearLayout>
@@ -223,16 +153,17 @@
         android:layout_centerHorizontal="true"
         android:layout_marginHorizontal="10dp"
         android:layout_marginTop="10dp"
-        android:layout_marginBottom="0dp"
+        android:layout_marginBottom="10dp"
         android:gravity="center"
         android:orientation="vertical"
-        android:weightSum="100">
+        android:weightSum="11">
 
         <RelativeLayout
             android:id="@+id/infoView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="18"
+            android:layout_marginBottom="10dp"
+            android:layout_weight="2"
             android:background="@drawable/info_boarder">
 
             <TextView
@@ -240,7 +171,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="24dp"
                 android:layout_marginStart="15dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="10dp"
                 android:gravity="center"
                 android:text="@string/device_label"
                 android:textColor="#FFF"
@@ -290,7 +221,8 @@
             android:id="@+id/statusInfo"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="46"
+            android:layout_marginBottom="10dp"
+            android:layout_weight="4"
             android:background="@drawable/info_boarder">
 
             <TextView
@@ -355,53 +287,12 @@
                 android:layout_marginEnd="15dp"
                 android:src="@drawable/ic_close_black_24dp" />
 
-            <TextView
-                android:id="@+id/serial_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/fix_text"
-                android:layout_marginStart="15dp"
-                android:layout_marginTop="5dp"
-                android:gravity="center"
-                android:text="@string/serial_print_label"
-                android:textColor="#FFF"
-                android:textSize="17sp" />
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/serial_text_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignTop="@+id/serial_text"
-                android:layout_alignParentEnd="true"
-                android:layout_marginEnd="15dp"
-                android:src="@drawable/ic_close_black_24dp" />
-
-            <TextView
-                android:id="@+id/bleb_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/serial_text"
-                android:layout_marginStart="15dp"
-                android:layout_marginTop="5dp"
-                android:gravity="center"
-                android:text="@string/ble_print_label"
-                android:textColor="#FFF"
-                android:textSize="17sp" />
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/bleb_text_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignTop="@+id/bleb_text"
-                android:layout_alignParentEnd="true"
-                android:layout_marginEnd="15dp"
-                android:src="@drawable/ic_close_black_24dp" />
 
             <TextView
                 android:id="@+id/log_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/bleb_text"
+                android:layout_below="@+id/fix_text"
                 android:layout_marginStart="15dp"
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="20dp"
@@ -426,7 +317,8 @@
             android:id="@+id/location_Info"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="18"
+            android:layout_marginBottom="10dp"
+            android:layout_weight="2"
             android:background="@drawable/info_boarder">
 
             <TextView
@@ -484,15 +376,40 @@
             android:id="@+id/time_info"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="18"
+            android:layout_weight="3"
             android:background="@drawable/info_boarder">
+
+
+            <TextView
+                android:id="@+id/sat_text"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="15dp"
+                android:gravity="center"
+                android:text="@string/satellites_label"
+                android:textColor="#FFF"
+                android:textSize="17sp" />
+
+            <TextView
+                android:id="@+id/sat_text_label"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:layout_alignTop="@+id/sat_text"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="15dp"
+                android:gravity="center"
+                android:text="@string/init_sat"
+                android:textColor="#FFF"
+                android:textSize="17sp" />
 
             <TextView
                 android:id="@+id/lat_text"
                 android:layout_width="wrap_content"
                 android:layout_height="24dp"
+                android:layout_below="@+id/sat_text"
                 android:layout_marginStart="15dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="5dp"
                 android:gravity="center"
                 android:text="@string/latitude_label"
                 android:textColor="#FFF"
@@ -535,7 +452,6 @@
                 android:textSize="17sp" />
 
         </RelativeLayout>
-
 
     </LinearLayout>
 
