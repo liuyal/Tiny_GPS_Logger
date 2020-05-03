@@ -114,25 +114,25 @@
                 android:id="@+id/action_button_A"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
-                android:layout_weight="1"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="5dp"
+                android:layout_weight="1"
                 android:adjustViewBounds="true"
                 android:background="@drawable/btn_unpressed"
                 android:elevation="0dp"
                 android:gravity="center_vertical"
                 android:padding="6dp"
                 android:scaleType="fitCenter"
-                android:src="@drawable/ic_sync_disabled_black_24dp"
+                android:src="@drawable/ic_link_black_24dp"
                 app:elevation="0dp" />
 
             <ImageButton
                 android:id="@+id/action_button_B"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
-                android:layout_weight="1"
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
+                android:layout_weight="1"
                 android:adjustViewBounds="true"
                 android:background="@drawable/btn_unpressed"
                 android:elevation="0dp"
@@ -144,12 +144,12 @@
                 app:elevation="0dp" />
 
             <ImageButton
-                android:id="@+id/action_button_B2"
+                android:id="@+id/action_button_C"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
-                android:layout_weight="1"
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
+                android:layout_weight="1"
                 android:adjustViewBounds="true"
                 android:background="@drawable/btn_unpressed"
                 android:elevation="0dp"
@@ -161,12 +161,12 @@
                 app:elevation="0dp" />
 
             <ImageButton
-                android:id="@+id/action_button_C"
+                android:id="@+id/action_button_D"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
-                android:layout_weight="1"
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
+                android:layout_weight="1"
                 android:adjustViewBounds="true"
                 android:background="@drawable/btn_unpressed"
                 android:elevation="0dp"
@@ -178,12 +178,12 @@
                 app:elevation="0dp" />
 
             <ImageButton
-                android:id="@+id/action_button_D"
+                android:id="@+id/action_button_E"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
-                android:layout_weight="1"
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
+                android:layout_weight="1"
                 android:adjustViewBounds="true"
                 android:background="@drawable/btn_unpressed"
                 android:elevation="0dp"
@@ -195,20 +195,21 @@
                 app:elevation="0dp" />
 
             <ImageButton
-                android:id="@+id/action_button_E"
+                android:id="@+id/action_button_F"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
-                android:layout_weight="1"
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="10dp"
+                android:layout_weight="1"
                 android:adjustViewBounds="true"
                 android:background="@drawable/btn_unpressed"
                 android:elevation="0dp"
                 android:gravity="center_vertical"
                 android:padding="6dp"
                 android:scaleType="fitCenter"
-                android:src="@drawable/ic_link_black_24dp"
+                android:src="@drawable/ic_sync_disabled_black_24dp"
                 app:elevation="0dp" />
+
 
         </LinearLayout>
 

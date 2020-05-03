@@ -33,28 +33,11 @@ class HomeFragment : Fragment() {
 
         view.action_button_A.setOnClickListener {
             val main = activity as MainActivity?
-            if (main != null && main.checkBTon() && !autoCheckRunning) {
-                autoCheckRunning = true
-                if (this.statueCheckThread != null && this.statueCheckThread?.isAlive!!) this.statueCheckThread?.interrupt()
-                this.statueCheckThread = null
-                this.statueCheckThread = Thread(Runnable { this.checkTaskLoop() })
-                this.statueCheckThread!!.start()
-            } else if (main != null && main.checkBTon() && this.statueCheckThread != null && this.statueCheckThread?.isAlive!!) {
-                autoCheckRunning = false
-                this.statueCheckThread?.interrupt()
-                this.statueCheckThread = null
-                view?.action_button_A?.setImageResource(R.drawable.ic_sync_disabled_black_24dp)
-                view?.action_button_A?.setColorFilter(Color.WHITE)
-            }
-        }
-
-        view.action_button_E.setOnClickListener {
-            val main = activity as MainActivity?
             if (main != null && main.checkBTon() && GlobalApp.BLE?.connectionState == STATE_CONNECTED) {
                 if (this.statueCheckThread != null && this.statueCheckThread?.isAlive!!) this.statueCheckThread?.interrupt()
                 this.statueCheckThread = null
                 this.disconnectionUIHandler()
-                autoCheckRunning = false
+                view?.action_button_A?.setColorFilter(Color.WHITE)
             } else if (main != null && main.checkBTon()) {
                 if (GlobalApp.BLE == null) {
                     GlobalApp.BLE = BLEDevice(main as Context, activity as ContextWrapper)
@@ -66,6 +49,29 @@ class HomeFragment : Fragment() {
                 this.statueCheckThread!!.start()
             }
         }
+
+        view.action_button_B.setOnClickListener {}
+
+        view.action_button_D.setOnClickListener {}
+
+        view.action_button_E.setOnClickListener {}
+
+        view.action_button_F.setOnClickListener {
+            val main = activity as MainActivity?
+            if (main != null && main.checkBTon() && !autoCheckRunning) {
+                autoCheckRunning = true
+                if (this.statueCheckThread != null && this.statueCheckThread?.isAlive!!) this.statueCheckThread?.interrupt()
+                this.statueCheckThread = null
+                this.statueCheckThread = Thread(Runnable { this.checkTaskLoop() })
+                this.statueCheckThread!!.start()
+            } else if (main != null && main.checkBTon() && this.statueCheckThread != null && this.statueCheckThread?.isAlive!!) {
+                autoCheckRunning = false
+                this.statueCheckThread?.interrupt()
+                this.statueCheckThread = null
+                view?.action_button_F?.setColorFilter(Color.WHITE)
+            }
+        }
+
         return view
     }
 
@@ -107,9 +113,9 @@ class HomeFragment : Fragment() {
             }
             if (GlobalApp.BLE?.connectionState != STATE_CONNECTED || GlobalApp.BLE?.bleGATT == null) {
                 GlobalApp.BLE?.connect(GlobalApp.BLE?.bleAddress!!)!!
+                Thread.sleep(1000)
             }
             activity?.runOnUiThread { this.updateUIDeviceInfo() }
-            Thread.sleep(1000)
             while (true) {
                 try {
                     if (GlobalApp.BLE?.connectionState == STATE_CONNECTED || GlobalApp.BLE?.bleGATT != null) {
@@ -117,12 +123,10 @@ class HomeFragment : Fragment() {
                         if (GlobalApp.BLE?.gpsStatusFlags?.get(GPS_FIX_FLAG_INDEX)!!) GlobalApp.BLE?.fetchGPSData()
                         else GlobalApp.BLE?.gpsData = ""
                         activity?.runOnUiThread {
-                            this.updateUIStatusInfo()
                             this.updateUIStatusBar()
+                            this.updateUIStatusButtons()
+                            this.updateUIStatusInfo()
                             this.updateUICoordinateInfo()
-                            view?.action_button_A?.setImageResource(R.drawable.ic_sync_black_24dp)
-                            view?.action_button_A?.setColorFilter(Color.GREEN)
-                            view?.action_button_E?.setColorFilter(ResourcesCompat.getColor(resources, R.color.DodgerBlue, null))
                             view?.status_progress_bar?.visibility = View.GONE
                         }
                         Thread.sleep((delay * TIME_OUT).toLong())
@@ -156,21 +160,17 @@ class HomeFragment : Fragment() {
                 if (System.currentTimeMillis() - start > 10 * TIME_OUT) break
             }
             if (GlobalApp.BLE?.connectionState == STATE_CONNECTED || connected) {
-                Thread.sleep(1000)
+                Thread.sleep(500)
                 GlobalApp.BLE?.fetchDeviceStatus()
-                Thread.sleep(1000)
+                Thread.sleep(500)
                 activity?.runOnUiThread {
-                    this.updateUIDeviceInfo()
-                    this.updateUIStatusInfo()
                     this.updateUIStatusBar()
-                    view?.action_button_E?.setColorFilter(ResourcesCompat.getColor(resources, R.color.DodgerBlue, null))
+                    this.updateUIStatusButtons()
+                    this.updateUIStatusInfo()
+                    this.updateUICoordinateInfo()
                 }
             } else {
-                activity?.runOnUiThread {
-                    view?.action_button_A?.setImageResource(R.drawable.ic_sync_disabled_black_24dp)
-                    view?.action_button_A?.setColorFilter(Color.WHITE)
-                    view?.action_button_E?.setColorFilter(Color.WHITE)
-                }
+                activity?.runOnUiThread { this.disconnectionUIHandler() }
                 Log.d("HOME", "Unable to Connect to Device")
             }
             activity?.runOnUiThread { view?.status_progress_bar?.visibility = View.GONE }
@@ -182,14 +182,14 @@ class HomeFragment : Fragment() {
 
     private fun disconnectionUIHandler() {
         try {
-            view?.action_button_A?.setImageResource(R.drawable.ic_sync_disabled_black_24dp)
-            view?.action_button_A?.setColorFilter(Color.WHITE)
-            view?.action_button_B?.setImageResource(R.drawable.ic_location_off_black_24dp)
-            view?.action_button_E?.setColorFilter(Color.WHITE)
+            this.autoCheckRunning = false
             view?.status_progress_bar?.visibility = View.GONE
             GlobalApp.BLE?.disconnect()
-            this.updateUIStatusInfo()
+            GlobalApp.BLE?.gpsStatusFlags?.fill(false, 0, NUMBER_OF_FLAGS)
+            GlobalApp.BLE?.gpsData = ""
             this.updateUIStatusBar()
+            this.updateUIStatusButtons()
+            this.updateUIStatusInfo()
             this.updateUICoordinateInfo()
         } catch (e: Throwable) {
             Log.e("HOME", "Disconnection UI Update Error")
@@ -224,7 +224,47 @@ class HomeFragment : Fragment() {
 
     private fun updateUIStatusButtons() {
         try {
+            if (GlobalApp.BLE?.connectionState == STATE_CONNECTED) {
+                view?.action_button_A?.setImageResource(R.drawable.ic_link_black_24dp)
+                view?.action_button_A?.setColorFilter(Color.GREEN)
+            } else if (GlobalApp.BLE?.connectionState != STATE_CONNECTED) {
+                view?.action_button_A?.setImageResource(R.drawable.ic_link_black_24dp)
+                view?.action_button_A?.setColorFilter(Color.WHITE)
+            }
 
+            if (GlobalApp.BLE?.gpsStatusFlags?.get(GPS_FIX_FLAG_INDEX)!!) {
+                view?.action_button_C?.setImageResource(R.drawable.ic_gps_fixed_black_24dp)
+                view?.action_button_C?.setColorFilter(Color.GREEN)
+            } else if (!GlobalApp.BLE?.gpsStatusFlags?.get(GPS_FIX_FLAG_INDEX)!!) {
+                view?.action_button_C?.setImageResource(R.drawable.ic_gps_not_fixed_black_24dp)
+                view?.action_button_C?.setColorFilter(Color.WHITE)
+            }
+
+            if (GlobalApp.BLE?.gpsStatusFlags?.get(GPS_ON_FLAG_INDEX)!!) {
+                view?.action_button_B?.setImageResource(R.drawable.ic_location_on_black_24dp)
+                view?.action_button_B?.setColorFilter(Color.GREEN)
+            } else if (!GlobalApp.BLE?.gpsStatusFlags?.get(GPS_ON_FLAG_INDEX)!!) {
+                view?.action_button_B?.setImageResource(R.drawable.ic_location_off_black_24dp)
+                view?.action_button_C?.setImageResource(R.drawable.ic_gps_off_black_24dp)
+                view?.action_button_B?.setColorFilter(Color.WHITE)
+                view?.action_button_C?.setColorFilter(Color.WHITE)
+            }
+
+            if (GlobalApp.BLE?.gpsStatusFlags?.get(GPS_LOGGING_FLAG_INDEX)!!) {
+                view?.action_button_E?.setImageResource(R.drawable.ic_fiber_manual_record_black_24dp)
+                view?.action_button_E?.setColorFilter(Color.RED)
+            } else if (!GlobalApp.BLE?.gpsStatusFlags?.get(GPS_LOGGING_FLAG_INDEX)!!) {
+                view?.action_button_E?.setImageResource(R.drawable.ic_fiber_manual_record_black_24dp)
+                view?.action_button_E?.setColorFilter(Color.WHITE)
+            }
+
+            if (this.autoCheckRunning) {
+                view?.action_button_F?.setImageResource(R.drawable.ic_sync_black_24dp)
+                view?.action_button_F?.setColorFilter(Color.GREEN)
+            } else if (!this.autoCheckRunning) {
+                view?.action_button_F?.setImageResource(R.drawable.ic_sync_disabled_black_24dp)
+                view?.action_button_F?.setColorFilter(Color.WHITE)
+            }
 
         } catch (e: Throwable) {
             Log.e("HOME", "Update UI Status Button Error")
