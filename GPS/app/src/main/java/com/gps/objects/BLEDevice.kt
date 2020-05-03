@@ -82,7 +82,6 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
     private var characteristic: BluetoothGattCharacteristic? = null
     private var dbHandler: SqliteDB? = null
 
-
     private val mGattCallback = object : BluetoothGattCallback() {
 
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {

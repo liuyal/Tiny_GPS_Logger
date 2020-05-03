@@ -36,18 +36,9 @@ import com.gps.objects.*
 import com.mapbox.android.gestures.Utils
 import maes.tech.intentanim.CustomIntent
 
-class MainActivity : AppCompatActivity(), OnMapReadyCallback {
+class MainActivity : AppCompatActivity(){
 
     private lateinit var appBarConfiguration: AppBarConfiguration
-
-    var statueCheckThread: Thread? = null
-
-    private lateinit var googleMap: GoogleMap
-    private lateinit var markerOptions: MarkerOptions
-    private lateinit var marker: Marker
-    private lateinit var cameraPosition: CameraPosition
-    private var defaultLatitude = 49.279793
-    private var defaultLongitude = -123.115669
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -99,76 +90,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 
-    override fun onMapReady(googleMap: GoogleMap?) {
-        this.googleMap = googleMap!!
-        this.googleMap.uiSettings.isZoomControlsEnabled = true
-        this.googleMap.uiSettings.isCompassEnabled = true
-        this.googleMap.uiSettings.isMapToolbarEnabled = true
-        this.googleMap.uiSettings.isScrollGesturesEnabled = true
-        this.googleMap.uiSettings.isTiltGesturesEnabled = true
-        this.googleMap.uiSettings.isRotateGesturesEnabled = true
-        this.marker = googleMap.addMarker( this.markerOptions)
-        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition( this.cameraPosition))
-        googleMap.mapType = GoogleMap.MAP_TYPE_NORMAL
-    }
-
-    fun createMaps() {
-        this.markerOptions = MarkerOptions()
-        val bitmapDescriptor = bitmapDescriptorFromVector(this, R.drawable.ic_fiber_manual_record_black_24dp)
-        this.markerOptions.icon(bitmapDescriptor)
-        this.markerOptions.position(LatLng(defaultLatitude, defaultLongitude))
-        this.cameraPosition = CameraPosition.Builder().target(LatLng(defaultLatitude, defaultLongitude)).zoom(10f).build()
-    }
-
-    private fun bitmapDescriptorFromVector(context: Context, vectorResId: Int): BitmapDescriptor? {
-        return ContextCompat.getDrawable(context, vectorResId)?.run {
-            setBounds(0, 0, intrinsicWidth, intrinsicHeight)
-            val bitmap = Bitmap.createBitmap(intrinsicWidth, intrinsicHeight, Bitmap.Config.ARGB_8888)
-            draw(Canvas(bitmap))
-            BitmapDescriptorFactory.fromBitmap(bitmap)
-        }
-    }
-
-    fun updateMaps() {
-        this.connectionHandler()
-        if (GlobalApp.BLE?.gpsStatusFlags?.get(GPS_FIX_FLAG_INDEX)!!) GlobalApp.BLE?.fetchGPSData()
-        else GlobalApp.BLE?.gpsData = ""
-        if (GlobalApp.BLE?.gpsData != null && GlobalApp.BLE?.gpsData != "") {
-            var gpsData = GlobalApp.BLE?.gpsData!!
-            gpsData = gpsData.substring(gpsData.indexOf('[') + 1, gpsData.indexOf(']'))
-            val gpdDataList = gpsData.split(',') as ArrayList<String>
-            this.defaultLatitude = gpdDataList[LOCATION_LAT_INDEX].toDouble()
-            this.defaultLongitude = gpdDataList[LOCATION_LNG_INDEX].toDouble()
-            runOnUiThread {
-                marker.position = LatLng(defaultLatitude, defaultLongitude)
-                cameraPosition = CameraPosition.Builder().target(LatLng(defaultLatitude, defaultLongitude)).zoom(15f).build()
-                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
-            }
-        } else Log.d("MAIN", "NO GPS FIX")
-        Log.d("MAIN", "MAPS UPDATE")
-    }
-
-    fun connectionHandler() {
-        Log.d("MAIN", "Connection Handler Starting")
-        if (GlobalApp.BLE?.bleAddress == null || GlobalApp.BLE?.bleAddress == "") {
-            this.runOnUiThread { Toast.makeText(applicationContext, "No Device Paired", Toast.LENGTH_SHORT).show() }
-            return
-        }
-        var connected = false
-        val start = System.currentTimeMillis()
-        while (!connected && (GlobalApp.BLE?.connectionState != STATE_CONNECTED || GlobalApp.BLE?.bleGATT == null)) {
-            connected = GlobalApp.BLE?.connect(GlobalApp.BLE?.bleAddress!!)!!
-            if (System.currentTimeMillis() - start > 10 * TIME_OUT) break
-        }
-        if (GlobalApp.BLE?.connectionState == STATE_CONNECTED || connected) {
-            Thread.sleep(1000)
-            GlobalApp.BLE?.fetchDeviceStatus()
-            Thread.sleep(1000)
-            this.runOnUiThread {}// updateUIStatusBar() }
-        } else Log.d("MAIN", "Unable to Connect to Device")
-        Log.d("MAIN", "Connection Handler Complete")
-    }
-
     fun checkBTon(): Boolean {
         if (BluetoothAdapter.getDefaultAdapter() == null) {
             Toast.makeText(applicationContext, "BlueTooth is not supported!", Toast.LENGTH_SHORT).show()
@@ -179,5 +100,4 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         return false
     }
-
 }

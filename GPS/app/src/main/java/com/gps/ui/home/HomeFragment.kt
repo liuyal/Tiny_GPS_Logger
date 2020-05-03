@@ -93,82 +93,90 @@ class HomeFragment : Fragment() {
 
     // TODO: configurable delay (in settings fragment)
     private fun checkTaskLoop() {
-        Log.d("MAIN", "STATUS CHECK START")
-        val delay = 5
-        activity?.runOnUiThread { view?.status_progress_bar?.visibility = View.VISIBLE }
-        if (GlobalApp.BLE?.bleAddress == null || GlobalApp.BLE?.bleAddress == "") {
+        try {
+            Log.d("HOME", "STATUS CHECK START")
+            val delay = 5
+            activity?.runOnUiThread { view?.status_progress_bar?.visibility = View.VISIBLE }
+            if (GlobalApp.BLE?.bleAddress == null || GlobalApp.BLE?.bleAddress == "") {
+                activity?.runOnUiThread {
+                    this.disconnectionUIHandler()
+                    Toast.makeText(activity, "No Device Paired", Toast.LENGTH_SHORT).show()
+                }
+                return
+            }
+            if (GlobalApp.BLE?.connectionState != STATE_CONNECTED || GlobalApp.BLE?.bleGATT == null) {
+                GlobalApp.BLE?.connect(GlobalApp.BLE?.bleAddress!!)!!
+            }
             activity?.runOnUiThread {
-                this.disconnectionUIHandler()
-                Toast.makeText(activity, "No Device Paired", Toast.LENGTH_SHORT).show()
+                this.updateUIDeviceInfo()
+                view?.action_button_A?.setColorFilter(Color.GREEN)
+                view?.action_button_B?.setColorFilter(ResourcesCompat.getColor(resources, R.color.DodgerBlue, null))
             }
-            return
-        }
-        if (GlobalApp.BLE?.connectionState != STATE_CONNECTED || GlobalApp.BLE?.bleGATT == null) {
-            GlobalApp.BLE?.connect(GlobalApp.BLE?.bleAddress!!)!!
-        }
-        activity?.runOnUiThread {
-            this.updateUIDeviceInfo()
-            view?.action_button_A?.setColorFilter(Color.GREEN)
-            view?.action_button_B?.setColorFilter(ResourcesCompat.getColor(resources, R.color.DodgerBlue, null))
-        }
-        Thread.sleep(1000)
-        while (true) {
-            try {
-                if (GlobalApp.BLE?.connectionState == STATE_CONNECTED || GlobalApp.BLE?.bleGATT != null) {
-                    GlobalApp.BLE?.fetchDeviceStatus()
-                    if (GlobalApp.BLE?.gpsStatusFlags?.get(GPS_FIX_FLAG_INDEX)!!) GlobalApp.BLE?.fetchGPSData()
-                    else GlobalApp.BLE?.gpsData = ""
-                    activity?.runOnUiThread {
-                        this.updateUIStatusInfo()
-                        this.updateUIStatusBar()
-                        this.updateUICoordinateInfo()
-                        view?.status_progress_bar?.visibility = View.GONE
-                    }
-                    Thread.sleep((delay * TIME_OUT).toLong())
-                } else throw IllegalArgumentException()
-            } catch (e: Throwable) {
-                break
+            Thread.sleep(1000)
+            while (true) {
+                try {
+                    if (GlobalApp.BLE?.connectionState == STATE_CONNECTED || GlobalApp.BLE?.bleGATT != null) {
+                        GlobalApp.BLE?.fetchDeviceStatus()
+                        if (GlobalApp.BLE?.gpsStatusFlags?.get(GPS_FIX_FLAG_INDEX)!!) GlobalApp.BLE?.fetchGPSData()
+                        else GlobalApp.BLE?.gpsData = ""
+                        activity?.runOnUiThread {
+                            this.updateUIStatusInfo()
+                            this.updateUIStatusBar()
+                            this.updateUICoordinateInfo()
+                            view?.status_progress_bar?.visibility = View.GONE
+                        }
+                        Thread.sleep((delay * TIME_OUT).toLong())
+                    } else throw IllegalArgumentException()
+                } catch (e: Throwable) {
+                    break
+                }
             }
+            Log.d("HOME", "STATUS CHECK STOPPED")
+        } catch (e: Throwable) {
+            Log.e("HOME", "STATUS CHECK ERROR")
         }
-        Log.d("MAIN", "STATUS CHECK STOPPED")
     }
 
     private fun connectionUIHandler() {
-        Log.d("MAIN", "Connection UI Handler Starting")
-        activity?.runOnUiThread { view?.status_progress_bar?.visibility = View.VISIBLE }
-        if (GlobalApp.BLE?.bleAddress == null || GlobalApp.BLE?.bleAddress == "") {
-            activity?.runOnUiThread {
-                this.updateUIDeviceInfo()
-                this.disconnectionUIHandler()
-                Toast.makeText(activity, "No Device Paired", Toast.LENGTH_SHORT).show()
+        try {
+            Log.d("HOME", "Connection UI Handler Starting")
+            activity?.runOnUiThread { view?.status_progress_bar?.visibility = View.VISIBLE }
+            if (GlobalApp.BLE?.bleAddress == null || GlobalApp.BLE?.bleAddress == "") {
+                activity?.runOnUiThread {
+                    this.updateUIDeviceInfo()
+                    this.disconnectionUIHandler()
+                    Toast.makeText(activity, "No Device Paired", Toast.LENGTH_SHORT).show()
+                }
+                return
             }
-            return
-        }
-        var connected = false
-        val start = System.currentTimeMillis()
-        while (!connected && (GlobalApp.BLE?.connectionState != STATE_CONNECTED || GlobalApp.BLE?.bleGATT == null)) {
-            connected = GlobalApp.BLE?.connect(GlobalApp.BLE?.bleAddress!!)!!
-            if (System.currentTimeMillis() - start > 10 * TIME_OUT) break
-        }
-        if (GlobalApp.BLE?.connectionState == STATE_CONNECTED || connected) {
-            Thread.sleep(1000)
-            GlobalApp.BLE?.fetchDeviceStatus()
-            Thread.sleep(1000)
-            activity?.runOnUiThread {
-                this.updateUIDeviceInfo()
-                this.updateUIStatusInfo()
-                this.updateUIStatusBar()
-                view?.action_button_B?.setColorFilter(ResourcesCompat.getColor(resources, R.color.DodgerBlue, null))
+            var connected = false
+            val start = System.currentTimeMillis()
+            while (!connected && (GlobalApp.BLE?.connectionState != STATE_CONNECTED || GlobalApp.BLE?.bleGATT == null)) {
+                connected = GlobalApp.BLE?.connect(GlobalApp.BLE?.bleAddress!!)!!
+                if (System.currentTimeMillis() - start > 10 * TIME_OUT) break
             }
-        } else {
-            activity?.runOnUiThread {
-                view?.action_button_A?.setColorFilter(Color.WHITE)
-                view?.action_button_B?.setColorFilter(Color.WHITE)
+            if (GlobalApp.BLE?.connectionState == STATE_CONNECTED || connected) {
+                Thread.sleep(1000)
+                GlobalApp.BLE?.fetchDeviceStatus()
+                Thread.sleep(1000)
+                activity?.runOnUiThread {
+                    this.updateUIDeviceInfo()
+                    this.updateUIStatusInfo()
+                    this.updateUIStatusBar()
+                    view?.action_button_B?.setColorFilter(ResourcesCompat.getColor(resources, R.color.DodgerBlue, null))
+                }
+            } else {
+                activity?.runOnUiThread {
+                    view?.action_button_A?.setColorFilter(Color.WHITE)
+                    view?.action_button_B?.setColorFilter(Color.WHITE)
+                }
+                Log.d("HOME", "Unable to Connect to Device")
             }
-            Log.d("MAIN", "Unable to Connect to Device")
+            activity?.runOnUiThread { view?.status_progress_bar?.visibility = View.GONE }
+            Log.d("HOME", "Connection UI Handler Complete")
+        } catch (e: Throwable) {
+            Log.e("MAP", "Connection Handler Error")
         }
-        activity?.runOnUiThread { view?.status_progress_bar?.visibility = View.GONE }
-        Log.d("MAIN", "Connection UI Handler Complete")
     }
 
     private fun disconnectionUIHandler() {
@@ -181,95 +189,111 @@ class HomeFragment : Fragment() {
             this.updateUIStatusBar()
             this.updateUICoordinateInfo()
         } catch (e: Throwable) {
-            Log.e("MAIN", "Disconnection UI Update Error")
+            Log.e("HOME", "Disconnection UI Update Error")
         }
     }
 
     private fun updateUIStatusBar() {
-        val statusBarArray: ArrayList<View>? = ArrayList(0)
-        statusBarArray?.add(view?.statusBar1!!)
-        statusBarArray?.add(view?.statusBar2!!)
-        statusBarArray?.add(view?.statusBar3!!)
-        statusBarArray?.add(view?.statusBar4!!)
-        statusBarArray?.add(view?.statusBar5!!)
-        statusBarArray?.add(view?.statusBar6!!)
-        for (i in 0 until NUMBER_OF_FLAGS) {
-            val view: View? = statusBarArray?.get(i)
-            if (statusBarArray != null && GlobalApp.BLE?.gpsStatusFlags?.get(i)!!) {
-                if (view != null) {
-                    statusBarArray[i].background = ContextCompat.getDrawable(requireContext(), R.drawable.status_on)
-                }
-            } else if (!GlobalApp.BLE?.gpsStatusFlags?.get(i)!!) {
-                if (view != null) {
-                    statusBarArray[i].background = ContextCompat.getDrawable(requireContext(), R.drawable.status_off)
+        try {
+            val statusBarArray: ArrayList<View>? = ArrayList(0)
+            statusBarArray?.add(view?.statusBar1!!)
+            statusBarArray?.add(view?.statusBar2!!)
+            statusBarArray?.add(view?.statusBar3!!)
+            statusBarArray?.add(view?.statusBar4!!)
+            statusBarArray?.add(view?.statusBar5!!)
+            statusBarArray?.add(view?.statusBar6!!)
+            for (i in 0 until NUMBER_OF_FLAGS) {
+                val view: View? = statusBarArray?.get(i)
+                if (statusBarArray != null && GlobalApp.BLE?.gpsStatusFlags?.get(i)!!) {
+                    if (view != null) {
+                        statusBarArray[i].background = ContextCompat.getDrawable(requireContext(), R.drawable.status_on)
+                    }
+                } else if (!GlobalApp.BLE?.gpsStatusFlags?.get(i)!!) {
+                    if (view != null) {
+                        statusBarArray[i].background = ContextCompat.getDrawable(requireContext(), R.drawable.status_off)
+                    }
                 }
             }
+        } catch (e: Throwable) {
+            Log.e("HOME", "Update UI Status Bar Error")
         }
     }
 
     private fun updateUIDeviceInfo() {
-        val macLabel: TextView? = view?.mac_text_label
-        val deviceLabel: TextView? = view?.device_text_label
-        val macAddress = GlobalApp.BLE?.bleAddress
-        if (macAddress != "" && macLabel != null && deviceLabel != null) {
-            deviceLabel.text = DEVICE_CODE_NAME
-            macLabel.text = macAddress
-        } else {
-            GlobalApp.BLE?.initialize()
-            if (macLabel != null && deviceLabel != null) {
-                deviceLabel.text = getString(R.string.initial_ble_name)
-                macLabel.text = getString(R.string.initial_ble_mac)
+        try {
+            val macLabel: TextView? = view?.mac_text_label
+            val deviceLabel: TextView? = view?.device_text_label
+            val macAddress = GlobalApp.BLE?.bleAddress
+            if (macAddress != "" && macLabel != null && deviceLabel != null) {
+                deviceLabel.text = DEVICE_CODE_NAME
+                macLabel.text = macAddress
+            } else {
+                GlobalApp.BLE?.initialize()
+                if (macLabel != null && deviceLabel != null) {
+                    deviceLabel.text = getString(R.string.initial_ble_name)
+                    macLabel.text = getString(R.string.initial_ble_mac)
+                }
             }
+        } catch (e: Throwable) {
+            Log.e("HOME", "Update Device Info Error")
         }
     }
 
     private fun updateUIStatusInfo() {
-        val iconArray: ArrayList<AppCompatImageView>? = ArrayList(0)
-        iconArray?.add(view?.connected_text_label!!)
-        iconArray?.add(view?.gps_on_text_label!!)
-        iconArray?.add(view?.fix_text_label!!)
-        iconArray?.add(view?.serial_text_label!!)
-        iconArray?.add(view?.bleb_text_label!!)
-        iconArray?.add(view?.log_text_label!!)
-        for (i in 0 until NUMBER_OF_FLAGS) {
-            val icon: AppCompatImageView? = iconArray?.get(i)
-            if (GlobalApp.BLE?.gpsStatusFlags?.get(i)!!) {
-                if (icon != null) {
-                    iconArray[i].setImageResource(R.drawable.ic_check_black_24dp)
-                    iconArray[i].setColorFilter(Color.parseColor("#00b250"))
-                }
-            } else if (iconArray != null && !GlobalApp.BLE?.gpsStatusFlags?.get(i)!!) {
-                if (icon != null) {
-                    iconArray[i].setImageResource(R.drawable.ic_close_black_24dp)
-                    iconArray[i].setColorFilter(Color.argb(255, 255, 0, 0))
+        try {
+            val iconArray: ArrayList<AppCompatImageView>? = ArrayList(0)
+            iconArray?.add(view?.connected_text_label!!)
+            iconArray?.add(view?.gps_on_text_label!!)
+            iconArray?.add(view?.fix_text_label!!)
+            iconArray?.add(view?.serial_text_label!!)
+            iconArray?.add(view?.bleb_text_label!!)
+            iconArray?.add(view?.log_text_label!!)
+            for (i in 0 until NUMBER_OF_FLAGS) {
+                val icon: AppCompatImageView? = iconArray?.get(i)
+                if (GlobalApp.BLE?.gpsStatusFlags?.get(i)!!) {
+                    if (icon != null) {
+                        iconArray[i].setImageResource(R.drawable.ic_check_black_24dp)
+                        iconArray[i].setColorFilter(Color.parseColor("#00b250"))
+                    }
+                } else if (iconArray != null && !GlobalApp.BLE?.gpsStatusFlags?.get(i)!!) {
+                    if (icon != null) {
+                        iconArray[i].setImageResource(R.drawable.ic_close_black_24dp)
+                        iconArray[i].setColorFilter(Color.argb(255, 255, 0, 0))
+                    }
                 }
             }
+        } catch (e: Throwable) {
+            Log.e("HOME", "Update UI Status Info Error")
         }
     }
 
     private fun updateUICoordinateInfo() {
-        val gpsDate: TextView? = view?.date_text_label
-        val gpsTime: TextView? = view?.time_text_label
-        val latitude: TextView? = view?.lat_text_label
-        val longitude: TextView? = view?.long_text_label
-        var gpsData = GlobalApp.BLE?.gpsData
-        if (gpsData != null && gpsData != "") {
-            gpsData = gpsData.substring(gpsData.indexOf('[') + 1, gpsData.indexOf(']'))
-            val gpdDataList = gpsData.split(',') as ArrayList<String>
-            if (gpdDataList[DATE_MONTH_INDEX].toInt() < 10) gpdDataList[DATE_MONTH_INDEX] = "0" + gpdDataList[DATE_MONTH_INDEX]
-            if (gpdDataList[DATE_DAY_INDEX].toInt() < 10) gpdDataList[DATE_DAY_INDEX] = "0" + gpdDataList[DATE_DAY_INDEX]
-            if (gpdDataList[TIME_HOUR_INDEX].toInt() < 10) gpdDataList[TIME_HOUR_INDEX] = "0" + gpdDataList[TIME_HOUR_INDEX]
-            if (gpdDataList[TIME_MINUTE_INDEX].toInt() < 10) gpdDataList[TIME_MINUTE_INDEX] = "0" + gpdDataList[TIME_MINUTE_INDEX]
-            if (gpdDataList[TIME_SECOND_INDEX].toInt() < 10) gpdDataList[TIME_SECOND_INDEX] = "0" + gpdDataList[TIME_SECOND_INDEX]
-            gpsDate?.text = getString(R.string.gpsDate, gpdDataList[DATE_YEAR_INDEX], gpdDataList[DATE_MONTH_INDEX], gpdDataList[DATE_DAY_INDEX])
-            gpsTime?.text = getString(R.string.gpsTime, gpdDataList[TIME_HOUR_INDEX], gpdDataList[TIME_MINUTE_INDEX], gpdDataList[TIME_SECOND_INDEX])
-            latitude?.text = gpdDataList[LOCATION_LAT_INDEX]
-            longitude?.text = gpdDataList[LOCATION_LNG_INDEX]
-        } else if (gpsData == null || gpsData == "") {
-            gpsDate?.text = getString(R.string.init_date)
-            gpsTime?.text = getString(R.string.init_time)
-            latitude?.text = getString(R.string.init_lat)
-            longitude?.text = getString(R.string.init_long)
+        try {
+            val gpsDate: TextView? = view?.date_text_label
+            val gpsTime: TextView? = view?.time_text_label
+            val latitude: TextView? = view?.lat_text_label
+            val longitude: TextView? = view?.long_text_label
+            var gpsData = GlobalApp.BLE?.gpsData
+            if (gpsData != null && gpsData != "") {
+                gpsData = gpsData.substring(gpsData.indexOf('[') + 1, gpsData.indexOf(']'))
+                val gpdDataList = gpsData.split(',') as ArrayList<String>
+                if (gpdDataList[DATE_MONTH_INDEX].toInt() < 10) gpdDataList[DATE_MONTH_INDEX] = "0" + gpdDataList[DATE_MONTH_INDEX]
+                if (gpdDataList[DATE_DAY_INDEX].toInt() < 10) gpdDataList[DATE_DAY_INDEX] = "0" + gpdDataList[DATE_DAY_INDEX]
+                if (gpdDataList[TIME_HOUR_INDEX].toInt() < 10) gpdDataList[TIME_HOUR_INDEX] = "0" + gpdDataList[TIME_HOUR_INDEX]
+                if (gpdDataList[TIME_MINUTE_INDEX].toInt() < 10) gpdDataList[TIME_MINUTE_INDEX] = "0" + gpdDataList[TIME_MINUTE_INDEX]
+                if (gpdDataList[TIME_SECOND_INDEX].toInt() < 10) gpdDataList[TIME_SECOND_INDEX] = "0" + gpdDataList[TIME_SECOND_INDEX]
+                gpsDate?.text = getString(R.string.gpsDate, gpdDataList[DATE_YEAR_INDEX], gpdDataList[DATE_MONTH_INDEX], gpdDataList[DATE_DAY_INDEX])
+                gpsTime?.text = getString(R.string.gpsTime, gpdDataList[TIME_HOUR_INDEX], gpdDataList[TIME_MINUTE_INDEX], gpdDataList[TIME_SECOND_INDEX])
+                latitude?.text = gpdDataList[LOCATION_LAT_INDEX]
+                longitude?.text = gpdDataList[LOCATION_LNG_INDEX]
+            } else if (gpsData == null || gpsData == "") {
+                gpsDate?.text = getString(R.string.init_date)
+                gpsTime?.text = getString(R.string.init_time)
+                latitude?.text = getString(R.string.init_lat)
+                longitude?.text = getString(R.string.init_long)
+            }
+        } catch (e: Throwable) {
+            Log.e("HOME", "Update UI Coordinate Info Error")
         }
     }
 
