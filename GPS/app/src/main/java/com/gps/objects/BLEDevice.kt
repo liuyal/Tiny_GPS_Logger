@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.database.Cursor
 import android.util.Log
+import android.widget.Toast
 import java.util.*
 
 //https://developer.android.com/reference/android/bluetooth/BluetoothGatt
@@ -210,25 +211,6 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
         return true
     }
 
-    private fun updateDBMAC(address: String?) {
-        dbHandler?.clearTable(SqliteDB.macTable)
-        if (address != null) {
-            dbHandler?.insertDB(SqliteDB.macTable, arrayListOf(SqliteDB.macColumn), arrayListOf(address))
-        }
-    }
-
-    fun loadDBMAC(): String? {
-        return try {
-            val cursor: Cursor? = dbHandler?.selectFromDB(SqliteDB.macTable)
-            cursor!!.moveToFirst()
-            this.bleAddress = cursor.getString(cursor.getColumnIndex(SqliteDB.macColumn))
-            this.bleAddress!!
-        } catch (e: Throwable) {
-            this.bleAddress = ""
-            this.bleAddress
-        }
-    }
-
     fun disconnect() {
         this.gpsStatusFlags?.fill(false, 0, NUMBER_OF_FLAGS)
         this.gpsData = ""
@@ -240,6 +222,25 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
         if (this.bleGATT == null) return
         this.bleGATT!!.close()
         this.bleGATT = null
+    }
+
+    private fun updateDBMAC(address: String?) {
+        dbHandler?.clearTable(SqliteDB.macTable)
+        if (address != null) {
+            dbHandler?.insertDB(SqliteDB.macTable, arrayListOf(SqliteDB.macColumn), arrayListOf(address))
+        }
+    }
+
+    private fun loadDBMAC(): String? {
+        return try {
+            val cursor: Cursor? = dbHandler?.selectFromDB(SqliteDB.macTable)
+            cursor!!.moveToFirst()
+            this.bleAddress = cursor.getString(cursor.getColumnIndex(SqliteDB.macColumn))
+            this.bleAddress!!
+        } catch (e: Throwable) {
+            this.bleAddress = ""
+            this.bleAddress
+        }
     }
 
     private fun serviceChecks(timeout: Boolean = true): Boolean {
@@ -273,6 +274,16 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
             }
         }
         if (this.service == null || this.characteristic == null) return false
+        return true
+    }
+
+    private fun gpsTagCheck(): Boolean {
+        writeValue(byteArrayOf(GPS_CHECK_CODE))
+        val returnVal = readValue()
+        if (returnVal != null && returnVal.toString(Charsets.UTF_8).contains(DEVICE_CODE_NAME, ignoreCase = true)) {
+            Log.d("BLE", returnVal.contentToString())
+            Log.d("BLE", returnVal.toString(Charsets.UTF_8))
+        } else return false
         return true
     }
 
@@ -315,16 +326,6 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
 
     private fun Int.toBoolean(): Boolean {
         return this == 1
-    }
-
-    private fun gpsTagCheck(): Boolean {
-        writeValue(byteArrayOf(GPS_CHECK_CODE))
-        val returnVal = readValue()
-        if (returnVal != null && returnVal.toString(Charsets.UTF_8).contains(DEVICE_CODE_NAME, ignoreCase = true)) {
-            Log.d("BLE", returnVal.contentToString())
-            Log.d("BLE", returnVal.toString(Charsets.UTF_8))
-        } else return false
-        return true
     }
 
     fun fetchDeviceStatus(): Boolean {

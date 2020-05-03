@@ -109,7 +109,7 @@ Portable GPS logging device built with ESP32, NEO-6M, and Catalex Micro SD Card 
 
 #### Google Map API
 - [Android Developers: Map Object](https://developers.google.com/maps/documentation/android-sdk/map)
-- [Android Developers: MapView](https://developers.google.com/android/reference/com/google/android/gms/maps/MapView)
+- [Android Developers: Map View](https://developers.google.com/android/reference/com/google/android/gms/maps/MapView)
 - [Android Developers: Map Controls and Gestures](https://developers.google.com/maps/documentation/android-sdk/controls)
 - [Android Developers: Map Markers](https://developers.google.com/maps/documentation/javascript/markers)
 - [Android Developers: Map MarkerOptions](https://developers.google.com/android/reference/com/google/android/gms/maps/model/MarkerOptions)
