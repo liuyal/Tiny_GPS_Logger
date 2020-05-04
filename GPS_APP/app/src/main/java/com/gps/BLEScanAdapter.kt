@@ -1,4 +1,4 @@
-package com.gps.objects
+package com.gps
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.ScanResult
@@ -7,10 +7,9 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import com.gps.R
 import kotlinx.android.synthetic.main.ble_cells.view.*
 
-class ScanAdapter(private val devices : ArrayList<BluetoothDevice>, private val results: ArrayList<ScanResult>, private val listener: (BluetoothDevice) -> Unit) : RecyclerView.Adapter<ViewHolder>() {
+class BLEScanAdapter(private val devices : ArrayList<BluetoothDevice>, private val results: ArrayList<ScanResult>, private val listener: (BluetoothDevice) -> Unit) : RecyclerView.Adapter<ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomViewHolder {
         return CustomViewHolder(LayoutInflater.from(parent.context), parent)

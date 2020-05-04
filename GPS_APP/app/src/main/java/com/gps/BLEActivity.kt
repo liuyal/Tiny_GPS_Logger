@@ -22,7 +22,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.gps.objects.GlobalApp
-import com.gps.objects.ScanAdapter
 import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator
 import kotlinx.android.synthetic.main.activity_ble.*
 import maes.tech.intentanim.CustomIntent
@@ -80,7 +79,7 @@ class BLEActivity : AppCompatActivity() {
         GlobalApp.BLE?.context = this
         GlobalApp.BLE?.applicationContext = applicationContext as ContextWrapper
         select_device_list.layoutManager = LinearLayoutManager(select_device_list.context)
-        select_device_list.adapter = ScanAdapter(deviceList, resultsList) { partItem: BluetoothDevice -> partItemClicked(partItem) }
+        select_device_list.adapter = BLEScanAdapter(deviceList, resultsList) { partItem: BluetoothDevice -> partItemClicked(partItem) }
         select_device_list.itemAnimator = SlideInLeftAnimator()
         select_device_list.itemAnimator?.addDuration = 200
         select_device_list.addItemDecoration(DividerItemDecoration(select_device_list.context, DividerItemDecoration.VERTICAL))

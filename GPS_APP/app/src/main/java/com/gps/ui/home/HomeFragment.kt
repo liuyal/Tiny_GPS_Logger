@@ -19,10 +19,10 @@ import com.gps.R
 import com.gps.objects.*
 import kotlinx.android.synthetic.main.fragment_home.view.*
 
-// TODO: Update all buttons
 class HomeFragment : Fragment() {
 
     private lateinit var homeViewModel: HomeViewModel
+
     private var autoCheckRunning: Boolean = false
     private var statueCheckThread: Thread? = null
 
@@ -49,9 +49,19 @@ class HomeFragment : Fragment() {
             }
         }
 
-        view.action_button_B.setOnClickListener {}
+        view.action_button_B.setOnClickListener {
+            if (this.statueCheckThread != null && this.statueCheckThread?.isAlive!!) this.statueCheckThread?.interrupt()
+            this.statueCheckThread = null
+            this.statueCheckThread = Thread(Runnable { this.toggleGPS() })
+            this.statueCheckThread!!.start()
+        }
 
-        view.action_button_D.setOnClickListener {}
+        view.action_button_D.setOnClickListener {
+            if (this.statueCheckThread != null && this.statueCheckThread?.isAlive!!) this.statueCheckThread?.interrupt()
+            this.statueCheckThread = null
+            this.statueCheckThread = Thread(Runnable { this.toggleLogging() })
+            this.statueCheckThread!!.start()
+        }
 
         view.action_button_E.setOnClickListener {
             val main = activity as MainActivity?
@@ -69,7 +79,6 @@ class HomeFragment : Fragment() {
                 view?.action_button_E?.setColorFilter(Color.WHITE)
             }
         }
-
         return view
     }
 
@@ -97,36 +106,94 @@ class HomeFragment : Fragment() {
         Log.d("HOME", "Stopped h Fragment")
     }
 
+    private fun connectionCheck(): Boolean {
+        if (GlobalApp.BLE?.bleAddress == null || GlobalApp.BLE?.bleAddress == "") {
+            activity?.runOnUiThread { this.updateUIDeviceInfo() }
+            activity?.runOnUiThread { this.disconnectionUIHandler() }
+            Toast.makeText(activity, "No Device Paired", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        val start = System.currentTimeMillis()
+        while (GlobalApp.BLE?.connectionState != STATE_CONNECTED || GlobalApp.BLE?.bleGATT == null) {
+            if (System.currentTimeMillis() - start > 10 * TIME_OUT) return false
+            GlobalApp.BLE?.connect(GlobalApp.BLE?.bleAddress!!)!!
+            Thread.sleep(250)
+        }
+        activity?.runOnUiThread { this.updateUIDeviceInfo() }
+        Thread.sleep(1000)
+        return true
+    }
+
+    private fun updateUIAll() {
+        this.updateUIStatusBar()
+        this.updateUIStatusButtons()
+        this.updateUIStatusInfo()
+        this.updateUICoordinateInfo()
+    }
+
+    private fun toggleGPS() {
+        try {
+            Log.d("HOME", "Toggled GPS")
+            activity?.runOnUiThread { view?.status_progress_bar?.visibility = View.VISIBLE }
+            val connected = connectionCheck()
+            if (GlobalApp.BLE?.connectionState == STATE_CONNECTED || connected) {
+                if (GlobalApp.BLE?.gpsStatusFlags?.get(GPS_ON_FLAG_INDEX)!!) {
+                    if (!GlobalApp.BLE?.GPSoff()!!) throw IllegalArgumentException("GPS off Failed")
+                } else {
+                    if (!GlobalApp.BLE?.GPSon()!!) throw IllegalArgumentException("GPS on Failed")
+                    GlobalApp.BLE?.fetchGPSData()
+                }
+                GlobalApp.BLE?.fetchDeviceStatus()
+                activity?.runOnUiThread { this.updateUIAll() }
+            }
+            activity?.runOnUiThread { view?.status_progress_bar?.visibility = View.GONE }
+            if (this.autoCheckRunning) this.checkTaskLoop()
+            Log.d("HOME", "Toggled GPS " + GlobalApp.BLE?.gpsStatusFlags?.get(GPS_ON_FLAG_INDEX).toString())
+        } catch (e: Throwable) {
+            Log.e("HOME", "TOGGLE GPS ERROR")
+        }
+    }
+
+    private fun toggleLogging() {
+        try {
+            Log.d("HOME", "Toggled GPS Logging")
+            activity?.runOnUiThread { view?.status_progress_bar?.visibility = View.VISIBLE }
+            val connected = connectionCheck()
+            if (GlobalApp.BLE?.connectionState == STATE_CONNECTED || connected) {
+                if (GlobalApp.BLE?.gpsStatusFlags?.get(GPS_LOGGING_FLAG_INDEX)!!) {
+                    if (!GlobalApp.BLE?.GPSloggingOff()!!) throw IllegalArgumentException("GPS Logging off Failed")
+                } else {
+                    if (!GlobalApp.BLE?.GPSloggingOn()!!) throw IllegalArgumentException("GPS Logging on Failed")
+                    GlobalApp.BLE?.fetchGPSData()
+                }
+                GlobalApp.BLE?.fetchDeviceStatus()
+                activity?.runOnUiThread { this.updateUIAll() }
+            }
+            activity?.runOnUiThread { view?.status_progress_bar?.visibility = View.GONE }
+            if (this.autoCheckRunning) this.checkTaskLoop()
+            Log.d("HOME", "Toggled GPS Logging " + GlobalApp.BLE?.gpsStatusFlags?.get(GPS_LOGGING_FLAG_INDEX).toString())
+        } catch (e: Throwable) {
+            Log.e("HOME", "TOGGLE GPS Logging ERROR")
+        }
+    }
+
     private fun checkTaskLoop() {
         try {
             Log.d("HOME", "STATUS CHECK START")
-            val delay = 5 // TODO: configurable delay (in settings fragment)
             activity?.runOnUiThread { view?.status_progress_bar?.visibility = View.VISIBLE }
-            if (GlobalApp.BLE?.bleAddress == null || GlobalApp.BLE?.bleAddress == "") {
-                activity?.runOnUiThread {
-                    this.disconnectionUIHandler()
-                    Toast.makeText(activity, "No Device Paired", Toast.LENGTH_SHORT).show()
-                }
+            if (!connectionCheck()) {
+                view?.status_progress_bar?.visibility = View.GONE
                 return
             }
-            if (GlobalApp.BLE?.connectionState != STATE_CONNECTED || GlobalApp.BLE?.bleGATT == null) {
-                GlobalApp.BLE?.connect(GlobalApp.BLE?.bleAddress!!)!!
-                Thread.sleep(1000)
-            }
-            activity?.runOnUiThread { this.updateUIDeviceInfo() }
+            val delay = 5 // TODO: configurable delay (in settings fragment)
             while (true) {
                 try {
                     if (GlobalApp.BLE?.connectionState == STATE_CONNECTED || GlobalApp.BLE?.bleGATT != null) {
                         GlobalApp.BLE?.fetchDeviceStatus()
                         if (GlobalApp.BLE?.gpsStatusFlags?.get(GPS_FIX_FLAG_INDEX)!!) GlobalApp.BLE?.fetchGPSData()
                         else GlobalApp.BLE?.gpsData = ""
-                        activity?.runOnUiThread {
-                            this.updateUIStatusBar()
-                            this.updateUIStatusButtons()
-                            this.updateUIStatusInfo()
-                            this.updateUICoordinateInfo()
-                            view?.status_progress_bar?.visibility = View.GONE
-                        }
+                        activity?.runOnUiThread { this.updateUIAll() }
+                        activity?.runOnUiThread { view?.status_progress_bar?.visibility = View.GONE }
                         Thread.sleep((delay * TIME_OUT).toLong())
                     } else throw IllegalArgumentException()
                 } catch (e: Throwable) {
@@ -143,30 +210,10 @@ class HomeFragment : Fragment() {
         try {
             Log.d("HOME", "Connection UI Handler Starting")
             activity?.runOnUiThread { view?.status_progress_bar?.visibility = View.VISIBLE }
-            if (GlobalApp.BLE?.bleAddress == null || GlobalApp.BLE?.bleAddress == "") {
-                activity?.runOnUiThread {
-                    this.updateUIDeviceInfo()
-                    this.disconnectionUIHandler()
-                    Toast.makeText(activity, "No Device Paired", Toast.LENGTH_SHORT).show()
-                }
-                return
-            }
-            var connected = false
-            val start = System.currentTimeMillis()
-            while (!connected && (GlobalApp.BLE?.connectionState != STATE_CONNECTED || GlobalApp.BLE?.bleGATT == null)) {
-                connected = GlobalApp.BLE?.connect(GlobalApp.BLE?.bleAddress!!)!!
-                if (System.currentTimeMillis() - start > 10 * TIME_OUT) break
-            }
+            val connected = connectionCheck()
             if (GlobalApp.BLE?.connectionState == STATE_CONNECTED || connected) {
-                Thread.sleep(1000)
                 GlobalApp.BLE?.fetchDeviceStatus()
-                Thread.sleep(1000)
-                activity?.runOnUiThread {
-                    this.updateUIStatusBar()
-                    this.updateUIStatusButtons()
-                    this.updateUIStatusInfo()
-                    this.updateUICoordinateInfo()
-                }
+                activity?.runOnUiThread { this.updateUIAll() }
             } else {
                 activity?.runOnUiThread { this.disconnectionUIHandler() }
                 Log.d("HOME", "Unable to Connect to Device")
@@ -174,7 +221,6 @@ class HomeFragment : Fragment() {
             activity?.runOnUiThread { view?.status_progress_bar?.visibility = View.GONE }
             Log.d("HOME", "Connection UI Handler Complete")
         } catch (e: Throwable) {
-            e.printStackTrace()
             Log.e("MAP", "Connection Handler Error")
         }
     }
@@ -186,10 +232,7 @@ class HomeFragment : Fragment() {
             GlobalApp.BLE?.disconnect()
             GlobalApp.BLE?.gpsStatusFlags?.fill(false, 0, NUMBER_OF_FLAGS)
             GlobalApp.BLE?.gpsData = ""
-            this.updateUIStatusBar()
-            this.updateUIStatusButtons()
-            this.updateUIStatusInfo()
-            this.updateUICoordinateInfo()
+            this.updateUIAll()
         } catch (e: Throwable) {
             Log.e("HOME", "Disconnection UI Update Error")
         }

@@ -284,18 +284,16 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
 
     private fun writeValue(value: ByteArray): Boolean {
         this.transactionSuccess = false
-        val start = System.currentTimeMillis()
         val serviceCheck: Boolean = if (this.service == null || this.characteristic == null) {
             GlobalApp.BLE?.serviceChecks()!!
         } else true
-
         if (serviceCheck) {
             this.characteristic!!.value = value
             GlobalApp.BLE?.bleGATT?.writeCharacteristic(this.characteristic)
         } else return false
-
+        val start = System.currentTimeMillis()
         while (!this.transactionSuccess) {
-            if (System.currentTimeMillis() - start > 2 * TIME_OUT) return false
+            if (System.currentTimeMillis() - start > 5 * TIME_OUT) return false
         }
         this.transactionSuccess = false
         return true
@@ -303,17 +301,15 @@ class BLEDevice(c: Context, var applicationContext: ContextWrapper) {
 
     private fun readValue(): ByteArray? {
         this.transactionSuccess = false
-        val start = System.currentTimeMillis()
         val serviceCheck: Boolean = if (this.service == null || this.characteristic == null) {
             GlobalApp.BLE?.serviceChecks()!!
         } else true
-
         if (serviceCheck) {
             GlobalApp.BLE?.bleGATT?.readCharacteristic(this.characteristic)
         } else return null
-
+        val start = System.currentTimeMillis()
         while (!this.transactionSuccess) {
-            if (System.currentTimeMillis() - start > 2 * TIME_OUT) return null
+            if (System.currentTimeMillis() - start > 5 * TIME_OUT) return null
         }
         this.transactionSuccess = false
         return this.characteristic?.value
