@@ -63,9 +63,9 @@ Portable GPS logging device built with ESP32, NEO-6M, and Catalex Micro SD Card 
 
 | Bit Index | Function | Description |
 | :---: | --- | --- |
-| 0 | BLE Connection    | True if BLE service on GPS device is connected to BLE client |
-| 1 | GPS Has Fix       | True if GPS has location fix |
-| 2 | GPS On/Off Status | True if GPS service is enabled on device |
+| 0 | BLE Connection    | True if BLE service is connected to BLE client |
+| 1 | GPS On/Off Status | True if GPS service is enabled on device |
+| 2 | GPS Has Fix       | True if GPS has location fix |
 | 3 | Logging Status    | True if GPS sentences logging is enabled |
 
 ## Resource Links
@@ -79,7 +79,7 @@ Portable GPS logging device built with ESP32, NEO-6M, and Catalex Micro SD Card 
 - [NEO-6M Product Summary](https://www.u-blox.com/sites/default/files/products/documents/NEO-6_ProductSummary_%28GPS.G6-HW-09003%29.pdf)
 - [NEOGPS Repo](https://github.com/SlashDevin/NeoGPS/tree/master/examples)
 - [LoRaTracker GPS Tutorial](https://github.com/LoRaTracker/GPSTutorial)
-- 
+-
 #### ESP32
 - [ESP32 DataSheet](https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf)
 - [ESP32 Wiki](http://arduinoinfo.mywikis.net/wiki/Esp32)
