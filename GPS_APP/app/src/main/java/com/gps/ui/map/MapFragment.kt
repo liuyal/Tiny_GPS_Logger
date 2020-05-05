@@ -149,20 +149,26 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
+    private fun connectionCheck(): Boolean {
+        if (GlobalApp.BLE?.bleAddress == null || GlobalApp.BLE?.bleAddress == "") {
+            Toast.makeText(activity, "No Device Paired", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        val start = System.currentTimeMillis()
+        while (GlobalApp.BLE?.connectionState != STATE_CONNECTED || GlobalApp.BLE?.bleGATT == null) {
+            if (System.currentTimeMillis() - start > 10 * TIME_OUT) return false
+            GlobalApp.BLE?.connect(GlobalApp.BLE?.bleAddress!!)!!
+            Thread.sleep(250)
+        }
+        Thread.sleep(1000)
+        return true
+    }
+
     // TODO: Lock out inputs
     private fun connectionHandler() {
         try {
             Log.d("MAP", "Connection Handler Starting")
-            if (GlobalApp.BLE?.bleAddress == null || GlobalApp.BLE?.bleAddress == "") {
-                activity?.runOnUiThread { Toast.makeText(activity, "No Device Paired", Toast.LENGTH_SHORT).show() }
-                return
-            }
-            var connected = false
-            val start = System.currentTimeMillis()
-            while (!connected && (GlobalApp.BLE?.connectionState != STATE_CONNECTED || GlobalApp.BLE?.bleGATT == null)) {
-                connected = GlobalApp.BLE?.connect(GlobalApp.BLE?.bleAddress!!)!!
-                if (System.currentTimeMillis() - start > 10 * TIME_OUT) break
-            }
+            val connected = connectionCheck()
             if (GlobalApp.BLE?.connectionState == STATE_CONNECTED || connected) {
                 Thread.sleep(1000)
                 GlobalApp.BLE?.fetchDeviceStatus()
