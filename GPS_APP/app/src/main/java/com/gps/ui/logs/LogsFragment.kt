@@ -5,13 +5,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.gps.R
-
-//https://stackoverflow.com/questions/23358822/how-to-custom-switch-button
 
 class LogsFragment : Fragment() {
 
@@ -20,8 +16,12 @@ class LogsFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         logsViewModel = ViewModelProvider(this).get(LogsViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_logs, container, false)
-        val textView: TextView = root.findViewById(R.id.text_logs)
-        logsViewModel.text.observe(viewLifecycleOwner, Observer { textView.text = it })
+
+
+
+
+
+
         return root
     }
 

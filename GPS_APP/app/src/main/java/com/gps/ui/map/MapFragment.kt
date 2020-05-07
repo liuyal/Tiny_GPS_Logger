@@ -26,7 +26,6 @@ import kotlinx.android.synthetic.main.fragment_map.view.statusBar2
 import kotlinx.android.synthetic.main.fragment_map.view.statusBar3
 import kotlinx.android.synthetic.main.fragment_map.view.statusBar4
 
-
 class MapFragment : Fragment(), OnMapReadyCallback {
 
     private lateinit var mapViewModel: MapViewModel
@@ -51,7 +50,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         view.toggleButton.setOnClickListener {
             if (this.mapCheckThread != null && this.mapCheckThread!!.isAlive) this.mapCheckThread?.interrupt()
             this.mapCheckThread = null
-            this.mapCheckThread = Thread(Runnable { this.updateMaps() })
+            this.mapCheckThread = Thread(Runnable { this.updateMapTask() })
             this.mapCheckThread!!.start()
         }
 
@@ -125,27 +124,39 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    // TODO: add progress bar to lock out inputs
+    private fun drawPath() {
+
+    }
+
     private fun updateMaps() {
+        if (GlobalApp.BLE?.gpsData != null && GlobalApp.BLE?.gpsData != "") {
+            var gpsData = GlobalApp.BLE?.gpsData!!
+            gpsData = gpsData.substring(gpsData.indexOf('[') + 1, gpsData.indexOf(']'))
+            val gpdDataList = gpsData.split(',') as ArrayList<String>
+            this.defaultLatitude = gpdDataList[LOCATION_LAT_INDEX].toDouble()
+            this.defaultLongitude = gpdDataList[LOCATION_LNG_INDEX].toDouble()
+            marker.position = LatLng(defaultLatitude, defaultLongitude)
+            cameraPosition = CameraPosition.Builder().target(LatLng(defaultLatitude, defaultLongitude)).zoom(15f).build()
+            googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+        }
+    }
+
+    private fun updateMapTask() {
+        val delay = 5 // TODO: configurable delay (in settings fragment)
         try {
             this.connectionHandler()
-            if (GlobalApp.BLE?.gpsStatusFlags?.get(GPS_FIX_FLAG_INDEX)!!) GlobalApp.BLE?.fetchGPSData()
-            else GlobalApp.BLE?.gpsData = ""
-            if (GlobalApp.BLE?.gpsData != null && GlobalApp.BLE?.gpsData != "") {
-                var gpsData = GlobalApp.BLE?.gpsData!!
-                gpsData = gpsData.substring(gpsData.indexOf('[') + 1, gpsData.indexOf(']'))
-                val gpdDataList = gpsData.split(',') as ArrayList<String>
-                this.defaultLatitude = gpdDataList[LOCATION_LAT_INDEX].toDouble()
-                this.defaultLongitude = gpdDataList[LOCATION_LNG_INDEX].toDouble()
-                activity?.runOnUiThread {
-                    marker.position = LatLng(defaultLatitude, defaultLongitude)
-                    cameraPosition = CameraPosition.Builder().target(LatLng(defaultLatitude, defaultLongitude)).zoom(15f).build()
-                    googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
-                }
-            } else Log.d("MAP", "NO GPS FIX")
-            Log.d("MAP", "MAPS UPDATE")
+            while (true) {
+                if (GlobalApp.BLE?.connectionState == STATE_CONNECTED || GlobalApp.BLE?.bleGATT != null) {
+                    GlobalApp.BLE?.fetchDeviceStatus()
+                    if (GlobalApp.BLE?.gpsStatusFlags?.get(GPS_FIX_FLAG_INDEX)!!) GlobalApp.BLE?.fetchGPSData()
+                    else GlobalApp.BLE?.gpsData = ""
+                    activity?.runOnUiThread { updateMaps() }
+                    Thread.sleep((delay * TIME_OUT).toLong())
+                    Log.d("MAP", "UPDATING MAPS")
+                } else throw IllegalArgumentException("NO GPS FIX")
+            }
         } catch (e: Throwable) {
-            Log.e("MAP", "Update Maps Error")
+            Log.e("MAP", "MAP UPDATE ERROR")
         }
     }
 
@@ -164,7 +175,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         return true
     }
 
-    // TODO: Lock out inputs
     private fun connectionHandler() {
         try {
             Log.d("MAP", "Connection Handler Starting")

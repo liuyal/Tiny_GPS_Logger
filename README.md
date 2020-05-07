@@ -109,6 +109,7 @@ Portable GPS logging device built with ESP32, NEO-6M, and Catalex Micro SD Card 
 - [Android Developers: Map Controls and Gestures](https://developers.google.com/maps/documentation/android-sdk/controls)
 - [Android Developers: Map Markers](https://developers.google.com/maps/documentation/javascript/markers)
 - [Android Developers: Map MarkerOptions](https://developers.google.com/android/reference/com/google/android/gms/maps/model/MarkerOptions)
+- [Android Developers: Map Path](https://developers.google.com/maps/documentation/android-sdk/polygon-tutorial)
 - [Mapbox API Offline maps](https://docs.mapbox.com/android/maps/overview/)
 - [Real-Time Map using Kotlin](https://pusher.com/tutorials/realtime-map-kotlin)
 - [Real-Time Map using Kotlin Repo](https://github.com/neoighodaro/realtime-map-example-kotlin)

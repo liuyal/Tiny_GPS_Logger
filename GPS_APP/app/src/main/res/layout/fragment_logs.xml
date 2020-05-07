@@ -1,16 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.logs.LogsFragment">
 
+
+    <LinearLayout
+        android:id="@+id/statusBar"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="100">
+
+        <View
+            android:id="@+id/statusBar1"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/statusBarHeight"
+            android:layout_weight="25"
+            android:background="@drawable/status_off" />
+
+        <View
+            android:id="@+id/statusBar2"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/statusBarHeight"
+            android:layout_weight="25"
+            android:background="@drawable/status_off" />
+
+        <View
+            android:id="@+id/statusBar3"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/statusBarHeight"
+            android:layout_weight="25"
+            android:background="@drawable/status_off" />
+
+
+        <View
+            android:id="@+id/statusBar4"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/statusBarHeight"
+            android:layout_weight="25"
+            android:background="@drawable/status_off" />
+
+
+    </LinearLayout>
+
+
     <TextView
         android:id="@+id/text_logs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_marginTop="50dp"
         android:textAlignment="center"
         android:textSize="20sp" />
 
