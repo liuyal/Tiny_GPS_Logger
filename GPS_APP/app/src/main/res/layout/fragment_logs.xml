@@ -45,13 +45,15 @@
     </LinearLayout>
 
 
-    <TextView
-        android:id="@+id/text_logs"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:textAlignment="center"
-        android:textSize="20sp" />
+
+
+
+
+
+
+
+
+
 
 
 </RelativeLayout>
