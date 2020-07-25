@@ -25,6 +25,7 @@ Portable GPS logging device built with ESP32, NEO-6M, and Catalex Micro SD Card 
 ## Android App Guide
 
 - TBA
+- USE OF BUILT-IN INTERNAL PHONE GPS
 
 ### Android [Remote adb debug](https://stackoverflow.com/questions/4893953/run-install-debug-android-applications-over-wi-fi)
 
