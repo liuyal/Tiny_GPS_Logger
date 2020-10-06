@@ -176,3 +176,6 @@ class BLEActivity : AppCompatActivity() {
         return true
     }
 }
+
+
+// https://stackoverflow.com/questions/32759785/is-it-possible-to-allocate-these-folders-in-another-place
