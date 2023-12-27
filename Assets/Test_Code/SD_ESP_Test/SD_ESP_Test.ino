@@ -38,21 +38,21 @@ void SD_INIT() {
 
 int listDir(fs::FS &fs, String dirname, uint8_t levels) {
   int count = 0;
-  Serial_Print("Listing directory: " + dirname + "\n");
+  Serial.println("Listing directory: " + dirname + "\n");
   File root = fs.open(dirname);
   if (!root || !root.isDirectory()) {
-    Serial_Print("Failed to open directory\n");
+    Serial.println("Failed to open directory\n");
     return -1;
   }
   File file = root.openNextFile();
   while (file) {
     if (file.isDirectory()) {
-      Serial_Print("  DIR : " + String(file.name()) + "\n");
+      Serial.println("  DIR : " + String(file.name()) + "\n");
       if (levels) listDir(fs, file.name(), levels - 1);
     }
     else {
       count += 1;
-      Serial_Print("  FILE: " + String(file.name()) + "  SIZE: " + String(file.size()) + "\n");
+      Serial.println("  FILE: " + String(file.name()) + "  SIZE: " + String(file.size()) + "\n");
     }
     file = root.openNextFile();
   }
@@ -61,66 +61,66 @@ int listDir(fs::FS &fs, String dirname, uint8_t levels) {
 
 void createDir(fs::FS &fs, String path) {
   if (SD.exists(path)) {
-    Serial_Print("Dir " + path + " Exists...\n");
+    Serial.println("Dir " + path + " Exists...\n");
     return;
   }
-  Serial_Print("Creating Dir: " + path + "\n");
-  if (fs.mkdir(path)) Serial_Print("Dir created\n");
-  else Serial_Print("mkdir failed\n");
+  Serial.println("Creating Dir: " + path + "\n");
+  if (fs.mkdir(path)) Serial.println("Dir created\n");
+  else Serial.println("mkdir failed\n");
 }
 
 void removeDir(fs::FS &fs, String path) {
-  Serial_Print("Removing Dir: " + path + "\n");
-  if (fs.rmdir(path))Serial_Print("Dir removed\n");
-  else Serial_Print("rmdir failed\n");
+  Serial.println("Removing Dir: " + path + "\n");
+  if (fs.rmdir(path))Serial.println("Dir removed\n");
+  else Serial.println("rmdir failed\n");
 }
 
 void readFile(fs::FS &fs, String path) {
-  Serial_Print("Reading file: " + path + "\n");
+  Serial.println("Reading file: " + path + "\n");
   File file = fs.open(path);
   if (!file) {
-    Serial_Print("Failed to open file for reading\n");
+    Serial.println("Failed to open file for reading\n");
     return;
   }
-  Serial_Print("Read from file: ");
+  Serial.println("Read from file: ");
   while (file.available()) Serial.write(file.read());
   file.close();
 }
 
 void writeFile(fs::FS &fs, String path, String message) {
-  Serial_Print("Writing file: " + path + "\n");
+  Serial.println("Writing file: " + path + "\n");
   File file = fs.open(path, FILE_WRITE);
   if (!file) {
-    Serial_Print("Failed to open file for writing\n");
+    Serial.println("Failed to open file for writing\n");
     return;
   }
-  if (file.print(message)) Serial_Print("File written\n");
-  else Serial_Print("Write failed\n");
+  if (file.print(message)) Serial.println("File written\n");
+  else Serial.println("Write failed\n");
   file.close();
 }
 
 void appendFile(fs::FS &fs, String path, String message) {
-  Serial_Print("Append to file: " + path + " ");
+  Serial.println("Append to file: " + path + " ");
   File file = fs.open(path, FILE_APPEND);
   if (!file) {
-    Serial_Print("Failed to open file\n");
+    Serial.println("Failed to open file\n");
     return;
   }
-  if (file.print(message)) Serial_Print("| Data appended\n");
-  else Serial_Print("Append failed\n");
+  if (file.print(message)) Serial.println("| Data appended\n");
+  else Serial.println("Append failed\n");
   file.close();
 }
 
 void renameFile(fs::FS &fs, String path1, String path2) {
-  Serial_Print("Renaming file " + path1 + " to " + path2 + "\n");
-  if (fs.rename(path1, path2)) Serial_Print("File renamed\n");
-  else Serial_Print("Rename failed\n");
+  Serial.println("Renaming file " + path1 + " to " + path2 + "\n");
+  if (fs.rename(path1, path2)) Serial.println("File renamed\n");
+  else Serial.println("Rename failed\n");
 }
 
 void deleteFile(fs::FS &fs, String path) {
-  Serial_Print("Deleting file: " + path + "\n");
-  if (fs.remove(path))Serial_Print("File deleted\n");
-  else Serial_Print("Delete failed\n");
+  Serial.println("Deleting file: " + path + "\n");
+  if (fs.remove(path))Serial.println("File deleted\n");
+  else Serial.println("Delete failed\n");
 }
 
 void loop() {
