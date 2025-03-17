@@ -6,7 +6,7 @@
 
 #define DEBUG true
 
-#ifdef DEBUG
+#if DEBUG
 #define DEBUG_PRINT(x) Serial.print(x);
 #else
 #define DEBUG_PRINT(x) \
@@ -14,7 +14,7 @@
   } while (0);
 #endif
 
-#ifdef DEBUG
+#if DEBUG
 #define DEBUG_PRINT_LN(x) Serial.println(x);
 #else
 #define DEBUG_PRINT_LN(x) \
@@ -29,14 +29,15 @@
 TinyGPSPlus gps;
 
 const int CS_PIN = 5;
-
+int nFiles = 0;
 
 /**********************************************************************
    SDCard Functions
  **********************************************************************/
 
 void SD_INIT() {
-  DEBUG_PRINT_LN("\n\rInitializing SD Card...");
+
+  DEBUG_PRINT_LN("Initializing SD Card...");
 
   if (!SD.begin(CS_PIN)) {
     DEBUG_PRINT_LN("SD Card Initialization Failed!");
@@ -44,6 +45,7 @@ void SD_INIT() {
   }
 
   DEBUG_PRINT_LN("-------SD Card Info-------");
+
   uint8_t cardType = SD.cardType();
   uint64_t bytes = SD.totalBytes();
   uint64_t used_bytes = SD.usedBytes();
@@ -68,11 +70,38 @@ void SD_INIT() {
   DEBUG_PRINT_LN((float)bytes / (1000 * 1000));
   DEBUG_PRINT("Volume(GB):\t");
   DEBUG_PRINT_LN((float)bytes / (1000 * 1000 * 1000));
+
+  nFiles = countFiles(SD, "/", 0);
+
+  DEBUG_PRINT("Files Count:\t");
+  DEBUG_PRINT_LN(nFiles);
   DEBUG_PRINT_LN("--------------------------");
 }
 
-void appendFile(fs::FS &fs, String message) {
-  File file = fs.open("/test.log", FILE_APPEND);
+int countFiles(fs::FS &fs, String dirname, uint8_t levels) {
+
+  int count = 0;
+  File root = fs.open(dirname);
+  if (!root || !root.isDirectory()) {
+    return -1;
+  }
+  File file = root.openNextFile();
+
+  while (file) {
+    if (file.isDirectory()) {
+      if (levels) countFiles(fs, file.name(), levels - 1);
+    } else count += 1;
+
+    file = root.openNextFile();
+  }
+
+  return count;
+}
+
+
+void appendFile(fs::FS &fs, String path, String message) {
+
+  File file = fs.open(path, FILE_APPEND);
   if (!file) return;
   file.print(message);
   file.close();
@@ -111,14 +140,17 @@ void loop() {
     gnss_data += (char)raw_data;
   }
 
-  if (gps.location.isValid()) {
-    digitalWrite(LED_PIN, HIGH);
-    DEBUG_PRINT(gnss_data)
-    appendFile(SD, gnss_data);
+  // // Check fix and log to file
+  // if (gps.location.isValid()) {
+  //   digitalWrite(LED_PIN, HIGH);
+  //   appendFile(SD, "/" + String(nFiles) + ".log", gnss_data);
 
-  } else {
-    digitalWrite(LED_PIN, LOW);
-    DEBUG_PRINT_LN("No GNSS FIX...");
-    delay(1000);
-  }
+  // } else {
+  //   digitalWrite(LED_PIN, LOW);
+  //   DEBUG_PRINT_LN("No GNSS FIX...");
+  // }
+  
+  DEBUG_PRINT(gnss_data)
+  delay(1000);
+  appendFile(SD, "/" + String(nFiles) + ".log", gnss_data);
 }
