@@ -1,7 +1,13 @@
+#include <EEPROM.h>
 #include <SPI.h>
 #include "SD.h"
 #include "FS.h"
+#include "TinyGPS++.h"
 
+#define GNSS_BUF_SIZE 128
+#define LED_PIN 22
+#define RXD2 16
+#define TXD2 17
 #define DEBUG true
 
 #define DEBUG_PRINT(x) \
@@ -18,6 +24,7 @@
       Serial.println(x);  \
   } while (0)
 
+TinyGPSPlus gps;
 const int CS = 5;
 
 void SD_INIT()
@@ -175,10 +182,49 @@ void deleteFile(fs::FS &fs, String path)
 
 void setup()
 {
+  // LED
+  pinMode(LED_PIN, OUTPUT);
+  // Initialize Serial
   Serial.begin(115200);
+  // Initialize HW Serial to NEO
+  Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
+
+  // Initialize SD card
   SD_INIT();
+
+  DEBUG_PRINT_LN("Initialization Complete!");
 }
 
 void loop()
 {
+  static char gnss_data[GNSS_BUF_SIZE];
+  static size_t gnss_len = 0;
+
+  // Read from NEO serial
+  while (Serial2.available())
+  {
+    int raw_data = Serial2.read();
+    gps.encode(raw_data);
+    // leave room for the null terminator
+    if (gnss_len < GNSS_BUF_SIZE - 1)
+    {
+      gnss_data[gnss_len++] = (char)raw_data;
+    }
+  }
+
+  // Check fix and set LED status
+  if (gps.location.isValid())
+  {
+    digitalWrite(LED_PIN, HIGH);
+  }
+  else
+  {
+    digitalWrite(LED_PIN, LOW);
+  }
+
+  gnss_data[gnss_len] = '\0';
+  DEBUG_PRINT(gnss_data);
+  gnss_len = 0;
+
+  delay(1000);
 }
