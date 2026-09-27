@@ -61,20 +61,20 @@ The following table outlines the BLE instruction bits used to control the GPS de
 
 ## Resource & Reference Links
 
-#### GPS Module
-- [NMEA Sentences](https://www.gpsinformation.org/dale/nmea.htm)
-- [Tiny GPS++ Library](http://arduiniana.org/libraries/tinygpsplus/)
-- [Guide to NEO-6M GPS Module](https://randomnerdtutorials.com/guide-to-neo-6m-gps-module-with-arduino/)
-- [Interface ublox NEO-6M GPS Module](https://lastminuteengineers.com/neo6m-gps-arduino-tutorial/)
-- [NEO-6M DataSheet](https://www.u-blox.com/sites/default/files/products/documents/NEO-6_DataSheet_%28GPS.G6-HW-09005%29.pdf)
-- [NEO-6M Product Summary](https://www.u-blox.com/sites/default/files/products/documents/NEO-6_ProductSummary_%28GPS.G6-HW-09003%29.pdf)
-- [NEOGPS Repo](https://github.com/SlashDevin/NeoGPS/tree/master/examples)
-- [LoRaTracker GPS Tutorial](https://github.com/LoRaTracker/GPSTutorial)
-
 #### ESP32
 - [ESP32 DataSheet](https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf)
 - [ESP32 Wiki](http://arduinoinfo.mywikis.net/wiki/Esp32)
 
+#### GPS Module
+- [NEO-6M DataSheet](https://www.u-blox.com/sites/default/files/products/documents/NEO-6_DataSheet_%28GPS.G6-HW-09005%29.pdf)
+- [NEO-6M Product Summary](https://www.u-blox.com/sites/default/files/products/documents/NEO-6_ProductSummary_%28GPS.G6-HW-09003%29.pdf)
+- [Guide to NEO-6M GPS Module](https://randomnerdtutorials.com/guide-to-neo-6m-gps-module-with-arduino/)
+- [Interface ublox NEO-6M GPS Module](https://lastminuteengineers.com/neo6m-gps-arduino-tutorial/)
+- [Tiny GPS++ Library](http://arduiniana.org/libraries/tinygpsplus/)
+- [NEOGPS Repo](https://github.com/SlashDevin/NeoGPS/tree/master/examples)
+- [LoRaTracker GPS Tutorial](https://github.com/LoRaTracker/GPSTutorial)
+- [NMEA Sentences](https://www.gpsinformation.org/dale/nmea.htm)
+- 
 #### SD Card Module
 - [ESP32 Logging to MicroSD Card](https://randomnerdtutorials.com/esp32-data-logging-temperature-to-microsd-card/)
 - [Interfacing Micro SD Card Module](https://lastminuteengineers.com/arduino-micro-sd-card-module-tutorial/)
