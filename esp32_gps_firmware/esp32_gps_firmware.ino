@@ -371,6 +371,8 @@ void control_cmd_event() {
 }
 
 void setup() {
+  // Initialize Serial
+  Serial.begin(115200);
   DEBUG_PRINT_LN("Starting Initialization...");
 
   // Initialize EEPROM
@@ -383,9 +385,6 @@ void setup() {
     statusFlags[GPS_ENABLED] = true;
   if (EEPROM.read(GPS_LOGGING_ENABLED) == 0x01)
     statusFlags[GPS_LOGGING_ENABLED] = true;
-
-  // Initialize Serial
-  Serial.begin(115200);
 
   // Initialize HW Serial to NEO
   Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
