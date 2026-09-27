@@ -20,7 +20,7 @@ class ServerCallbacks : public NimBLEServerCallbacks
     void onDisconnect(NimBLEServer *pServer, NimBLEConnInfo &connInfo, int reason)
     {
         deviceConnected = false;
-        Serial.println("BLE Device Disconnect");
+        Serial.println("BLE Device Disconnected");
     }
 };
 

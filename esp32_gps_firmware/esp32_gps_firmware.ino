@@ -20,18 +20,18 @@
 #define TXD2 17
 #define DEBUG true
 
-#define DEBUG_PRINT(x) \
-  do                   \
-  {                    \
-    if (DEBUG)         \
-      Serial.print(x); \
+#define DEBUG_PRINT(...)         \
+  do                             \
+  {                              \
+    if (DEBUG)                   \
+      Serial.print(__VA_ARGS__); \
   } while (0)
 
-#define DEBUG_PRINT_LN(x) \
-  do                      \
-  {                       \
-    if (DEBUG)            \
-      Serial.println(x);  \
+#define DEBUG_PRINT_LN(...)        \
+  do                               \
+  {                                \
+    if (DEBUG)                     \
+      Serial.println(__VA_ARGS__); \
   } while (0)
 
 /**********************************************************************
@@ -61,80 +61,6 @@ const int GPS_LOGGING_ENABLED = 3;
 char gnss_dir[] = "GNSS_LOGS";
 char log_buffer[LOG_BUFFER_SIZE] = "";
 int nfiles = 0;
-
-/**********************************************************************
-   BLE Functions
- **********************************************************************/
-
-class ServerCallbacks : public NimBLEServerCallbacks
-{
-  void onConnect(NimBLEServer *pServer, NimBLEConnInfo &connInfo)
-  {
-    deviceConnected = true;
-    DEBUG_PRINT_LN("BLE Device Connected");
-  };
-  void onDisconnect(NimBLEServer *pServer, NimBLEConnInfo &connInfo, int reason)
-  {
-    deviceConnected = false;
-    DEBUG_PRINT_LN("BLE Device Disconnect");
-  }
-};
-
-class BLE_Callbacks : public NimBLECharacteristicCallbacks
-{
-  void onWrite(NimBLECharacteristic *pCharacteristic, NimBLEConnInfo &connInfo)
-  {
-    char value[64];
-    size_t len = pCharacteristic->getValue().length();
-    len = len < sizeof(value) - 1 ? len : sizeof(value) - 1;
-    memcpy(value, pCharacteristic->getValue().data(), len);
-    value[len] = '\0';
-    if (len > 0)
-    {
-      DEBUG_PRINT("Value: ");
-      for (size_t i = 0; i < len; i++)
-        DEBUG_PRINT(value[i], HEX);
-      DEBUG_PRINT_LN("");
-    }
-  }
-};
-
-void BLE_INIT()
-{
-  char uuid_buf[96];
-  DEBUG_PRINT_LN("Initializing BLE...");
-  snprintf(uuid_buf, sizeof(uuid_buf), "SERVICE UUID: %s", SERVICE_UUID);
-  DEBUG_PRINT_LN(uuid_buf);
-  snprintf(uuid_buf, sizeof(uuid_buf), "CHARACTERISTIC UUID: %s", CHARACTERISTIC_UUID);
-  DEBUG_PRINT_LN(uuid_buf);
-  DEBUG_PRINT_LN("Starting BLE Server...");
-
-  NimBLEDevice::init("ESP32_GPS_LOGGER");
-  DEBUG_PRINT("BLE MAC Address: ");
-  DEBUG_PRINT_LN(NimBLEDevice::getAddress().toString().c_str());
-
-  pServer = NimBLEDevice::createServer();
-  pServer->setCallbacks(new ServerCallbacks());
-  pService = pServer->createService(SERVICE_UUID);
-  pCharacteristic = pService->createCharacteristic(
-      CHARACTERISTIC_UUID,
-      NIMBLE_PROPERTY::READ |
-          NIMBLE_PROPERTY::WRITE |
-          NIMBLE_PROPERTY::NOTIFY |
-          NIMBLE_PROPERTY::INDICATE);
-  pCharacteristic->setCallbacks(new BLE_Callbacks());
-  pCharacteristic->createDescriptor("2901", NIMBLE_PROPERTY::READ)->setValue("BLE Control Service");
-  pService->start();
-
-  NimBLEAdvertising *pAdvertising = NimBLEDevice::getAdvertising();
-  pAdvertising->addServiceUUID(SERVICE_UUID);
-  pAdvertising->enableScanResponse(true);
-  pAdvertising->setPreferredParams(0x06, 0x12);
-  pServer->getAdvertising()->start();
-
-  DEBUG_PRINT_LN("GATT Service Defined!");
-  DEBUG_PRINT_LN("GATT Characteristic Defined!");
-}
 
 /**********************************************************************
    SD Card Functions
@@ -343,6 +269,273 @@ void FS_INIT(bool reset)
 }
 
 /**********************************************************************
+   Shared Command Functions
+   (used by both the BLE opcode handler and the serial command handler)
+ **********************************************************************/
+
+void build_status_buf(byte *buf)
+{
+  buf[BLE_CONNECTED] = statusFlags[BLE_CONNECTED] ? 0x01 : 0x00;
+  buf[GPS_ENABLED] = statusFlags[GPS_ENABLED] ? 0x01 : 0x00;
+  buf[GPS_HAS_FIX] = statusFlags[GPS_HAS_FIX] ? 0x01 : 0x00;
+  buf[GPS_LOGGING_ENABLED] = statusFlags[GPS_LOGGING_ENABLED] ? 0x01 : 0x00;
+}
+
+void gps_start()
+{
+  statusFlags[GPS_ENABLED] = true;
+  EEPROM.write(GPS_ENABLED, 0x01);
+  EEPROM.commit();
+}
+
+void gps_stop()
+{
+  statusFlags[GPS_ENABLED] = false;
+  EEPROM.write(GPS_ENABLED, 0x00);
+  EEPROM.commit();
+}
+
+void logging_start()
+{
+  statusFlags[GPS_LOGGING_ENABLED] = true;
+  EEPROM.write(GPS_LOGGING_ENABLED, 0x01);
+  EEPROM.commit();
+}
+
+void logging_stop()
+{
+  statusFlags[GPS_LOGGING_ENABLED] = false;
+  EEPROM.write(GPS_LOGGING_ENABLED, 0x00);
+  EEPROM.commit();
+}
+
+void build_gps_packet(char *buf, size_t size)
+{
+  snprintf(buf, size,
+           "[%d,%d,%lu,%.7f,%.7f,%u,%u,%u,%u,%u,%u,%lu,%.2f,%.2f,%.2f,%lu]",
+           gps.location.isValid(),
+           gps.location.isUpdated(),
+           (unsigned long)gps.location.age(),
+           gps.location.lat(),
+           gps.location.lng(),
+           gps.date.year(),
+           gps.date.month(),
+           gps.date.day(),
+           gps.time.hour(),
+           gps.time.minute(),
+           gps.time.second(),
+           (unsigned long)gps.satellites.value(),
+           gps.speed.kmph(),
+           gps.course.deg(),
+           gps.altitude.meters(),
+           (unsigned long)gps.hdop.value());
+}
+
+void build_sdcard_info(char *buf, size_t size)
+{
+  uint64_t bytes = SD.totalBytes();
+  uint64_t used_bytes = SD.usedBytes();
+  uint32_t bytes_low = (uint32_t)bytes;
+  uint32_t bytes_high = (uint32_t)(bytes >> 32);
+  uint32_t used_bytes_low = (uint32_t)used_bytes;
+  uint32_t used_bytes_high = (uint32_t)(used_bytes >> 32);
+  snprintf(buf, size, "[%lu,%lu,%lu,%lu]",
+           (unsigned long)bytes_high,
+           (unsigned long)bytes_low,
+           (unsigned long)used_bytes_high,
+           (unsigned long)used_bytes_low);
+}
+
+void system_reboot(uint32_t delay_ms)
+{
+  delay(delay_ms);
+  ESP.restart();
+}
+
+void system_reset()
+{
+  statusFlags[GPS_ENABLED] = false;
+  statusFlags[GPS_LOGGING_ENABLED] = false;
+  EEPROM.write(GPS_ENABLED, 0x00);
+  EEPROM.write(GPS_LOGGING_ENABLED, 0x00);
+  EEPROM.commit();
+  delay(1000);
+  FS_INIT(true);
+}
+
+/**********************************************************************
+   BLE Functions
+ **********************************************************************/
+
+class ServerCallbacks : public NimBLEServerCallbacks
+{
+  void onConnect(NimBLEServer *pServer, NimBLEConnInfo &connInfo)
+  {
+    DEBUG_PRINT_LN("BLE Device Connected");
+  };
+  void onDisconnect(NimBLEServer *pServer, NimBLEConnInfo &connInfo, int reason)
+  {
+    DEBUG_PRINT_LN("BLE Device Disconnect");
+  }
+};
+
+class BLE_Callbacks : public NimBLECharacteristicCallbacks
+{
+  void onWrite(NimBLECharacteristic *pCharacteristic, NimBLEConnInfo &connInfo)
+  {
+    char value[64];
+    size_t len = pCharacteristic->getValue().length();
+    len = len < sizeof(value) - 1 ? len : sizeof(value) - 1;
+    memcpy(value, pCharacteristic->getValue().data(), len);
+    value[len] = '\0';
+
+    if (len > 0)
+    {
+      DEBUG_PRINT("Value: ");
+      for (size_t i = 0; i < len; i++)
+        DEBUG_PRINT(value[i], HEX);
+      DEBUG_PRINT_LN("");
+
+      if (value[0] == 0x00)
+      {
+        const char *packet = "[BLE] ESP32_GPS";
+        pCharacteristic->setValue((const uint8_t *)packet, strlen(packet));
+        pCharacteristic->indicate();
+        DEBUG_PRINT_LN(packet);
+      }
+      else if (value[0] == 0x01)
+      {
+        byte buf[NUMBER_OF_FLAGS];
+        char status_buf[32];
+        build_status_buf(buf);
+        pCharacteristic->setValue(buf, sizeof(buf));
+        pCharacteristic->indicate();
+        snprintf(status_buf, sizeof(status_buf), "[BLE] Status: %d%d%d%d", buf[0], buf[1], buf[2], buf[3]);
+        DEBUG_PRINT_LN(status_buf);
+      }
+      else if (value[0] == 0x02)
+      {
+        DEBUG_PRINT_LN("[BLE] Start GPS");
+        gps_start();
+        byte buf[2] = {0x01, 0x01};
+        pCharacteristic->setValue(buf, sizeof(buf));
+        pCharacteristic->indicate();
+      }
+      else if (value[0] == 0x03)
+      {
+        DEBUG_PRINT_LN("[BLE] Stop GPS");
+        gps_stop();
+        byte buf[2] = {0x01, 0x01};
+        pCharacteristic->setValue(buf, sizeof(buf));
+        pCharacteristic->indicate();
+      }
+      else if (value[0] == 0x04)
+      {
+        DEBUG_PRINT_LN("[BLE] Start logging");
+        logging_start();
+        byte buf[2] = {0x01, 0x01};
+        pCharacteristic->setValue(buf, sizeof(buf));
+        pCharacteristic->indicate();
+      }
+      else if (value[0] == 0x05)
+      {
+        DEBUG_PRINT_LN("[BLE] Stop logging");
+        logging_stop();
+        byte buf[2] = {0x01, 0x01};
+        pCharacteristic->setValue(buf, sizeof(buf));
+        pCharacteristic->indicate();
+      }
+      else if (value[0] == 0x06)
+      {
+        char packet[200];
+        build_gps_packet(packet, sizeof(packet));
+        pCharacteristic->setValue((const uint8_t *)packet, strlen(packet));
+        pCharacteristic->indicate();
+        DEBUG_PRINT_LN(packet);
+      }
+      else if (value[0] == 0x07)
+      {
+        // char gnss_path[32];
+        // snprintf(gnss_path, sizeof(gnss_path), "/%s", gnss_dir);
+        // int count = listDir(SD, gnss_path, 0);
+        // char listing[16];
+        // snprintf(listing, sizeof(listing), "[%d]", count);
+        // pCharacteristic->setValue((const uint8_t *)listing, strlen(listing));
+        // pCharacteristic->indicate();
+        // DEBUG_PRINT_LN(listing);
+         // TODO: list file contents over BLE
+      }
+      else if (value[0] == 0x08)
+      {
+        // char log_path[64];
+        // snprintf(log_path, sizeof(log_path), "/%s/GPS_%d.log", gnss_dir, (int)value[1]);
+        // readFile(SD, log_path);
+        // TODO: send file contents over BLE
+      }
+      else if (value[0] == 0x09)
+      {
+        char sdcard_buf[64];
+        build_sdcard_info(sdcard_buf, sizeof(sdcard_buf));
+        pCharacteristic->setValue((const uint8_t *)sdcard_buf, strlen(sdcard_buf));
+        pCharacteristic->indicate();
+        DEBUG_PRINT_LN(sdcard_buf);
+      }
+      else if (value[0] == 0x0a)
+      {
+        DEBUG_PRINT_LN("[BLE] Rebooting");
+        byte buf[2] = {0x01, 0x01};
+        pCharacteristic->setValue(buf, sizeof(buf));
+        pCharacteristic->indicate();
+        system_reboot(2000);
+      }
+      else if (value[0] == 0x0b)
+      {
+        DEBUG_PRINT_LN("[BLE] System reset");
+        byte buf[2] = {0x01, 0x01};
+        pCharacteristic->setValue(buf, sizeof(buf));
+        pCharacteristic->indicate();
+        system_reset();
+        DEBUG_PRINT_LN("[BLE] System reset complete");
+      }
+    }
+  }
+};
+
+void BLE_INIT()
+{
+  char uuid_buf[96];
+  DEBUG_PRINT_LN("Initializing BLE...");
+  snprintf(uuid_buf, sizeof(uuid_buf), "SERVICE UUID: %s", SERVICE_UUID);
+  DEBUG_PRINT_LN(uuid_buf);
+  snprintf(uuid_buf, sizeof(uuid_buf), "CHARACTERISTIC UUID: %s", CHARACTERISTIC_UUID);
+  DEBUG_PRINT_LN(uuid_buf);
+  DEBUG_PRINT_LN("Starting BLE Server...");
+
+  NimBLEDevice::init("ESP32_GPS_LOGGER");
+  DEBUG_PRINT("BLE MAC Address: ");
+  DEBUG_PRINT_LN(NimBLEDevice::getAddress().toString().c_str());
+
+  pServer = NimBLEDevice::createServer();
+  pServer->setCallbacks(new ServerCallbacks());
+  pService = pServer->createService(SERVICE_UUID);
+  pCharacteristic = pService->createCharacteristic(
+      CHARACTERISTIC_UUID,
+      NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::INDICATE);
+  pCharacteristic->setCallbacks(new BLE_Callbacks());
+  pCharacteristic->createDescriptor("2901", NIMBLE_PROPERTY::READ)->setValue("BLE Control Service");
+  pService->start();
+
+  NimBLEAdvertising *pAdvertising = NimBLEDevice::getAdvertising();
+  pAdvertising->addServiceUUID(SERVICE_UUID);
+  pAdvertising->enableScanResponse(true);
+  pAdvertising->setPreferredParams(0x06, 0x12);
+  pServer->getAdvertising()->start();
+
+  DEBUG_PRINT_LN("GATT Service Defined!");
+  DEBUG_PRINT_LN("GATT Characteristic Defined!");
+}
+
+/**********************************************************************
    Control Command Functions
  **********************************************************************/
 
@@ -370,62 +563,34 @@ void control_cmd_event()
   {
     byte buf[NUMBER_OF_FLAGS];
     char status_buf[32];
-    buf[BLE_CONNECTED] = statusFlags[BLE_CONNECTED] ? 0x01 : 0x00;
-    buf[GPS_ENABLED] = statusFlags[GPS_ENABLED] ? 0x01 : 0x00;
-    buf[GPS_HAS_FIX] = statusFlags[GPS_HAS_FIX] ? 0x01 : 0x00;
-    buf[GPS_LOGGING_ENABLED] = statusFlags[GPS_LOGGING_ENABLED] ? 0x01 : 0x00;
+    build_status_buf(buf);
     snprintf(status_buf, sizeof(status_buf), "Status: %d%d%d%d", buf[0], buf[1], buf[2], buf[3]);
     DEBUG_PRINT_LN(status_buf);
   }
   else if (strstr(cmd_buf, "gps on") && !statusFlags[GPS_ENABLED])
   {
     DEBUG_PRINT_LN("Start GPS");
-    statusFlags[GPS_ENABLED] = true;
-    EEPROM.write(GPS_ENABLED, 0x01);
-    EEPROM.commit();
+    gps_start();
   }
   else if (strstr(cmd_buf, "gps off") && statusFlags[GPS_ENABLED])
   {
     DEBUG_PRINT_LN("Stop GPS");
-    statusFlags[GPS_ENABLED] = false;
-    EEPROM.write(GPS_ENABLED, 0x00);
-    EEPROM.commit();
+    gps_stop();
   }
   else if (strstr(cmd_buf, "log on") && !statusFlags[GPS_LOGGING_ENABLED])
   {
     DEBUG_PRINT_LN("Start logging");
-    statusFlags[GPS_LOGGING_ENABLED] = true;
-    EEPROM.write(GPS_LOGGING_ENABLED, 0x01);
-    EEPROM.commit();
+    logging_start();
   }
   else if (strstr(cmd_buf, "log off") && statusFlags[GPS_LOGGING_ENABLED])
   {
     DEBUG_PRINT_LN("End logging");
-    statusFlags[GPS_LOGGING_ENABLED] = false;
-    EEPROM.write(GPS_LOGGING_ENABLED, 0x00);
-    EEPROM.commit();
+    logging_stop();
   }
   else if (strstr(cmd_buf, "data"))
   {
     char packet[200];
-    snprintf(packet, sizeof(packet),
-             "[%d,%d,%lu,%.7f,%.7f,%u,%u,%u,%u,%u,%u,%lu,%.2f,%.2f,%.2f,%lu]",
-             gps.location.isValid(),
-             gps.location.isUpdated(),
-             (unsigned long)gps.location.age(),
-             gps.location.lat(),
-             gps.location.lng(),
-             gps.date.year(),
-             gps.date.month(),
-             gps.date.day(),
-             gps.time.hour(),
-             gps.time.minute(),
-             gps.time.second(),
-             (unsigned long)gps.satellites.value(),
-             gps.speed.kmph(),
-             gps.course.deg(),
-             gps.altitude.meters(),
-             (unsigned long)gps.hdop.value());
+    build_gps_packet(packet, sizeof(packet));
     DEBUG_PRINT_LN(packet);
   }
   else if (strstr(cmd_buf, "ls"))
@@ -462,38 +627,19 @@ void control_cmd_event()
   }
   else if (strstr(cmd_buf, "sdcard"))
   {
-    uint64_t bytes = SD.totalBytes();
-    uint64_t used_bytes = SD.usedBytes();
-    uint32_t bytes_low = bytes % 0xFFFFFFFF;
-    uint32_t bytes_high = (bytes >> 32) % 0xFFFFFFFF;
-    uint32_t used_bytes_low = used_bytes % 0xFFFFFFFF;
-    uint32_t used_bytes_high = (used_bytes >> 32) % 0xFFFFFFFF;
     char sdcard_buf[64];
-    snprintf(sdcard_buf,
-             sizeof(sdcard_buf),
-             "[%lu,%lu,%lu,%lu]",
-             (unsigned long)bytes_high,
-             (unsigned long)bytes_low,
-             (unsigned long)used_bytes_high,
-             (unsigned long)used_bytes_low);
+    build_sdcard_info(sdcard_buf, sizeof(sdcard_buf));
     DEBUG_PRINT_LN(sdcard_buf);
   }
   else if (strstr(cmd_buf, "reboot"))
   {
     DEBUG_PRINT_LN("Rebooting esp32");
-    delay(1000);
-    ESP.restart();
+    system_reboot(1000);
   }
   else if (strstr(cmd_buf, "reset"))
   {
     DEBUG_PRINT_LN("System reset");
-    statusFlags[GPS_ENABLED] = false;
-    statusFlags[GPS_LOGGING_ENABLED] = false;
-    EEPROM.write(GPS_ENABLED, 0x00);
-    EEPROM.write(GPS_LOGGING_ENABLED, 0x00);
-    EEPROM.commit();
-    delay(1000);
-    FS_INIT(true);
+    system_reset();
     DEBUG_PRINT_LN("Reset complete");
   }
 }
@@ -523,6 +669,9 @@ void setup()
 
   // Initialize FS
   FS_INIT(false);
+
+  // Initialize BLE
+  BLE_INIT();
 
   // Initialize GPS status LED
   pinMode(LED_PIN, OUTPUT);
