@@ -85,6 +85,7 @@ int listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
     }
     file = root.openNextFile();
   }
+
   return count;
 }
 
@@ -153,10 +154,11 @@ void appendFile(fs::FS &fs, const char *path, const char *message) {
     DEBUG_PRINT_LN("Failed to open file");
     return;
   }
-  // if (file.print(message))
-  //   DEBUG_PRINT_LN("Data appended");
-  // else
-  //   DEBUG_PRINT_LN("Append failed");
+  if (file.print(message)) {
+    // DEBUG_PRINT_LN("Data appended");
+  } else {
+    DEBUG_PRINT_LN("Append failed");
+  }
   file.close();
 }
 
@@ -230,7 +232,9 @@ void FS_INIT(bool reset) {
 
   listDir(SD, "/", 0);
   createDir(SD, gnss_path);
-  listDir(SD, gnss_path, 0);
+
+  int count = listDir(SD, gnss_path, 0);
+  nfiles = count;
 }
 
 /**********************************************************************
@@ -258,12 +262,10 @@ void control_cmd_event() {
   if (strstr(cmd_buf, "status")) {
     byte buf[NUMBER_OF_FLAGS];
     char status_buf[32];
-
     buf[BLE_CONNECTED] = statusFlags[BLE_CONNECTED] ? 0x01 : 0x00;
     buf[GPS_ENABLED] = statusFlags[GPS_ENABLED] ? 0x01 : 0x00;
     buf[GPS_HAS_FIX] = statusFlags[GPS_HAS_FIX] ? 0x01 : 0x00;
     buf[GPS_LOGGING_ENABLED] = statusFlags[GPS_LOGGING_ENABLED] ? 0x01 : 0x00;
-
     snprintf(status_buf, sizeof(status_buf), "Status: %d%d%d%d", buf[0], buf[1], buf[2], buf[3]);
     DEBUG_PRINT_LN(status_buf);
   } else if (strstr(cmd_buf, "gps on") && !statusFlags[GPS_ENABLED]) {
@@ -345,7 +347,7 @@ void control_cmd_event() {
     char sdcard_buf[64];
     snprintf(sdcard_buf,
              sizeof(sdcard_buf),
-             "[%lu%lu,%lu%lu]",
+             "[%lu,%lu,%lu,%lu]",
              (unsigned long)bytes_high,
              (unsigned long)bytes_low,
              (unsigned long)used_bytes_high,
@@ -357,12 +359,13 @@ void control_cmd_event() {
     ESP.restart();
   } else if (strstr(cmd_buf, "reset")) {
     DEBUG_PRINT_LN("System reset");
-    FS_INIT(true);
     statusFlags[GPS_ENABLED] = false;
     statusFlags[GPS_LOGGING_ENABLED] = false;
     EEPROM.write(GPS_ENABLED, 0x00);
     EEPROM.write(GPS_LOGGING_ENABLED, 0x00);
     EEPROM.commit();
+    delay(1000);
+    FS_INIT(true);
     DEBUG_PRINT_LN("Reset complete");
   }
 }
