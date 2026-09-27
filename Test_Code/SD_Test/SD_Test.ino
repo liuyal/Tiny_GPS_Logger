@@ -1,76 +1,184 @@
-
 #include <SPI.h>
-#include <SD.h>
+#include "SD.h"
+#include "FS.h"
 
-Sd2Card card;
-SdVolume volume;
-SdFile root;
-File myFile;
+#define DEBUG true
 
-const int CS = 4;
+#define DEBUG_PRINT(x) \
+  do                   \
+  {                    \
+    if (DEBUG)         \
+      Serial.print(x); \
+  } while (0)
 
-void setup() {
+#define DEBUG_PRINT_LN(x) \
+  do                      \
+  {                       \
+    if (DEBUG)            \
+      Serial.println(x);  \
+  } while (0)
 
+const int CS = 5;
+
+void SD_INIT()
+{
+  if (!SD.begin(CS))
+  {
+    DEBUG_PRINT_LN("SD Card Initialization Failed!");
+    return;
+  }
+  DEBUG_PRINT_LN("Initialized SD Card!");
+  DEBUG_PRINT_LN("------- SD Card Info -------");
+
+  uint8_t cardType = SD.cardType();
+  uint64_t bytes = SD.totalBytes();
+  uint64_t used_bytes = SD.usedBytes();
+
+  DEBUG_PRINT("SD Card Type:\t");
+  if (cardType == CARD_MMC)
+    DEBUG_PRINT_LN("MMC");
+  else if (cardType == CARD_SD)
+    DEBUG_PRINT_LN("SDSC");
+  else if (cardType == CARD_SDHC)
+    DEBUG_PRINT_LN("SDHC");
+  else if (cardType == CARD_NONE)
+    DEBUG_PRINT_LN("No SD Card Attached");
+  else
+    DEBUG_PRINT_LN("UNKNOWN");
+
+  DEBUG_PRINT_LN("Volume(KB):\t" + String((float)bytes / (1000)));
+  DEBUG_PRINT_LN("Volume(MB):\t" + String((float)bytes / (1000 * 1000)));
+  DEBUG_PRINT_LN("Volume(GB):\t" + String((float)bytes / (1000 * 1000 * 1000)));
+
+  DEBUG_PRINT_LN("Used(KB):\t" + String((float)used_bytes / (1000)));
+  DEBUG_PRINT_LN("Used(MB):\t" + String((float)used_bytes / (1000 * 1000)));
+  DEBUG_PRINT_LN("Used(GB):\t" + String((float)used_bytes / (1000 * 1000 * 1000)));
+  DEBUG_PRINT_LN("--------------------------\n");
+}
+
+int listDir(fs::FS &fs, String dirname, uint8_t levels)
+{
+  int count = 0;
+  DEBUG_PRINT_LN("Listing directory: " + dirname + "\n");
+  File root = fs.open(dirname);
+  if (!root || !root.isDirectory())
+  {
+    DEBUG_PRINT_LN("Failed to open directory\n");
+    return -1;
+  }
+  File file = root.openNextFile();
+  while (file)
+  {
+    if (file.isDirectory())
+    {
+      DEBUG_PRINT_LN("  DIR : " + String(file.name()) + "\n");
+      if (levels)
+        listDir(fs, file.name(), levels - 1);
+    }
+    else
+    {
+      count += 1;
+      DEBUG_PRINT_LN("  FILE: " + String(file.name()) + "  SIZE: " + String(file.size()) + "\n");
+    }
+    file = root.openNextFile();
+  }
+  return count;
+}
+
+void createDir(fs::FS &fs, String path)
+{
+  if (SD.exists(path))
+  {
+    DEBUG_PRINT_LN("Dir " + path + " Exists...\n");
+    return;
+  }
+  DEBUG_PRINT_LN("Creating Dir: " + path + "\n");
+  if (fs.mkdir(path))
+    DEBUG_PRINT_LN("Dir created\n");
+  else
+    DEBUG_PRINT_LN("mkdir failed\n");
+}
+
+void removeDir(fs::FS &fs, String path)
+{
+  DEBUG_PRINT_LN("Removing Dir: " + path + "\n");
+  if (fs.rmdir(path))
+    DEBUG_PRINT_LN("Dir removed\n");
+  else
+    DEBUG_PRINT_LN("rmdir failed\n");
+}
+
+void readFile(fs::FS &fs, String path)
+{
+  DEBUG_PRINT_LN("Reading file: " + path + "\n");
+  File file = fs.open(path);
+  if (!file)
+  {
+    DEBUG_PRINT_LN("Failed to open file for reading\n");
+    return;
+  }
+  DEBUG_PRINT_LN("Read from file: ");
+  while (file.available())
+    Serial.write(file.read());
+  file.close();
+}
+
+void writeFile(fs::FS &fs, String path, String message)
+{
+  DEBUG_PRINT_LN("Writing file: " + path + "\n");
+  File file = fs.open(path, FILE_WRITE);
+  if (!file)
+  {
+    DEBUG_PRINT_LN("Failed to open file for writing\n");
+    return;
+  }
+  if (file.print(message))
+    DEBUG_PRINT_LN("File written\n");
+  else
+    DEBUG_PRINT_LN("Write failed\n");
+  file.close();
+}
+
+void appendFile(fs::FS &fs, String path, String message)
+{
+  DEBUG_PRINT_LN("Append to file: " + path + " ");
+  File file = fs.open(path, FILE_APPEND);
+  if (!file)
+  {
+    DEBUG_PRINT_LN("Failed to open file\n");
+    return;
+  }
+  if (file.print(message))
+    DEBUG_PRINT_LN("| Data appended\n");
+  else
+    DEBUG_PRINT_LN("Append failed\n");
+  file.close();
+}
+
+void renameFile(fs::FS &fs, String path1, String path2)
+{
+  DEBUG_PRINT_LN("Renaming file " + path1 + " to " + path2 + "\n");
+  if (fs.rename(path1, path2))
+    DEBUG_PRINT_LN("File renamed\n");
+  else
+    DEBUG_PRINT_LN("Rename failed\n");
+}
+
+void deleteFile(fs::FS &fs, String path)
+{
+  DEBUG_PRINT_LN("Deleting file: " + path + "\n");
+  if (fs.remove(path))
+    DEBUG_PRINT_LN("File deleted\n");
+  else
+    DEBUG_PRINT_LN("Delete failed\n");
+}
+
+void setup()
+{
   Serial.begin(115200);
-  GET_SD_INFO();
-
-  if (!SD.begin(CS)) {
-    Serial.println("\nSD Init Failed!");
-    return;
-  }
-
-  Serial.println("\nSD Initialization Success!");
+  SD_INIT();
 }
 
-void GET_SD_INFO() {
-
-  Serial.println("Mounting SD Card...");
-  if (!card.init(SPI_HALF_SPEED, CS)) {
-    Serial.println("SD Mount Failed!");
-    return;
-  }
-
-  Serial.print("SD Mount Success!\n\nCard type:\t\t");
-
-  switch (card.type()) {
-    case SD_CARD_TYPE_SD1:
-      Serial.println("SD1"); 
-      break;
-    case SD_CARD_TYPE_SD2:
-      Serial.println("SD2");
-      break;
-    case SD_CARD_TYPE_SDHC:
-      Serial.println("SDHC");
-      break;
-    default:
-      Serial.println("Unknown");
-  }
-
-  if (!volume.init(card)) {
-    Serial.println("Could not find FAT16/FAT32 partition.");
-    while (1);
-  }
-
-  Serial.print("Clusters:\t\t" + volume.clusterCount());
-  Serial.print("Blocks x Cluster:\t");
-  Serial.println(volume.blocksPerCluster());
-  Serial.print("Total Blocks:\t\t");
-  Serial.println(volume.blocksPerCluster() * volume.clusterCount());
-  uint32_t volumesize;
-  Serial.print("\nVolume type is:\t\tFAT");
-  Serial.println(volume.fatType(), DEC);
-  volumesize = volume.blocksPerCluster();
-  volumesize *= volume.clusterCount();
-  volumesize /= 2;
-  Serial.println("Volume size (Kb):\t" + String(volumesize));
-  Serial.println("Volume size (Mb):\t" + String((float)volumesize / 1024.0));
-  Serial.println("Volume size (Gb):\t" + String((float)volumesize / (1024.0 * 1024.0)));
-  Serial.println("\nList Files (name, date, and size in bytes): ");
-  root.openRoot(volume);
-  root.ls(LS_R | LS_DATE | LS_SIZE);
-}
-
-void loop() {
-
-
+void loop()
+{
 }
