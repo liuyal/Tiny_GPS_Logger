@@ -1,10 +1,13 @@
 # Tiny GPS Logger
 
-Portable GPS logging device built with ESP32, NEO-6M, and Catalex Micro SD Card Module.
+Tiny GPS logger is a portable GPS logging device built with ESP32, NEO-6M, and Catalex Micro SD Card Module. The ESP32 is the main system controller handing GNSS messages fetched from the NEO-6M module and log the data into a connected SD card module. The ESP32 also supports BLE control messages which allows smart phones or BLE controllers to emit control messages to enable features and fetch GNSS data.
+
 
 ## Hardware Schematic & Pin Connection
  
-![](./Assets/images/schematics/schematic_b.png)
+![](./Assets/images/schematics/schematic_c.svg)
+
+SD Card Connection
 
 | ESP32  | SD Card Module |
 | ------ | -------------- |
@@ -15,6 +18,8 @@ Portable GPS logging device built with ESP32, NEO-6M, and Catalex Micro SD Card 
 | 5V     | VCC            |
 | GND    | GND            |
 
+GPS NEO-6M Connection
+
 | ESP32  | NEO-6M |
 | ------ | ------ |
 | 3V3    | VCC    |
@@ -22,7 +27,22 @@ Portable GPS logging device built with ESP32, NEO-6M, and Catalex Micro SD Card 
 | Pin 16 | TX     |
 | GND    | GND    |
 
+## System Status Flags
+
+#### 4 Bit Status Flag System
+
+The following table outlines the system status bits used in the GPS device
+
+| Bit Index | Function       | Description                                    |
+| :-------: | -------------- | ---------------------------------------------- |
+|     0     | BLE Connection | True if BLE service is connected to BLE client |
+|     1     | GPS Enalbed    | True if GPS service is enabled on device       |
+|     2     | GPS Has Fix    | True if GPS has location fix                   |
+|     3     | Logging Status | True if GNSS message logging is enabled        |
+
 ## BLE Instruction Codes
+
+The following table outlines the BLE instruction bits used to control the GPS device
 
 | Hex Code | Function           | Description                                               |
 | :------: | ------------------ | --------------------------------------------------------- |
@@ -38,17 +58,6 @@ Portable GPS logging device built with ESP32, NEO-6M, and Catalex Micro SD Card 
 |   0x09   | Get SD Card Status | Get SD card usage information                             |
 |   0x0a   | Reboot             | Reboot GPS device                                         |
 |   0x0b   | Reset              | Reset GPS device configurations and all status flags      |
-
-## GPS Status Flags
-
-#### 4 Bit GPS Status Flag System
-
-| Bit Index | Function          | Description                                    |
-| :-------: | ----------------- | ---------------------------------------------- |
-|     0     | BLE Connection    | True if BLE service is connected to BLE client |
-|     1     | GPS On/Off Status | True if GPS service is enabled on device       |
-|     2     | GPS Has Fix       | True if GPS has location fix                   |
-|     3     | Logging Status    | True if GPS sentences logging is enabled       |
 
 ## Resource & Reference Links
 
