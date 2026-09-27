@@ -5,7 +5,7 @@ Tiny GPS logger is a portable GPS logging device built with ESP32, NEO-6M, and C
 
 ## Hardware Schematic & Pin Connection
  
-![](./Assets/images/schematics/schematic_c.svg)
+![](./Assets/images/schematics/schematic_c.png)
 
 SD Card Connection
 
