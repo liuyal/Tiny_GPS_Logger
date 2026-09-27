@@ -59,6 +59,13 @@ The following table outlines the BLE instruction bits used to control the GPS de
 |   0x0a   | Reboot             | Reboot GPS device                                         |
 |   0x0b   | Reset              | Reset GPS device configurations and all status flags      |
 
+Response Code
+
+| Hex Code | Function | Description                                     |
+| :------: | -------- | ----------------------------------------------- |
+|   0x0a   | ACK      | Ackownledgement of the command request          |
+|   0x0b   | NACK     | Negative ackownledgement of the command request |
+
 ## Resource & Reference Links
 
 #### ESP32

@@ -57,6 +57,9 @@ const int GPS_ENABLED = 1;
 const int GPS_HAS_FIX = 2;
 const int GPS_LOGGING_ENABLED = 3;
 
+// fixed-size status flag payload shared by the BLE and serial "status" replies
+typedef byte StatusBuf[NUMBER_OF_FLAGS];
+
 // GNSS log directory and buffer
 char gnss_dir[] = "GNSS_LOGS";
 char log_buffer[LOG_BUFFER_SIZE] = "";
@@ -379,6 +382,22 @@ class ServerCallbacks : public NimBLEServerCallbacks
   }
 };
 
+// sends the 2-byte ack payload used by simple fire-and-forget BLE commands
+void send_ack()
+{
+  byte buf[2] = {0x01, 0x01};
+  pCharacteristic->setValue(buf, sizeof(buf));
+  pCharacteristic->indicate();
+}
+
+// sends a null-terminated string over BLE and mirrors it to the debug log
+void ble_indicate_and_log(const char *packet)
+{
+  pCharacteristic->setValue((const uint8_t *)packet, strlen(packet));
+  pCharacteristic->indicate();
+  DEBUG_PRINT_LN(packet);
+}
+
 class BLE_Callbacks : public NimBLECharacteristicCallbacks
 {
   void onWrite(NimBLECharacteristic *pCharacteristic, NimBLEConnInfo &connInfo)
@@ -398,14 +417,11 @@ class BLE_Callbacks : public NimBLECharacteristicCallbacks
 
       if (value[0] == 0x00)
       {
-        const char *packet = "[BLE] ESP32_GPS";
-        pCharacteristic->setValue((const uint8_t *)packet, strlen(packet));
-        pCharacteristic->indicate();
-        DEBUG_PRINT_LN(packet);
+        ble_indicate_and_log("[BLE] ESP32_GPS");
       }
       else if (value[0] == 0x01)
       {
-        byte buf[NUMBER_OF_FLAGS];
+        StatusBuf buf;
         char status_buf[32];
         build_status_buf(buf);
         pCharacteristic->setValue(buf, sizeof(buf));
@@ -417,42 +433,33 @@ class BLE_Callbacks : public NimBLECharacteristicCallbacks
       {
         DEBUG_PRINT_LN("[BLE] Start GPS");
         gps_start();
-        byte buf[2] = {0x01, 0x01};
-        pCharacteristic->setValue(buf, sizeof(buf));
-        pCharacteristic->indicate();
+        send_ack();
       }
       else if (value[0] == 0x03)
       {
         DEBUG_PRINT_LN("[BLE] Stop GPS");
         gps_stop();
-        byte buf[2] = {0x01, 0x01};
-        pCharacteristic->setValue(buf, sizeof(buf));
-        pCharacteristic->indicate();
+        send_ack();
       }
       else if (value[0] == 0x04)
       {
         DEBUG_PRINT_LN("[BLE] Start logging");
         logging_start();
-        byte buf[2] = {0x01, 0x01};
-        pCharacteristic->setValue(buf, sizeof(buf));
-        pCharacteristic->indicate();
+        send_ack();
       }
       else if (value[0] == 0x05)
       {
         DEBUG_PRINT_LN("[BLE] Stop logging");
         logging_stop();
-        byte buf[2] = {0x01, 0x01};
-        pCharacteristic->setValue(buf, sizeof(buf));
-        pCharacteristic->indicate();
+        send_ack();
       }
       else if (value[0] == 0x06)
       {
         char packet[200];
         build_gps_packet(packet, sizeof(packet));
-        pCharacteristic->setValue((const uint8_t *)packet, strlen(packet));
-        pCharacteristic->indicate();
-        DEBUG_PRINT_LN(packet);
+        ble_indicate_and_log(packet);
       }
+      /*
       else if (value[0] == 0x07)
       {
         // char gnss_path[32];
@@ -463,7 +470,7 @@ class BLE_Callbacks : public NimBLECharacteristicCallbacks
         // pCharacteristic->setValue((const uint8_t *)listing, strlen(listing));
         // pCharacteristic->indicate();
         // DEBUG_PRINT_LN(listing);
-         // TODO: list file contents over BLE
+        // TODO: list file contents over BLE
       }
       else if (value[0] == 0x08)
       {
@@ -472,28 +479,23 @@ class BLE_Callbacks : public NimBLECharacteristicCallbacks
         // readFile(SD, log_path);
         // TODO: send file contents over BLE
       }
+      */
       else if (value[0] == 0x09)
       {
         char sdcard_buf[64];
         build_sdcard_info(sdcard_buf, sizeof(sdcard_buf));
-        pCharacteristic->setValue((const uint8_t *)sdcard_buf, strlen(sdcard_buf));
-        pCharacteristic->indicate();
-        DEBUG_PRINT_LN(sdcard_buf);
+        ble_indicate_and_log(sdcard_buf);
       }
       else if (value[0] == 0x0a)
       {
         DEBUG_PRINT_LN("[BLE] Rebooting");
-        byte buf[2] = {0x01, 0x01};
-        pCharacteristic->setValue(buf, sizeof(buf));
-        pCharacteristic->indicate();
+        send_ack();
         system_reboot(2000);
       }
       else if (value[0] == 0x0b)
       {
         DEBUG_PRINT_LN("[BLE] System reset");
-        byte buf[2] = {0x01, 0x01};
-        pCharacteristic->setValue(buf, sizeof(buf));
-        pCharacteristic->indicate();
+        send_ack();
         system_reset();
         DEBUG_PRINT_LN("[BLE] System reset complete");
       }
@@ -561,7 +563,7 @@ void control_cmd_event()
 
   if (strstr(cmd_buf, "status"))
   {
-    byte buf[NUMBER_OF_FLAGS];
+    StatusBuf buf;
     char status_buf[32];
     build_status_buf(buf);
     snprintf(status_buf, sizeof(status_buf), "Status: %d%d%d%d", buf[0], buf[1], buf[2], buf[3]);
