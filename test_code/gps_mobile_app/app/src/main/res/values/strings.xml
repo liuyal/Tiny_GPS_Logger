@@ -1,0 +1,59 @@
+<resources>
+    <string name="app_name">GPS</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Scan for Devices</string>
+    <string name="BLE_settings">BLE Settings</string>
+
+    <!--    Side Menu                       -->
+    <string name="menu_home">Dashboard</string>
+    <string name="menu_map">Map</string>
+    <string name="menu_log">Logs</string>
+    <string name="menu_setting">Settings</string>
+
+    <!--    ScanActivity                    -->
+    <string name="scan">SCAN</string>
+    <string name="stop_scan">STOP</string>
+    <string name="initial_ble_name">N/A</string>
+    <string name="initial_ble_mac">00:00:00:00:00:00</string>
+    <string name="initial_ble_bond">NOT BONDED</string>
+    <string name="initial_ble_db">RSSI: 0dBm</string>
+    <string name="connect_btn_label">CONNECT</string>
+
+    <!--    BLE Connection Popup             -->
+    <string name="home_second">Home Second</string>
+    <string name="ok">OK</string>
+    <string name="title">Title</string>
+    <string name="dialog">Dialog</string>
+    <string name="disconnect">DISCONNECT</string>
+
+    <!--    MainActivity                   -->
+    <string name="init_date">00000000</string>
+    <string name="init_time">00:00:00</string>
+    <string name="init_sat">0</string>
+    <string name="init_lat">000.0000</string>
+    <string name="init_long">000.0000</string>
+
+    <string name="gpsDate">%1$s%2$s%3$s</string>
+    <string name="gpsTime">%1$s:%2$s:%3$s</string>
+
+    <!--    HOME FRAGMENT                   -->
+    <string name="device_label">DEVICE:</string>
+    <string name="mac_label">MAC:</string>
+    <string name="connected_label">CONNECTED:</string>
+    <string name="gps_label">GPS:</string>
+    <string name="gps_fix_label">GPS FIX:</string>
+    <string name="logging_label">LOGGING:</string>
+    <string name="gps_date_label">GPS DATE:</string>
+    <string name="gps_time_label">GPS TIME:</string>
+    <string name="satellites_label">SATELLITES:</string>
+    <string name="latitude_label">LATITUDE:</string>
+    <string name="longitude_label">LONGITUDE:</string>
+
+    <!--    MAPS FRAGMENT -->
+    <string name="update_map_label">UPDATE</string>
+
+</resources>
