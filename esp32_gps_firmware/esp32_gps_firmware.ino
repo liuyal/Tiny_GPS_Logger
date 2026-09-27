@@ -20,17 +20,15 @@
 #define DEBUG true
 
 #define DEBUG_PRINT(x) \
-  do                   \
-  {                    \
-    if (DEBUG)         \
+  do { \
+    if (DEBUG) \
       Serial.print(x); \
   } while (0)
 
 #define DEBUG_PRINT_LN(x) \
-  do                      \
-  {                       \
-    if (DEBUG)            \
-      Serial.println(x);  \
+  do { \
+    if (DEBUG) \
+      Serial.println(x); \
   } while (0)
 
 /**********************************************************************
@@ -60,8 +58,7 @@ int nfiles = 0;
    SD Card Functions
  **********************************************************************/
 
-int listDir(fs::FS &fs, const char *dirname, uint8_t levels)
-{
+int listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
   int count = 0;
   char info_buf[160];
   File root = fs.open(dirname);
@@ -69,24 +66,19 @@ int listDir(fs::FS &fs, const char *dirname, uint8_t levels)
   DEBUG_PRINT("Listing directory: ");
   DEBUG_PRINT_LN(dirname);
 
-  if (!root || !root.isDirectory())
-  {
+  if (!root || !root.isDirectory()) {
     DEBUG_PRINT_LN("Failed to open directory");
     return -1;
   }
 
   File file = root.openNextFile();
-  while (file)
-  {
-    if (file.isDirectory())
-    {
+  while (file) {
+    if (file.isDirectory()) {
       snprintf(info_buf, sizeof(info_buf), "  DIR : %s", file.name());
       DEBUG_PRINT_LN(info_buf);
       if (levels)
         listDir(fs, file.name(), levels - 1);
-    }
-    else
-    {
+    } else {
       count += 1;
       snprintf(info_buf, sizeof(info_buf), "  FILE: %s  SIZE: %u", file.name(), (unsigned)file.size());
       DEBUG_PRINT_LN(info_buf);
@@ -96,11 +88,9 @@ int listDir(fs::FS &fs, const char *dirname, uint8_t levels)
   return count;
 }
 
-void createDir(fs::FS &fs, const char *path)
-{
+void createDir(fs::FS &fs, const char *path) {
   char info_buf[160];
-  if (SD.exists(path))
-  {
+  if (SD.exists(path)) {
     snprintf(info_buf, sizeof(info_buf), "Dir %s Exists...", path);
     DEBUG_PRINT_LN(info_buf);
     return;
@@ -113,8 +103,7 @@ void createDir(fs::FS &fs, const char *path)
     DEBUG_PRINT_LN("mkdir failed");
 }
 
-void removeDir(fs::FS &fs, const char *path)
-{
+void removeDir(fs::FS &fs, const char *path) {
   char info_buf[160];
   snprintf(info_buf, sizeof(info_buf), "Removing Dir: %s", path);
   DEBUG_PRINT_LN(info_buf);
@@ -124,14 +113,12 @@ void removeDir(fs::FS &fs, const char *path)
     DEBUG_PRINT_LN("rmdir failed");
 }
 
-void readFile(fs::FS &fs, const char *path)
-{
+void readFile(fs::FS &fs, const char *path) {
   char info_buf[160];
   snprintf(info_buf, sizeof(info_buf), "Reading file: %s", path);
   DEBUG_PRINT_LN(info_buf);
   File file = fs.open(path);
-  if (!file)
-  {
+  if (!file) {
     DEBUG_PRINT_LN("Failed to open file for reading");
     return;
   }
@@ -141,14 +128,12 @@ void readFile(fs::FS &fs, const char *path)
   file.close();
 }
 
-void writeFile(fs::FS &fs, const char *path, const char *message)
-{
+void writeFile(fs::FS &fs, const char *path, const char *message) {
   char info_buf[160];
   snprintf(info_buf, sizeof(info_buf), "Writing file: %s", path);
   DEBUG_PRINT_LN(info_buf);
   File file = fs.open(path, FILE_WRITE);
-  if (!file)
-  {
+  if (!file) {
     DEBUG_PRINT_LN("Failed to open file for writing");
     return;
   }
@@ -159,26 +144,23 @@ void writeFile(fs::FS &fs, const char *path, const char *message)
   file.close();
 }
 
-void appendFile(fs::FS &fs, const char *path, const char *message)
-{
-  char info_buf[160];
-  snprintf(info_buf, sizeof(info_buf), "Append to file: %s", path);
-  DEBUG_PRINT_LN(info_buf);
+void appendFile(fs::FS &fs, const char *path, const char *message) {
+  // char info_buf[160];
+  // snprintf(info_buf, sizeof(info_buf), "Append to file: %s", path);
+  // DEBUG_PRINT_LN(info_buf);
   File file = fs.open(path, FILE_APPEND);
-  if (!file)
-  {
+  if (!file) {
     DEBUG_PRINT_LN("Failed to open file");
     return;
   }
-  if (file.print(message))
-    DEBUG_PRINT_LN("| Data appended");
-  else
-    DEBUG_PRINT_LN("Append failed");
+  // if (file.print(message))
+  //   DEBUG_PRINT_LN("Data appended");
+  // else
+  //   DEBUG_PRINT_LN("Append failed");
   file.close();
 }
 
-void renameFile(fs::FS &fs, const char *path1, const char *path2)
-{
+void renameFile(fs::FS &fs, const char *path1, const char *path2) {
   char info_buf[160];
   snprintf(info_buf, sizeof(info_buf), "Renaming file %s to %s", path1, path2);
   DEBUG_PRINT_LN(info_buf);
@@ -188,8 +170,7 @@ void renameFile(fs::FS &fs, const char *path1, const char *path2)
     DEBUG_PRINT_LN("Rename failed");
 }
 
-void deleteFile(fs::FS &fs, const char *path)
-{
+void deleteFile(fs::FS &fs, const char *path) {
   char info_buf[160];
   snprintf(info_buf, sizeof(info_buf), "Deleting file: %s", path);
   DEBUG_PRINT_LN(info_buf);
@@ -199,10 +180,8 @@ void deleteFile(fs::FS &fs, const char *path)
     DEBUG_PRINT_LN("Delete failed");
 }
 
-void SD_INIT()
-{
-  if (!SD.begin(CS))
-  {
+void SD_INIT() {
+  if (!SD.begin(CS)) {
     DEBUG_PRINT_LN("SD Card Initialization Failed!");
     return;
   }
@@ -242,8 +221,7 @@ void SD_INIT()
   DEBUG_PRINT_LN("--------------------------\n");
 }
 
-void FS_INIT(bool reset)
-{
+void FS_INIT(bool reset) {
   char gnss_path[sizeof(gnss_dir) + 1];
   snprintf(gnss_path, sizeof(gnss_path), "/%s", gnss_dir);
 
@@ -259,8 +237,14 @@ void FS_INIT(bool reset)
    Control Command Functions
  **********************************************************************/
 
-void control_cmd_event()
-{
+// strip trailing CR/LF left over from a serial command argument
+void trim_line_ending(char *str) {
+  size_t len = strlen(str);
+  while (len > 0 && (str[len - 1] == '\r' || str[len - 1] == '\n'))
+    str[--len] = '\0';
+}
+
+void control_cmd_event() {
   static char cmd_buf[64];
   size_t cmd_len = 0;
 
@@ -271,8 +255,7 @@ void control_cmd_event()
   if (cmd_len == 0)
     return;
 
-  if (strstr(cmd_buf, "status"))
-  {
+  if (strstr(cmd_buf, "status")) {
     byte buf[NUMBER_OF_FLAGS];
     char status_buf[32];
 
@@ -283,37 +266,27 @@ void control_cmd_event()
 
     snprintf(status_buf, sizeof(status_buf), "Status: %d%d%d%d", buf[0], buf[1], buf[2], buf[3]);
     DEBUG_PRINT_LN(status_buf);
-  }
-  else if (strstr(cmd_buf, "gps on") && !statusFlags[GPS_ENABLED])
-  {
+  } else if (strstr(cmd_buf, "gps on") && !statusFlags[GPS_ENABLED]) {
     DEBUG_PRINT_LN("Start GPS");
     statusFlags[GPS_ENABLED] = true;
     EEPROM.write(GPS_ENABLED, 0x01);
     EEPROM.commit();
-  }
-  else if (strstr(cmd_buf, "gps off") && statusFlags[GPS_ENABLED])
-  {
-    DEBUG_PRINT("Stop GPS");
+  } else if (strstr(cmd_buf, "gps off") && statusFlags[GPS_ENABLED]) {
+    DEBUG_PRINT_LN("Stop GPS");
     statusFlags[GPS_ENABLED] = false;
     EEPROM.write(GPS_ENABLED, 0x00);
     EEPROM.commit();
-  }
-  else if (strstr(cmd_buf, "log on") && !statusFlags[GPS_LOGGING_ENABLED])
-  {
+  } else if (strstr(cmd_buf, "log on") && !statusFlags[GPS_LOGGING_ENABLED]) {
     DEBUG_PRINT_LN("Start logging");
     statusFlags[GPS_LOGGING_ENABLED] = true;
     EEPROM.write(GPS_LOGGING_ENABLED, 0x01);
     EEPROM.commit();
-  }
-  else if (strstr(cmd_buf, "log off") && statusFlags[GPS_LOGGING_ENABLED])
-  {
+  } else if (strstr(cmd_buf, "log off") && statusFlags[GPS_LOGGING_ENABLED]) {
     DEBUG_PRINT_LN("End logging");
     statusFlags[GPS_LOGGING_ENABLED] = false;
     EEPROM.write(GPS_LOGGING_ENABLED, 0x00);
     EEPROM.commit();
-  }
-  else if (strstr(cmd_buf, "data"))
-  {
+  } else if (strstr(cmd_buf, "data")) {
     char packet[200];
     snprintf(packet, sizeof(packet),
              "[%d,%d,%lu,%.7f,%.7f,%u,%u,%u,%u,%u,%u,%lu,%.2f,%.2f,%.2f,%lu]",
@@ -326,30 +299,43 @@ void control_cmd_event()
              gps.date.month(),
              gps.date.day(),
              gps.time.hour(),
-             gps.time.minute(), g ps.time.second(),
+             gps.time.minute(),
+             gps.time.second(),
              (unsigned long)gps.satellites.value(),
              gps.speed.kmph(),
              gps.course.deg(),
              gps.altitude.meters(),
              (unsigned long)gps.hdop.value());
-
     DEBUG_PRINT_LN(packet);
-  }
-  else if (strstr(cmd_buf, "ls"))
-  {
-    char gnss_path[sizeof(gnss_dir) + 1];
-    snprintf(gnss_path, sizeof(gnss_path), "/%s", gnss_dir);
-    listDir(SD, gnss_path, 0);
-  }
-  else if (strstr(cmd_buf, "cat"))
-  {
-    int index = atoi(strchr(cmd_buf, '|') + 1);
+  } else if (strstr(cmd_buf, "ls")) {
+    char *arg = strstr(cmd_buf, "ls") + 2;
+    while (*arg == ' ')
+      arg++;
+    trim_line_ending(arg);
+
+    char list_path[64];
+    if (arg[0] == '\0' || strcmp(arg, ".") == 0)
+      strcpy(list_path, "/");
+    else
+      snprintf(list_path, sizeof(list_path), "/%s", arg);
+
+    listDir(SD, list_path, 0);
+  } else if (strstr(cmd_buf, "cat ")) {
+    char filename[52];
+    strncpy(filename, strstr(cmd_buf, "cat ") + 4, sizeof(filename) - 1);
+    filename[sizeof(filename) - 1] = '\0';
+    trim_line_ending(filename);
+
+    // bare filenames are assumed to live in the GNSS log directory;
+    // paths containing '/' are treated as relative to the SD root
     char log_path[64];
-    snprintf(log_path, sizeof(log_path), "/%s/GPS_%d.log", gnss_dir, index);
+    if (strchr(filename, '/'))
+      snprintf(log_path, sizeof(log_path), "/%s", filename);
+    else
+      snprintf(log_path, sizeof(log_path), "/%s/%s", gnss_dir, filename);
+
     readFile(SD, log_path);
-  }
-  else if (strstr(cmd_buf, "sdcard"))
-  {
+  } else if (strstr(cmd_buf, "sdcard")) {
     uint64_t bytes = SD.totalBytes();
     uint64_t used_bytes = SD.usedBytes();
     uint32_t bytes_low = bytes % 0xFFFFFFFF;
@@ -365,17 +351,13 @@ void control_cmd_event()
              (unsigned long)used_bytes_high,
              (unsigned long)used_bytes_low);
     DEBUG_PRINT_LN(sdcard_buf);
-  }
-  else if (strstr(cmd_buf, "reboot"))
-  {
+  } else if (strstr(cmd_buf, "reboot")) {
     DEBUG_PRINT_LN("Rebooting esp32");
     delay(1000);
     ESP.restart();
-  }
-  else if (strstr(cmd_buf, "reset"))
-  {
+  } else if (strstr(cmd_buf, "reset")) {
     DEBUG_PRINT_LN("System reset");
-    FS_INIT();
+    FS_INIT(true);
     statusFlags[GPS_ENABLED] = false;
     statusFlags[GPS_LOGGING_ENABLED] = false;
     EEPROM.write(GPS_ENABLED, 0x00);
@@ -385,8 +367,7 @@ void control_cmd_event()
   }
 }
 
-void setup()
-{
+void setup() {
   DEBUG_PRINT_LN("Starting Initialization...");
 
   // Initialize EEPROM
@@ -410,7 +391,7 @@ void setup()
   SD_INIT();
 
   // Initialize FS
-  FS_INIT();
+  FS_INIT(false);
 
   // Initialize GPS status LED
   pinMode(LED_PIN, OUTPUT);
@@ -418,41 +399,35 @@ void setup()
   DEBUG_PRINT_LN("Initialization Complete!");
 }
 
-void loop()
-{
+void loop() {
   static char gnss_data[GNSS_BUF_SIZE];
   static size_t gnss_len = 0;
 
-  if (statusFlags[GPS_ENABLED])
-  {
+  if (statusFlags[GPS_ENABLED]) {
     // Read from NEO serial
-    while (Serial2.available())
-    {
+    while (Serial2.available()) {
       int raw_data = Serial2.read();
       gps.encode(raw_data);
       // leave room for the null terminator
-      if (gnss_len < GNSS_BUF_SIZE - 1)
-      {
+      if (gnss_len < GNSS_BUF_SIZE - 1) {
         gnss_data[gnss_len++] = (char)raw_data;
       }
     }
 
     // Check fix and set LED status
-    if (statusFlags[GPS_ENABLED] && gps.location.isValid())
-    {
+    if (gps.location.isValid()) {
       digitalWrite(LED_PIN, HIGH);
-    }
-    else
-    {
+      statusFlags[GPS_HAS_FIX] = true;
+    } else {
       digitalWrite(LED_PIN, LOW);
+      statusFlags[GPS_HAS_FIX] = false;
     }
 
     // bounded append to avoid overflowing the fixed-size log buffer
     strncat(log_buffer, gnss_data, sizeof(log_buffer) - strlen(log_buffer) - 1);
 
     // flush once the buffer is too full to safely hold another chunk
-    if (statusFlags[GPS_LOGGING_ENABLED] && strlen(log_buffer) >= LOG_FLUSH_THRESHOLD)
-    {
+    if (statusFlags[GPS_LOGGING_ENABLED] && strlen(log_buffer) >= LOG_FLUSH_THRESHOLD) {
       char log_path[64];
       snprintf(log_path, sizeof(log_path), "/%s/GPS_%d.log", gnss_dir, nfiles);
       appendFile(SD, log_path, log_buffer);
@@ -461,8 +436,10 @@ void loop()
 
     // Null-terminate the GNSS data buffer
     gnss_data[gnss_len] = '\0';
-    DEBUG_PRINT(gnss_data);
+    // DEBUG_PRINT(gnss_data);
     gnss_len = 0;
+  } else {
+    statusFlags[GPS_HAS_FIX] = false;
   }
 
   delay(100);
