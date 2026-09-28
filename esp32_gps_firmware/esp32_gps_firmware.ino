@@ -61,8 +61,9 @@ const int GPS_LOGGING_ENABLED = 3;
 typedef byte StatusBuf[NUMBER_OF_FLAGS];
 
 // GNSS log directory and buffer
-char gnss_dir[] = "GNSS_LOGS";
-char log_buffer[LOG_BUFFER_SIZE] = "";
+bool gnssDebug = false;
+char gnssDir[] = "GNSS_LOGS";
+char logBuffer[LOG_BUFFER_SIZE] = "";
 int nfiles = 0;
 
 /**********************************************************************
@@ -258,8 +259,8 @@ void SD_INIT()
 
 void FS_INIT(bool reset)
 {
-  char gnss_path[sizeof(gnss_dir) + 1];
-  snprintf(gnss_path, sizeof(gnss_path), "/%s", gnss_dir);
+  char gnss_path[sizeof(gnssDir) + 1];
+  snprintf(gnss_path, sizeof(gnss_path), "/%s", gnssDir);
 
   if (reset)
     removeDir(SD, gnss_path);
@@ -463,7 +464,7 @@ class BLE_Callbacks : public NimBLECharacteristicCallbacks
       else if (value[0] == 0x07)
       {
         // char gnss_path[32];
-        // snprintf(gnss_path, sizeof(gnss_path), "/%s", gnss_dir);
+        // snprintf(gnss_path, sizeof(gnss_path), "/%s", gnssDir);
         // int count = listDir(SD, gnss_path, 0);
         // char listing[16];
         // snprintf(listing, sizeof(listing), "[%d]", count);
@@ -475,7 +476,7 @@ class BLE_Callbacks : public NimBLECharacteristicCallbacks
       else if (value[0] == 0x08)
       {
         // char log_path[64];
-        // snprintf(log_path, sizeof(log_path), "/%s/GPS_%d.log", gnss_dir, (int)value[1]);
+        // snprintf(log_path, sizeof(log_path), "/%s/GPS_%d.log", gnssDir, (int)value[1]);
         // readFile(SD, log_path);
         // TODO: send file contents over BLE
       }
@@ -623,7 +624,7 @@ void control_cmd_event()
     if (strchr(filename, '/'))
       snprintf(log_path, sizeof(log_path), "/%s", filename);
     else
-      snprintf(log_path, sizeof(log_path), "/%s/%s", gnss_dir, filename);
+      snprintf(log_path, sizeof(log_path), "/%s/%s", gnssDir, filename);
 
     readFile(SD, log_path);
   }
@@ -643,6 +644,16 @@ void control_cmd_event()
     DEBUG_PRINT_LN("System reset");
     system_reset();
     DEBUG_PRINT_LN("Reset complete");
+  }
+  else if (strstr(cmd_buf, "gps debug on"))
+  {
+    gnssDebug = true;
+    DEBUG_PRINT_LN("Enable GNSS debug logs");
+  }
+  else if (strstr(cmd_buf, "gps debug off"))
+  {
+    gnssDebug = false;
+    DEBUG_PRINT_LN("Disable GNSS debug logs");
   }
 }
 
@@ -713,20 +724,23 @@ void loop()
     }
 
     // bounded append to avoid overflowing the fixed-size log buffer
-    strncat(log_buffer, gnss_data, sizeof(log_buffer) - strlen(log_buffer) - 1);
+    strncat(logBuffer, gnss_data, sizeof(logBuffer) - strlen(logBuffer) - 1);
 
     // flush once the buffer is too full to safely hold another chunk
-    if (statusFlags[GPS_LOGGING_ENABLED] && strlen(log_buffer) >= LOG_FLUSH_THRESHOLD)
+    if (statusFlags[GPS_LOGGING_ENABLED] && strlen(logBuffer) >= LOG_FLUSH_THRESHOLD)
     {
       char log_path[64];
-      snprintf(log_path, sizeof(log_path), "/%s/GPS_%d.log", gnss_dir, nfiles);
-      appendFile(SD, log_path, log_buffer);
-      log_buffer[0] = '\0';
+      snprintf(log_path, sizeof(log_path), "/%s/GPS_%d.log", gnssDir, nfiles);
+      appendFile(SD, log_path, logBuffer);
+      logBuffer[0] = '\0';
     }
 
     // Null-terminate the GNSS data buffer
     gnss_data[gnss_len] = '\0';
-    // DEBUG_PRINT(gnss_data);
+    if (gnssDebug)
+    {
+      DEBUG_PRINT(gnss_data);
+    }
     gnss_len = 0;
   }
   else
